@@ -1,7 +1,7 @@
 [project]
-name = "ALttPOverworldRandomizer"
-version = "0.1.0"
-description = "Add your description here"
+name = "alttpr-python"
+version = "0.2.0"
+description = "Python ALttP Randomizer"
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
