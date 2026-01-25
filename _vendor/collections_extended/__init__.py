@@ -1,9 +1,9 @@
 """collections_extended contains a few extra basic data structures."""
 from ._compat import Collection
 from .bags import bag, frozenbag
-from .setlists import setlist, frozensetlist
 from .bijection import bijection
-from .range_map import RangeMap, MappedRange
+from .range_map import MappedRange, RangeMap
+from .setlists import frozensetlist, setlist
 
 __version__ = '1.0.2'
 

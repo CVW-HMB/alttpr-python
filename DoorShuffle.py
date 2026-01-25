@@ -1,27 +1,62 @@
-import RaceRandom as random
-from collections import defaultdict, deque
 import logging
 import time
-from enum import unique, Flag
-from typing import DefaultDict, Dict, List
+from collections import defaultdict, deque
+from enum import Flag, unique
 from itertools import chain
+from typing import DefaultDict, Dict, List
 
-from BaseClasses import RegionType, Region, Door, DoorType, Sector, CrystalBarrier, DungeonInfo, dungeon_keys
-from BaseClasses import PotFlags, LocationType, Direction, KeyRuleType
+import RaceRandom as random
+from BaseClasses import (
+    CrystalBarrier,
+    Direction,
+    Door,
+    DoorType,
+    DungeonInfo,
+    KeyRuleType,
+    LocationType,
+    PotFlags,
+    Region,
+    RegionType,
+    Sector,
+    dungeon_keys,
+)
 from Doors import reset_portals
-from Dungeons import dungeon_regions, region_starts, standard_starts, split_region_starts
-from Dungeons import dungeon_bigs, dungeon_hints
+from DungeonGenerator import (
+    ExplorationState,
+    connect_doors,
+    convert_regions,
+    count_reserved_locations,
+    create_dungeon_builders,
+    default_dungeon_entrances,
+    determine_required_paths,
+    drop_entrances,
+    dungeon_drops,
+    dungeon_portals,
+    simple_dungeon_builder,
+    split_dungeon_builder,
+    valid_region_to_explore,
+)
+from Dungeons import (
+    dungeon_bigs,
+    dungeon_hints,
+    dungeon_regions,
+    region_starts,
+    split_region_starts,
+    standard_starts,
+)
 from Items import ItemFactory
+from KeyDoorShuffle import (
+    DoorRules,
+    analyze_dungeon,
+    build_key_layout,
+    determine_prize_lock,
+    validate_bk_layout,
+    validate_key_layout,
+)
 from RoomData import DoorKind, PairedDoor, reset_rooms
-from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
-from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, drop_entrances
-from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, simple_dungeon_builder, default_dungeon_entrances
-from DungeonGenerator import dungeon_portals, dungeon_drops, connect_doors, count_reserved_locations
-from DungeonGenerator import valid_region_to_explore
-from KeyDoorShuffle import analyze_dungeon, build_key_layout, validate_key_layout, determine_prize_lock
-from KeyDoorShuffle import validate_bk_layout, DoorRules
-from Utils import ncr, kth_combination
+from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
+from Utils import kth_combination, ncr
 
 
 def link_doors(world, player):

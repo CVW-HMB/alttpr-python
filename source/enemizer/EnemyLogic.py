@@ -2,9 +2,8 @@ import math
 from collections import defaultdict
 
 import RaceRandom as random
-
-from source.logic.Rule import RuleFactory
 from source.dungeon.EnemyList import EnemySprite
+from source.logic.Rule import RuleFactory
 
 
 # these are for drops only

@@ -1,11 +1,10 @@
 # Code derived from https://github.com/marcrobledo/RomPatcher.js (MIT License)
 
 import sys
-
+from binascii import crc32
+from collections import defaultdict
 from time import perf_counter
 
-from collections import defaultdict
-from binascii import crc32
 try:
     from fast_enum import FastEnum
 except ImportError:

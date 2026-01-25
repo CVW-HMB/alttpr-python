@@ -1,10 +1,25 @@
-from tkinter import ttk, StringVar, Button, Entry, Frame, Label, NE, NW, E, W, LEFT, RIGHT
-from functools import partial
-import source.classes.SpriteSelector as spriteSelector
-import source.classes.ItemGfxSelector as itemGfxSelector
-import source.gui.widgets as widgets
 import json
 import os
+from functools import partial
+from tkinter import (
+    LEFT,
+    NE,
+    NW,
+    RIGHT,
+    Button,
+    E,
+    Entry,
+    Frame,
+    Label,
+    StringVar,
+    W,
+    ttk,
+)
+
+import source.classes.ItemGfxSelector as itemGfxSelector
+import source.classes.SpriteSelector as spriteSelector
+import source.gui.widgets as widgets
+
 
 def gameoptions_page(top, parent):
     # Game Options

@@ -1,6 +1,6 @@
+import logging
 import os
 import time
-import logging
 
 try:
     import bps.apply
@@ -8,9 +8,9 @@ try:
 except ImportError:
     raise Exception('Could not load BPS module')
 
-from Utils import output_path
 from Rom import LocalRom, apply_rom_settings
 from source.tools.BPS import bps_read_vlv
+from Utils import output_path
 
 
 def adjust(args):

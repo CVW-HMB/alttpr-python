@@ -1,21 +1,39 @@
-from collections import namedtuple, defaultdict
 import logging
 import math
+from collections import defaultdict, namedtuple
+
 import RaceRandom as random
-
-from BaseClasses import LocationType, Region, RegionType, Shop, ShopType, Location, CollectionState, PotItem
-from Regions import location_events, shop_to_location_table, retro_shops, shop_table_by_location, valid_pot_location
-from Fill import FillError, fill_restrictive, get_dungeon_item_pool, track_dungeon_items, track_outside_keys
-from PotShuffle import vanilla_pots
-from Tables import bonk_prize_lookup
-from Items import ItemFactory
-
-from source.dungeon.EnemyList import add_drop_contents
-from source.overworld.EntranceShuffle2 import exit_ids, door_addresses
-from source.item.FillUtil import trash_items, pot_items
-
 import source.classes.constants as CONST
-
+from BaseClasses import (
+    CollectionState,
+    Location,
+    LocationType,
+    PotItem,
+    Region,
+    RegionType,
+    Shop,
+    ShopType,
+)
+from Fill import (
+    FillError,
+    fill_restrictive,
+    get_dungeon_item_pool,
+    track_dungeon_items,
+    track_outside_keys,
+)
+from Items import ItemFactory
+from PotShuffle import vanilla_pots
+from Regions import (
+    location_events,
+    retro_shops,
+    shop_table_by_location,
+    shop_to_location_table,
+    valid_pot_location,
+)
+from source.dungeon.EnemyList import add_drop_contents
+from source.item.FillUtil import pot_items, trash_items
+from source.overworld.EntranceShuffle2 import door_addresses, exit_ids
+from Tables import bonk_prize_lookup
 
 #This file sets the item pools for various modes. Timed modes and triforce hunt are enforced first, and then extra items are specified per mode to fill in the remaining space.
 #Some basic items that various modes require are placed here, including pendants and crystals. Medallion requirements for the two relevant entrances are also decided.
@@ -691,7 +709,7 @@ def create_farm_locations(world, player):
             world.dynamic_locations.append(loc)
         return loc
 
-    from Rules import set_rule, add_rule, add_bunny_rule
+    from Rules import add_bunny_rule, add_rule, set_rule
     for region in bush_bombs:
         loc = create_and_fill_location(region, 'Bush Drop', 'Farmable Bombs')
         add_bunny_rule(loc, player)

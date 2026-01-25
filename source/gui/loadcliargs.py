@@ -1,10 +1,11 @@
-from source.classes.SpriteSelector import SpriteSelector as spriteSelector
-from source.gui.randomize.gameoptions import set_sprite
-from Rom import Sprite, get_sprite_from_name
-from Utils import update_deprecated_args
 import source.classes.constants as CONST
+from Rom import Sprite, get_sprite_from_name
 from source.classes.BabelFish import BabelFish
 from source.classes.Empty import Empty
+from source.classes.SpriteSelector import SpriteSelector as spriteSelector
+from source.gui.randomize.gameoptions import set_sprite
+from Utils import update_deprecated_args
+
 
 # Load args/settings for most tabs
 def loadcliargs(gui, args, settings=None):

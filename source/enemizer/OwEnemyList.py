@@ -1,4 +1,5 @@
-from source.dungeon.EnemyList import Sprite, EnemySprite
+from source.dungeon.EnemyList import EnemySprite, Sprite
+
 vanilla_sprites_ow = {}
 
 

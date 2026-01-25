@@ -1,7 +1,11 @@
 import RaceRandom as random
+from source.dungeon.EnemyList import (
+    EnemySprite,
+    SpriteType,
+    enemy_names,
+    sprite_translation,
+)
 from Utils import snes_to_pc
-
-from source.dungeon.EnemyList import EnemySprite, SpriteType, sprite_translation, enemy_names
 
 change_idx_1 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 13, 16, 18, 19, 20, 21, 22, 23, 24, 25, 26, 28, 31, 32, 35, 38, 65, 66, 67, 68, 70, 71, 76, 77, 78, 81, 83, 89, 91, 92, 94, 97, 100, 101, 102, 103, 104, 105, 106, 107]
 

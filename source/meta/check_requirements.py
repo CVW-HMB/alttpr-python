@@ -25,7 +25,7 @@ def check_requirements(console=False):
             logger.error('https://github.com/aerinon/ALttPDoorRandomizer/blob/DoorDev/docs/BUILDING.md')
         else:
             import webbrowser
-            from tkinter import Tk, Label, Button, Frame
+            from tkinter import Button, Frame, Label, Tk
 
             master = Tk()
             master.title('Error')

@@ -1,6 +1,7 @@
 import os
 
 from OverworldShuffle import __version__
+
 OWR_VERSION = __version__
 
 def write_appversion():

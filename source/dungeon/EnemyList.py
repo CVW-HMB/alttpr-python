@@ -1,5 +1,5 @@
-from collections import defaultdict, deque
 import typing
+from collections import defaultdict, deque
 
 import yaml
 from yaml.representer import Representer
@@ -13,9 +13,9 @@ import RaceRandom as random
 from BaseClasses import Location, LocationType, RegionType
 from Items import ItemFactory
 from PotShuffle import key_drop_special
-from Utils import snes_to_pc, pc_to_snes, int16_as_bytes
-
 from source.overworld.EntranceData import door_addresses
+from Utils import int16_as_bytes, pc_to_snes, snes_to_pc
+
 
 class EnemyStats:
     def __init__(self, sprite, static, drop_flag=False, prize_pack: typing.Union[tuple, int] = 0,

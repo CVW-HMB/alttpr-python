@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
+import fileinput
 import os
 import re
 import subprocess
 import sys
+import urllib.parse
+import urllib.request
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-from math import factorial
 from itertools import count
-import fileinput
-
-import urllib.request
-import urllib.parse
-import yaml
+from math import factorial
 from pathlib import Path
+
+import yaml
 
 
 def int16_as_bytes(value):
@@ -103,9 +103,9 @@ def close_console():
 
 
 def make_new_base2current(old_rom='Zelda no Densetsu - Kamigami no Triforce (Japan).sfc', new_rom='working.sfc'):
-    from collections import OrderedDict
-    import json
     import hashlib
+    import json
+    from collections import OrderedDict
     with open(old_rom, 'rb') as stream:
         old_rom_data = bytearray(stream.read())
     with open(new_rom, 'rb') as stream:

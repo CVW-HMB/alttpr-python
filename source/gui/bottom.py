@@ -1,17 +1,29 @@
-from tkinter import ttk, messagebox, StringVar, Button, Entry, Frame, Label, LEFT, RIGHT, X
-from argparse import Namespace
 import logging
 import os
 import random
 import re
+from argparse import Namespace
+from tkinter import (
+    LEFT,
+    RIGHT,
+    Button,
+    Entry,
+    Frame,
+    Label,
+    StringVar,
+    X,
+    messagebox,
+    ttk,
+)
+
+import source.classes.constants as CONST
+import source.gui.widgets as widgets
 from CLI import parse_cli
 from Fill import FillError
-from Main import main, export_yaml, EnemizerError
-from Utils import local_path, output_path, open_file, update_deprecated_args
-import source.classes.constants as CONST
-from source.gui.randomize.multiworld import multiworld_page
-import source.gui.widgets as widgets
+from Main import EnemizerError, export_yaml, main
 from source.classes.Empty import Empty
+from source.gui.randomize.multiworld import multiworld_page
+from Utils import local_path, open_file, output_path, update_deprecated_args
 
 
 def bottom_frame(self, parent, args=None):

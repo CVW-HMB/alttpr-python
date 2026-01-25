@@ -6,8 +6,9 @@ import json
 import os
 import ssl
 import urllib.request
-import yaml
 from json.decoder import JSONDecodeError
+
+import yaml
 
 allACTIONS = {}
 listACTIONS = []

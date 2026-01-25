@@ -1,13 +1,12 @@
 """Setlist class definitions."""
 import random as random_
-
 from collections import (
-	Sequence,
-	Set,
-	MutableSequence,
-	MutableSet,
-	Hashable,
-	)
+    Hashable,
+    MutableSequence,
+    MutableSet,
+    Sequence,
+    Set,
+)
 
 from . import _util
 

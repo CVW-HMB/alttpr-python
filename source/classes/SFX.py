@@ -1,5 +1,6 @@
-from enum import IntEnum
 import random
+from enum import IntEnum
+
 from Utils import int16_as_bytes, snes_to_pc
 
 

@@ -1,10 +1,9 @@
 import RaceRandom as random
-from Utils import snes_to_pc
-
-from source.dungeon.EnemyList import EnemySprite, SpriteType, Sprite
-from source.dungeon.RoomList import boss_rooms, gt_boss_room, Room0006
+from source.dungeon.EnemyList import EnemySprite, Sprite, SpriteType
+from source.dungeon.RoomList import Room0006, boss_rooms, gt_boss_room
 from source.dungeon.RoomObject import RoomObject
 from source.enemizer.SpriteSheets import required_boss_sheets
+from Utils import snes_to_pc
 
 
 def get_dungeon_boss_room(dungeon_name, level):

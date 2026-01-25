@@ -2,6 +2,7 @@ import json
 import locale
 import os
 
+
 class BabelFish():
 	def __init__(self,subpath=["resources","app","meta"],lang=None):
 		localization_string = locale.getdefaultlocale()[0] #get set localization

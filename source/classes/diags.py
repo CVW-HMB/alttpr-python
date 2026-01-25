@@ -1,4 +1,8 @@
-import platform, sys, os, subprocess
+import os
+import platform
+import subprocess
+import sys
+
 try:
     import pkg_resources
 except ModuleNotFoundError as e:
@@ -6,9 +10,11 @@ except ModuleNotFoundError as e:
 import datetime
 
 from Main import __version__
+
 DR_VERSION = __version__
 
 from OverworldShuffle import __version__
+
 OWR_VERSION = __version__
 
 PROJECT_NAME = "ALttP Overworld Randomizer"

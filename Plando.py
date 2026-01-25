@@ -3,20 +3,31 @@ import argparse
 import hashlib
 import logging
 import os
-import RaceRandom as random
-import time
 import sys
+import time
 
+import RaceRandom as random
 from BaseClasses import World
-from Regions import create_regions
-from OverworldShuffle import link_overworld
-from source.overworld.EntranceShuffle2 import link_entrances_new, connect_entrance, connect_two_way, connect_exit
-from Rom import patch_rom, LocalRom, write_string_to_rom, apply_rom_settings, get_sprite_from_name
-from Rules import set_rules
 from Dungeons import create_dungeons
-from Items import ItemFactory
 from ItemList import difficulties
+from Items import ItemFactory
 from Main import create_playthrough
+from OverworldShuffle import link_overworld
+from Regions import create_regions
+from Rom import (
+    LocalRom,
+    apply_rom_settings,
+    get_sprite_from_name,
+    patch_rom,
+    write_string_to_rom,
+)
+from Rules import set_rules
+from source.overworld.EntranceShuffle2 import (
+    connect_entrance,
+    connect_exit,
+    connect_two_way,
+    link_entrances_new,
+)
 
 __version__ = '0.2-dev'
 

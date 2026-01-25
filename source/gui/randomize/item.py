@@ -1,8 +1,24 @@
-from tkinter import messagebox, ttk, font, Button, Frame, E, W, TOP, LEFT, RIGHT, X, Y, Label
-import source.gui.widgets as widgets
-from source.classes.Empty import Empty
 import json
 import os
+from tkinter import (
+    LEFT,
+    RIGHT,
+    TOP,
+    Button,
+    E,
+    Frame,
+    Label,
+    W,
+    X,
+    Y,
+    font,
+    messagebox,
+    ttk,
+)
+
+import source.gui.widgets as widgets
+from source.classes.Empty import Empty
+
 
 def item_page(parent):
     # Item Randomizer

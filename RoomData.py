@@ -1,4 +1,5 @@
 from enum import Enum, unique
+
 from Tables import door_pair_offset_table
 
 

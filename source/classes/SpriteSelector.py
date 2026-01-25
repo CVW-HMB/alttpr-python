@@ -1,16 +1,36 @@
-from tkinter import filedialog, messagebox, Button, Canvas, Label, LabelFrame, Frame, PhotoImage, Scrollbar, Toplevel, ALL, LEFT, BOTTOM, X, RIGHT, TOP, EW, NS
-from glob import glob
 import json
 import os
 import random
 import shutil
 import ssl
+import webbrowser
+from glob import glob
+from tkinter import (
+    ALL,
+    BOTTOM,
+    EW,
+    LEFT,
+    NS,
+    RIGHT,
+    TOP,
+    Button,
+    Canvas,
+    Frame,
+    Label,
+    LabelFrame,
+    PhotoImage,
+    Scrollbar,
+    Toplevel,
+    X,
+    filedialog,
+    messagebox,
+)
 from urllib.parse import urlparse
 from urllib.request import urlopen
-import webbrowser
-from GuiUtils import ToolTips, set_icon, BackgroundTaskProgress
+
+from GuiUtils import BackgroundTaskProgress, ToolTips, set_icon
 from Rom import Sprite
-from Utils import is_bundled, local_path, output_path, open_file
+from Utils import is_bundled, local_path, open_file, output_path
 
 
 class SpriteSelector(object):

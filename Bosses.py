@@ -1,6 +1,6 @@
 import logging
-import RaceRandom as random
 
+import RaceRandom as random
 from BaseClasses import Boss, FillError
 from source.enemizer.Bossmizer import boss_adjust
 

@@ -1,11 +1,30 @@
-import RaceRandom as random, logging, copy
+import copy
+import logging
 from collections import OrderedDict, defaultdict
+
+import RaceRandom as random
+from BaseClasses import (
+    Direction,
+    Entrance,
+    OWEdge,
+    PolSlot,
+    RegionType,
+    Terrain,
+    WorldType,
+)
 from DungeonGenerator import GenerationException
-from BaseClasses import OWEdge, WorldType, RegionType, Direction, Terrain, PolSlot, Entrance
+from OverworldGlitchRules import create_owg_connections
+from OWEdges import (
+    IsParallel,
+    OpenStd,
+    OWEdgeGroups,
+    OWEdgeGroupsTerrain,
+    OWExitTypes,
+    OWTileRegions,
+    parallel_links,
+)
 from Regions import mark_light_dark_world_regions
 from source.overworld.EntranceShuffle2 import connect_simple
-from OWEdges import OWTileRegions, OWEdgeGroups, OWEdgeGroupsTerrain, OWExitTypes, OpenStd, parallel_links, IsParallel
-from OverworldGlitchRules import create_owg_connections
 from Utils import bidict
 
 version_number = '0.6.1.7'
@@ -1370,8 +1389,8 @@ def update_world_regions(world, player):
             world.get_region(name, player).type = RegionType.LightWorld
 
 def can_reach_smith(world, player):
-    from Items import ItemFactory
     from BaseClasses import CollectionState
+    from Items import ItemFactory
     
     def explore_region(region_name, region=None):
         nonlocal found
@@ -1426,7 +1445,7 @@ def can_reach_smith(world, player):
 def build_sectors(world, player):
     from Main import copy_world_premature
     from OWEdges import OWTileRegions
-    
+
     # perform accessibility check on duplicate world
     for p in range(1, world.players + 1):
         world.key_logic[p] = {}
@@ -1478,8 +1497,8 @@ def build_sectors(world, player):
 
 def build_accessible_region_list(world, start_region, player, build_copy_world=False, cross_world=False, region_rules=True, ignore_ledges=False, restrictive_follower=False):
     from BaseClasses import CollectionState
-    from Main import copy_world_premature
     from Items import ItemFactory
+    from Main import copy_world_premature
     from Utils import stack_size3a
     
     def explore_region(region_name, region=None):
@@ -1552,7 +1571,14 @@ def validate_layout(world, player):
     }
 
     # TODO: Find a better source for the below lists, original sourced was deprecated
-    from source.overworld.EntranceData import default_dungeon_connections, default_connector_connections, default_item_connections, default_shop_connections, default_drop_connections, default_dropexit_connections
+    from source.overworld.EntranceData import (
+        default_connector_connections,
+        default_drop_connections,
+        default_dropexit_connections,
+        default_dungeon_connections,
+        default_item_connections,
+        default_shop_connections,
+    )
 
     dungeon_entrances = list(zip(*default_dungeon_connections + [('Ganons Tower', '')]))[0]
     connector_entrances = list(zip(*default_connector_connections))[0]

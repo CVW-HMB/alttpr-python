@@ -1,8 +1,9 @@
 # -*- coding: UTF-8 -*-
-from collections import OrderedDict
 import logging
 import re
 import warnings
+from collections import OrderedDict
+
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 text_addresses = {'Pedestal': (0x180300, 256),

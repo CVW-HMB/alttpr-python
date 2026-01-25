@@ -1,14 +1,30 @@
-from tkinter import ttk, filedialog, messagebox, StringVar, Button, Entry, Frame, Label, E, W, LEFT, RIGHT, X, BOTTOM
-from AdjusterMain import adjust, patch
-from argparse import Namespace
-from source.classes.SpriteSelector import SpriteSelector
-from source.classes.ItemGfxSelector import ItemGfxSelector
-import source.gui.widgets as widgets
 import json
 import logging
 import os
+from argparse import Namespace
+from tkinter import (
+    BOTTOM,
+    LEFT,
+    RIGHT,
+    Button,
+    E,
+    Entry,
+    Frame,
+    Label,
+    StringVar,
+    W,
+    X,
+    filedialog,
+    messagebox,
+    ttk,
+)
 
+import source.gui.widgets as widgets
+from AdjusterMain import adjust, patch
+from source.classes.ItemGfxSelector import ItemGfxSelector
+from source.classes.SpriteSelector import SpriteSelector
 from Utils import output_path
+
 
 def adjust_page(top, parent, settings):
     # Adjust page

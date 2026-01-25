@@ -1,8 +1,10 @@
-from tkinter import ttk, StringVar, Entry, Frame, Label, N, E, W, X, LEFT
-import source.gui.widgets as widgets
 import json
 import os
+from tkinter import LEFT, E, Entry, Frame, Label, N, StringVar, W, X, ttk
+
+import source.gui.widgets as widgets
 from source.classes.Empty import Empty
+
 
 def multiworld_page(parent,settings):
     # Multiworld

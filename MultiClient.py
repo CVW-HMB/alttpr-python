@@ -1,19 +1,20 @@
-import aioconsole
 import argparse
 import asyncio
-import colorama
 import json
 import logging
 import shlex
 import urllib.parse
+
+import aioconsole
+import colorama
 import websockets
 
-from BaseClasses import PotItem, PotFlags, LocationType
 import Items
-import Regions
 import PotShuffle
+import Regions
 import source.dungeon.EnemyList as EnemyList
 import source.rom.DataTables as DataTables
+from BaseClasses import LocationType, PotFlags, PotItem
 
 
 class ReceivedItem:
@@ -975,8 +976,8 @@ async def track_locations(ctx : Context, roomid, roomdata):
             ow_unchecked[location] = (screenid, 0x40)
             ow_begin = min(ow_begin, screenid)
             ow_end = max(ow_end, screenid + 1)
-    from Regions import bonk_prize_table
     from OWEdges import OWTileRegions
+    from Regions import bonk_prize_table
     for location, (_, flag, _, _, region_name, _) in bonk_prize_table.items():
         if location not in ctx.locations_checked:
             if region_name in OWTileRegions:

@@ -1,11 +1,11 @@
 # import modules
-import common       # app common functions
+import json  # json manipulation
+import os  # for os data, filesystem manipulation
+import subprocess  # for running shell commands
+import sys  # for system commands
+import traceback  # for errors
 
-import json         # json manipulation
-import os           # for os data, filesystem manipulation
-import subprocess   # for running shell commands
-import sys          # for system commands
-import traceback    # for errors
+import common  # app common functions
 
 # get env
 env = common.prepare_env()  # get environment variables

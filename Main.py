@@ -1,44 +1,97 @@
+import base64
 import copy
-from itertools import zip_longest
 import json
 import logging
 import os
-import RaceRandom as random
 import string
 import time
 import zlib
-import base64
+from itertools import zip_longest
 
-from BaseClasses import World, CollectionState, Item, Region, Location, Shop, Entrance, Settings
+import RaceRandom as random
+from BaseClasses import (
+    CollectionState,
+    Entrance,
+    Item,
+    Location,
+    Region,
+    Settings,
+    Shop,
+    World,
+)
 from Bosses import place_bosses
+from Doors import create_doors
+from DoorShuffle import connect_portal, link_doors, link_doors_prep
+from Dungeons import create_dungeons
+from Fill import (
+    balance_money_progression,
+    balance_multiworld_progression,
+    distribute_items_restrictive,
+    dungeon_tracking,
+    ensure_good_items,
+    fill_dungeons_restrictive,
+    lock_shop_locations,
+    promote_dungeon_items,
+    sell_keys,
+    sell_potions,
+    set_prize_drops,
+)
+from ItemList import (
+    create_farm_locations,
+    customize_shops,
+    difficulties,
+    fill_prizes,
+    fill_specific_items,
+    follower_pickups,
+    generate_itempool,
+    shuffle_event_items,
+)
 from Items import ItemFactory
 from KeyDoorShuffle import validate_key_placement
 from OverworldGlitchRules import create_owg_connections
-from PotShuffle import shuffle_pots, shuffle_pot_switches
-from Regions import create_regions, create_shops, mark_light_dark_world_regions, create_dungeon_regions, adjust_locations
+from OverworldShuffle import (
+    create_dynamic_flute_exits,
+    create_dynamic_mirror_exits,
+    link_overworld,
+    update_world_regions,
+)
 from OWEdges import create_owedges
-from OverworldShuffle import link_overworld, update_world_regions, create_dynamic_flute_exits, create_dynamic_mirror_exits
-from Rom import patch_rom, patch_race_rom, apply_rom_settings, LocalRom, JsonRom, get_hash_string
-from Doors import create_doors
-from DoorShuffle import link_doors, connect_portal, link_doors_prep
+from PotShuffle import shuffle_pot_switches, shuffle_pots
+from Regions import (
+    adjust_locations,
+    create_dungeon_regions,
+    create_regions,
+    create_shops,
+    mark_light_dark_world_regions,
+)
+from Rom import (
+    JsonRom,
+    LocalRom,
+    apply_rom_settings,
+    get_hash_string,
+    patch_race_rom,
+    patch_rom,
+)
 from RoomData import create_rooms
 from Rules import set_rules
-from Dungeons import create_dungeons
-from Fill import distribute_items_restrictive, promote_dungeon_items, fill_dungeons_restrictive, ensure_good_items
-from Fill import dungeon_tracking
-from Fill import sell_potions, sell_keys, balance_multiworld_progression, balance_money_progression, lock_shop_locations, set_prize_drops
-from ItemList import generate_itempool, difficulties, fill_prizes, customize_shops, fill_specific_items, create_farm_locations, shuffle_event_items, follower_pickups
-from UnderworldGlitchRules import connect_hmg_entrances_regions, create_hmg_entrances_regions
-from Utils import output_path, parse_player_names
-
-from source.item.District import init_districts
-from source.item.FillUtil import create_item_pool_config, massage_item_pool, district_item_pool_config, verify_item_pool_config
-from source.overworld.EntranceShuffle2 import link_entrances_new
-from source.tools.BPS import create_bps_from_data
 from source.classes.CustomSettings import CustomSettings
 from source.enemizer.DamageTables import DamageTable
 from source.enemizer.Enemizer import randomize_enemies
+from source.item.District import init_districts
+from source.item.FillUtil import (
+    create_item_pool_config,
+    district_item_pool_config,
+    massage_item_pool,
+    verify_item_pool_config,
+)
+from source.overworld.EntranceShuffle2 import link_entrances_new
 from source.rom.DataTables import init_data_tables
+from source.tools.BPS import create_bps_from_data
+from UnderworldGlitchRules import (
+    connect_hmg_entrances_regions,
+    create_hmg_entrances_regions,
+)
+from Utils import output_path, parse_player_names
 
 version_number = '1.5.0'
 version_branch = '-u'

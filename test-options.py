@@ -1,8 +1,11 @@
 from __future__ import annotations
-from aenum import Enum, IntEnum, extend_enum
-from source.classes.BabelFish import BabelFish
+
 import json
 import os
+
+from aenum import Enum, IntEnum, extend_enum
+
+from source.classes.BabelFish import BabelFish
 
 fish = BabelFish(lang="en")
 

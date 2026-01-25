@@ -2,11 +2,11 @@
 Build Entrypoints
 '''
 import json
-import platform
 import os  # for checking for dirs
+import platform
 import re
 from json.decoder import JSONDecodeError
-from subprocess import Popen, PIPE, STDOUT, CalledProcessError
+from subprocess import PIPE, STDOUT, CalledProcessError, Popen
 
 DEST_DIRECTORY = "."
 

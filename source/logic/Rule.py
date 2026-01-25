@@ -1,6 +1,6 @@
 import itertools
-
 from collections import OrderedDict
+
 try:
     from fast_enum import FastEnum
 except ImportError:

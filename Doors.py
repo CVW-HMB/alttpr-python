@@ -1,5 +1,5 @@
 
-from BaseClasses import Door, DoorType, Direction, CrystalBarrier, Portal
+from BaseClasses import CrystalBarrier, Direction, Door, DoorType, Portal
 from RoomData import PairedDoor
 
 # constants

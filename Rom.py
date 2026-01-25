@@ -1,47 +1,86 @@
 import bisect
 import collections
+import hashlib
 import io
 import json
-import hashlib
 import logging
 import os
+import struct
+import sys
 
 import Items
 import RaceRandom as random
-import struct
-import sys
+
 try:
     import bps.apply
     import bps.io
 except ImportError:
     raise Exception('Could not load BPS module')
 
-from BaseClasses import ShopType, Region, Location, OWEdge, Door, DoorType, RegionType, LocationType
-from DoorShuffle import compass_data, DROptions, boss_indicator, dungeon_portals
-from Dungeons import dungeon_music_addresses, dungeon_table
-from Regions import location_table, shop_to_location_table, retro_shops
-from RoomData import DoorKind
-from Text import MultiByteTextMapper, CompressedTextMapper, text_addresses, Credits, TextTable
-from Text import Uncle_texts, Ganon1_texts, Ganon_Phase_3_No_Silvers_texts, Ganon_Phase_3_No_Weakness_texts, TavernMan_texts, Sahasrahla2_texts
-from Text import Triforce_texts, Blind_texts, BombShop2_texts, junk_texts
-from Text import KingsReturn_texts, Sanctuary_texts, Kakariko_texts, Blacksmiths_texts, DeathMountain_texts
-from Text import LostWoods_texts, WishingWell_texts, DesertPalace_texts, MountainTower_texts, LinksHouse_texts
-from Text import Lumberjacks_texts, SickKid_texts, FluteBoy_texts, Zora_texts, MagicShop_texts, Sahasrahla_names
-from Utils import local_path, int16_as_bytes, int32_as_bytes, snes_to_pc
-from Items import ItemFactory, prize_item_table
-from source.overworld.EntranceData import door_addresses, ow_prize_table
-from source.overworld.EntranceShuffle2 import exit_ids
-from OverworldShuffle import default_flute_connections, flute_data
-from InitialSram import InitialSram
+from BaseClasses import (
+    Door,
+    DoorType,
+    Location,
+    LocationType,
+    OWEdge,
+    Region,
+    RegionType,
+    ShopType,
+)
 from DamageTable import DamageTable
-
-from source.classes.SFX import randomize_sfx, randomize_sfxinstruments, randomize_songinstruments
-from source.item.FillUtil import valid_pot_items
+from DoorShuffle import DROptions, boss_indicator, compass_data, dungeon_portals
+from Dungeons import dungeon_music_addresses, dungeon_table
+from InitialSram import InitialSram
+from Items import ItemFactory, prize_item_table
+from OverworldShuffle import default_flute_connections, flute_data
+from Regions import location_table, retro_shops, shop_to_location_table
+from RoomData import DoorKind
+from source.classes.SFX import (
+    randomize_sfx,
+    randomize_sfxinstruments,
+    randomize_songinstruments,
+)
 from source.dungeon.EnemyList import EnemySprite, setup_enemy_dungeon_tables
 from source.dungeon.RoomObject import DoorObject
 from source.enemizer.Bossmizer import boss_writes
 from source.enemizer.Enemizer import write_enemy_shuffle_settings
-
+from source.item.FillUtil import valid_pot_items
+from source.overworld.EntranceData import door_addresses, ow_prize_table
+from source.overworld.EntranceShuffle2 import exit_ids
+from Text import (
+    Blacksmiths_texts,
+    Blind_texts,
+    BombShop2_texts,
+    CompressedTextMapper,
+    Credits,
+    DeathMountain_texts,
+    DesertPalace_texts,
+    FluteBoy_texts,
+    Ganon1_texts,
+    Ganon_Phase_3_No_Silvers_texts,
+    Ganon_Phase_3_No_Weakness_texts,
+    Kakariko_texts,
+    KingsReturn_texts,
+    LinksHouse_texts,
+    LostWoods_texts,
+    Lumberjacks_texts,
+    MagicShop_texts,
+    MountainTower_texts,
+    MultiByteTextMapper,
+    Sahasrahla2_texts,
+    Sahasrahla_names,
+    Sanctuary_texts,
+    SickKid_texts,
+    TavernMan_texts,
+    TextTable,
+    Triforce_texts,
+    Uncle_texts,
+    WishingWell_texts,
+    Zora_texts,
+    junk_texts,
+    text_addresses,
+)
+from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
 RANDOMIZERBASEHASH = '76dc2d00e5dd5b925ad01574b327d364'

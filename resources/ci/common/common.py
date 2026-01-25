@@ -1,6 +1,7 @@
-import os   # for env vars
-import stat # file statistics
+import os  # for env vars
+import stat  # file statistics
 import sys  # default system info
+
 try:
     import distro
 except ModuleNotFoundError as e:

@@ -1,9 +1,20 @@
 import collections
-from Items import ItemFactory
-from BaseClasses import Region, Location, Entrance, RegionType, Terrain, Shop, ShopType, LocationType, PotItem, PotFlags
-from PotShuffle import key_drop_data, vanilla_pots, choose_pots, PotSecretTable
 
-from source.dungeon.EnemyList import setup_enemy_locations, enemy_names
+from BaseClasses import (
+    Entrance,
+    Location,
+    LocationType,
+    PotFlags,
+    PotItem,
+    Region,
+    RegionType,
+    Shop,
+    ShopType,
+    Terrain,
+)
+from Items import ItemFactory
+from PotShuffle import PotSecretTable, choose_pots, key_drop_data, vanilla_pots
+from source.dungeon.EnemyList import enemy_names, setup_enemy_locations
 
 
 def create_regions(world, player):

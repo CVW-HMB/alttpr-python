@@ -1,10 +1,11 @@
-import distutils.dir_util			# for copying trees
-import os											# for env vars
-import stat										# for file stats
-import subprocess							# do stuff at the shell level
+import distutils.dir_util  # for copying trees
+import os  # for env vars
+import stat  # for file stats
+import subprocess  # do stuff at the shell level
+from shutil import copy, make_archive, move, rmtree  # file manipulation
+
 import common
 from git_clean import git_clean
-from shutil import copy, make_archive, move, rmtree	# file manipulation
 
 env = common.prepare_env() # get env vars
 

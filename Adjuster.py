@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import argparse
-import os
 import logging
-import textwrap
+import os
 import sys
+import textwrap
 
 from AdjusterMain import adjust
 from Rom import get_sprite_from_name
+
 
 class ArgumentDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
 

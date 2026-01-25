@@ -1,7 +1,7 @@
-import install
-import get_get_pip
-
 import argparse
+
+import get_get_pip
+import install
 
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument('--py', default=0)

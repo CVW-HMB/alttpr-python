@@ -2,14 +2,13 @@ import argparse
 import copy
 import json
 import os
-import textwrap
 import shlex
 import sys
+import textwrap
 
 from source.classes.BabelFish import BabelFish
-
-from Utils import update_deprecated_args
 from source.classes.CustomSettings import CustomSettings
+from Utils import update_deprecated_args
 
 
 class ArgumentDefaultsHelpFormatter(argparse.RawTextHelpFormatter):

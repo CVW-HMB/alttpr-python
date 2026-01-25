@@ -1,9 +1,10 @@
-from tkinter import ttk, Frame, N, E, W, LEFT, TOP, X, VERTICAL, Y
-import source.gui.widgets as widgets
 import json
 import os
+from tkinter import LEFT, TOP, VERTICAL, E, Frame, N, W, X, Y, ttk
 
 import source.classes.constants as CONST
+import source.gui.widgets as widgets
+
 
 def custom_page(top,parent):
     # Custom Item Pool

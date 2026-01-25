@@ -1,7 +1,8 @@
 import functools
-from BaseClasses import Entrance, DoorType, Door
-from DoorShuffle import connect_simple_door
+
 import Rules
+from BaseClasses import Door, DoorType, Entrance
+from DoorShuffle import connect_simple_door
 
 kikiskip_spots = [
     ("Kiki Skip", "Spectacle Rock Cave (Bottom)", "Palace of Darkness Portal")

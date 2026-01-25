@@ -1,6 +1,6 @@
-import os
-import json
 import codecs
+import json
+import os
 
 if __name__ == '__main__':
     directory = './EnemizerCLI.Core/tiles'

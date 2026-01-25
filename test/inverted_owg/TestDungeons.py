@@ -1,5 +1,6 @@
 from test.inverted_owg.TestInvertedOWG import TestInvertedOWG
 
+
 class TestDungeons(TestInvertedOWG):
 
     def testFirstDungeonChests(self):

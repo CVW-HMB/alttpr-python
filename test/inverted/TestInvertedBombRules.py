@@ -1,14 +1,29 @@
 import unittest
+from test.inverted.TestInverted import TestInverted
 
 from BaseClasses import World
 from Dungeons import create_dungeons
-# todo: this test needs to be rewritten unfortunately
-from source.overworld.EntranceShuffle2 import connect_entrance, Inverted_LW_Entrances, Inverted_LW_Dungeon_Entrances, Inverted_LW_Single_Cave_Doors, Inverted_Old_Man_Entrances, Inverted_DW_Entrances, Inverted_DW_Dungeon_Entrances, Inverted_DW_Single_Cave_Doors, \
-    Inverted_LW_Entrances_Must_Exit, Inverted_LW_Dungeon_Entrances_Must_Exit, Inverted_Bomb_Shop_Multi_Cave_Doors, Inverted_Bomb_Shop_Single_Cave_Doors, Inverted_Blacksmith_Single_Cave_Doors, Inverted_Blacksmith_Multi_Cave_Doors
-from Regions import create_regions
 from ItemList import difficulties
+from Regions import create_regions
 from Rules import set_inverted_big_bomb_rules
-from test.inverted.TestInverted import TestInverted
+
+# todo: this test needs to be rewritten unfortunately
+from source.overworld.EntranceShuffle2 import (
+    Inverted_Blacksmith_Multi_Cave_Doors,
+    Inverted_Blacksmith_Single_Cave_Doors,
+    Inverted_Bomb_Shop_Multi_Cave_Doors,
+    Inverted_Bomb_Shop_Single_Cave_Doors,
+    Inverted_DW_Dungeon_Entrances,
+    Inverted_DW_Entrances,
+    Inverted_DW_Single_Cave_Doors,
+    Inverted_LW_Dungeon_Entrances,
+    Inverted_LW_Dungeon_Entrances_Must_Exit,
+    Inverted_LW_Entrances,
+    Inverted_LW_Entrances_Must_Exit,
+    Inverted_LW_Single_Cave_Doors,
+    Inverted_Old_Man_Entrances,
+    connect_entrance,
+)
 
 
 class TestInvertedBombRules(TestInverted):

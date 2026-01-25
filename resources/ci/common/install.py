@@ -1,8 +1,9 @@
-import common
 import argparse
 import os
 import platform
-import subprocess # do stuff at the shell level
+import subprocess  # do stuff at the shell level
+
+import common
 
 env = common.prepare_env()
 

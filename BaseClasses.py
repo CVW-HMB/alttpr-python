@@ -2,7 +2,7 @@ import base64
 import copy
 import json
 import logging
-from collections import OrderedDict, Counter, deque, defaultdict
+from collections import Counter, OrderedDict, defaultdict, deque
 from enum import Enum, IntEnum, unique
 
 try:
@@ -10,12 +10,17 @@ try:
 except ImportError:
     from enum import IntFlag as FastEnum
 
-from source.classes.BabelFish import BabelFish
-from Utils import int16_as_bytes
-from Tables import normal_offset_table, spiral_offset_table, multiply_lookup, divisor_lookup
 from RoomData import Room
+from source.classes.BabelFish import BabelFish
 from source.dungeon.RoomObject import RoomObject
 from source.overworld.EntranceData import door_addresses
+from Tables import (
+    divisor_lookup,
+    multiply_lookup,
+    normal_offset_table,
+    spiral_offset_table,
+)
+from Utils import int16_as_bytes
 
 
 class World(object):
@@ -1664,8 +1669,8 @@ class Region(object):
         self.crystal_switch = False
 
     def can_reach(self, state):
-        from Utils import stack_size3a
         from DungeonGenerator import GenerationException
+        from Utils import stack_size3a
         if stack_size3a() > self.world.players * 1000:
             raise GenerationException(f'Infinite loop detected for "{self.name}" located at \'Region.can_reach\'')
         

@@ -1,4 +1,3 @@
-import RaceRandom as random
 import collections
 import itertools
 import logging
@@ -6,11 +5,18 @@ import math
 from collections import Counter
 from contextlib import suppress
 
+import RaceRandom as random
 from BaseClasses import CollectionState, FillError, LocationType
 from Items import ItemFactory
-from Regions import shop_to_location_table, retro_shops
-from source.item.FillUtil import filter_locations, classify_major_items, replace_trash_item, vanilla_fallback
-from source.item.FillUtil import filter_special_locations, valid_pot_items
+from Regions import retro_shops, shop_to_location_table
+from source.item.FillUtil import (
+    classify_major_items,
+    filter_locations,
+    filter_special_locations,
+    replace_trash_item,
+    valid_pot_items,
+    vanilla_fallback,
+)
 
 
 def get_dungeon_item_pool(world):

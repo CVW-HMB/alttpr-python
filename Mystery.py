@@ -1,13 +1,13 @@
 import argparse
 import logging
-import RaceRandom as random
 
+from yaml.constructor import SafeConstructor
+
+import RaceRandom as random
 from DungeonRandomizer import parse_cli
 from Main import main as DRMain
 from source.classes.BabelFish import BabelFish
-from yaml.constructor import SafeConstructor
-
-from source.tools.MysteryUtils import roll_settings, get_weights
+from source.tools.MysteryUtils import get_weights, roll_settings
 
 
 def add_bool(self, node):

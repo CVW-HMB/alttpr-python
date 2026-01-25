@@ -1,11 +1,18 @@
-import RaceRandom as random
 import collections
 import logging
 import time
 
-from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector
-from BaseClasses import hook_from_door, flooded_keys
-from Regions import location_events, flooded_keys_reverse
+import RaceRandom as random
+from BaseClasses import (
+    CrystalBarrier,
+    DoorType,
+    Hook,
+    RegionType,
+    Sector,
+    flooded_keys,
+    hook_from_door,
+)
+from Regions import flooded_keys_reverse, location_events
 
 
 def pre_validate(builder, entrance_region_names, split_dungeon, world, player):

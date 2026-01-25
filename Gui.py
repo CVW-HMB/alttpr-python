@@ -5,29 +5,41 @@ if __name__ == '__main__':
 import json
 import os
 import sys
-from tkinter import Tk, Button, BOTTOM, TOP, StringVar, BooleanVar, X, BOTH, RIGHT, ttk, messagebox
+from tkinter import (
+    BOTH,
+    BOTTOM,
+    RIGHT,
+    TOP,
+    BooleanVar,
+    Button,
+    StringVar,
+    Tk,
+    X,
+    messagebox,
+    ttk,
+)
 
 from CLI import get_args_priority
 from DungeonRandomizer import parse_cli
-from source.gui.adjust.overview import adjust_page
-from source.gui.startinventory.overview import startinventory_page
-from source.gui.custom.overview import custom_page
-from source.gui.loadcliargs import loadcliargs, loadadjustargs
-from source.gui.randomize.item import item_page
-from source.gui.randomize.overworld import overworld_page
-from source.gui.randomize.entrando import entrando_page
-from source.gui.randomize.enemizer import enemizer_page
-from source.gui.randomize.dungeon import dungeon_page
-#from source.gui.randomize.multiworld import multiworld_page
-from source.gui.randomize.gameoptions import gameoptions_page
-from source.gui.randomize.generation import generation_page
-from source.gui.bottom import bottom_frame, create_guiargs
 from GuiUtils import set_icon
 from Main import __version__ as ESVersion
 from OverworldShuffle import __version__ as ORVersion
-
 from source.classes.BabelFish import BabelFish
 from source.classes.Empty import Empty
+from source.gui.adjust.overview import adjust_page
+from source.gui.bottom import bottom_frame, create_guiargs
+from source.gui.custom.overview import custom_page
+from source.gui.loadcliargs import loadadjustargs, loadcliargs
+from source.gui.randomize.dungeon import dungeon_page
+from source.gui.randomize.enemizer import enemizer_page
+from source.gui.randomize.entrando import entrando_page
+
+#from source.gui.randomize.multiworld import multiworld_page
+from source.gui.randomize.gameoptions import gameoptions_page
+from source.gui.randomize.generation import generation_page
+from source.gui.randomize.item import item_page
+from source.gui.randomize.overworld import overworld_page
+from source.gui.startinventory.overview import startinventory_page
 
 
 def check_python_version(fish):

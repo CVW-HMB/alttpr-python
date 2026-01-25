@@ -1,7 +1,9 @@
-from tkinter import ttk, Frame, Label, W, E, NW, LEFT, RIGHT, X, Y, TOP
-import source.gui.widgets as widgets
 import json
 import os
+from tkinter import LEFT, NW, RIGHT, TOP, E, Frame, Label, W, X, Y, ttk
+
+import source.gui.widgets as widgets
+
 
 def overworld_page(parent):
     # Overworld Shuffle

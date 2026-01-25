@@ -3,19 +3,19 @@ if __name__ == '__main__':
     from source.meta.check_requirements import check_requirements
     check_requirements(console=True)
 
-import os
 import logging
-import RaceRandom as random
+import os
 import sys
 
-from source.classes.BabelFish import BabelFish
+import RaceRandom as random
 import source.classes.diags as diagnostics
-
-from CLI import parse_cli, get_args_priority
-from Main import main, EnemizerError, __version__
-from Rom import get_sprite_from_name
-from Utils import is_bundled, close_console
+from CLI import get_args_priority, parse_cli
 from Fill import FillError
+from Main import EnemizerError, __version__, main
+from Rom import get_sprite_from_name
+from source.classes.BabelFish import BabelFish
+from Utils import close_console, is_bundled
+
 
 def start():
     args = parse_cli(None)

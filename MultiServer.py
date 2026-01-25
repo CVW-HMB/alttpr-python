@@ -1,4 +1,3 @@
-import aioconsole
 import argparse
 import asyncio
 import functools
@@ -8,16 +7,23 @@ import re
 import shlex
 import ssl
 import urllib.request
-import websockets
 import zlib
 
-from BaseClasses import PotItem, PotFlags
+import aioconsole
+import websockets
+
 import Items
-import Regions
 import PotShuffle
-from MultiClient import ReceivedItem, get_item_name_from_id, get_location_name_from_address
+import Regions
 import source.dungeon.EnemyList as EnemyList
 import source.rom.DataTables as DataTables
+from BaseClasses import PotFlags, PotItem
+from MultiClient import (
+    ReceivedItem,
+    get_item_name_from_id,
+    get_location_name_from_address,
+)
+
 
 class Client:
     def __init__(self, socket):

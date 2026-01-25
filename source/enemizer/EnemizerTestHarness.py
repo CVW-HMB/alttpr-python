@@ -1,12 +1,18 @@
-from types import SimpleNamespace
 from collections import Counter, defaultdict
+from types import SimpleNamespace
 
-from source.dungeon.EnemyList import enemy_names, SpriteType
-from source.enemizer.Enemizer import randomize_underworld_rooms, randomize_overworld_enemies
-from source.enemizer.SpriteSheets import randomize_underworld_sprite_sheets, randomize_overworld_sprite_sheets
-from source.rom.DataTables import init_data_tables
-from source.enemizer.DamageTables import DamageTable
 import RaceRandom as random
+from source.dungeon.EnemyList import SpriteType, enemy_names
+from source.enemizer.DamageTables import DamageTable
+from source.enemizer.Enemizer import (
+    randomize_overworld_enemies,
+    randomize_underworld_rooms,
+)
+from source.enemizer.SpriteSheets import (
+    randomize_overworld_sprite_sheets,
+    randomize_underworld_sprite_sheets,
+)
+from source.rom.DataTables import init_data_tables
 
 
 def calculate_odds():

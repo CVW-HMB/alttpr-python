@@ -1,12 +1,12 @@
 import unittest
 
-from BaseClasses import World, CollectionState
+from BaseClasses import CollectionState, World
 from Dungeons import create_dungeons, get_dungeon_item_pool
 from ItemList import difficulties, generate_itempool
 from Items import ItemFactory
 from Regions import create_regions
 from Rules import set_rules
-from source.overworld.EntranceShuffle2 import mandatory_connections, connect_simple
+from source.overworld.EntranceShuffle2 import connect_simple, mandatory_connections
 
 
 class TestDungeon(unittest.TestCase):

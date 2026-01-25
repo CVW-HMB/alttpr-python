@@ -1,16 +1,21 @@
+from test.TestBase import TestBase
+
 from BaseClasses import World
-from DoorShuffle import link_doors
 from Doors import create_doors
+from DoorShuffle import link_doors
 from Dungeons import create_dungeons, get_dungeon_item_pool
-from OverworldShuffle import link_overworld
-from ItemList import generate_itempool, difficulties
+from ItemList import difficulties, generate_itempool
 from Items import ItemFactory
-from Regions import create_regions, mark_light_dark_world_regions, create_dungeon_regions, create_shops
+from OverworldShuffle import link_overworld
+from Regions import (
+    create_dungeon_regions,
+    create_regions,
+    create_shops,
+    mark_light_dark_world_regions,
+)
 from RoomData import create_rooms
 from Rules import set_rules
-
 from source.overworld.EntranceShuffle2 import link_entrances_new
-from test.TestBase import TestBase
 
 
 class TestInverted(TestBase):

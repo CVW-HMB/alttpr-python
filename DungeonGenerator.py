@@ -1,22 +1,32 @@
-import RaceRandom as random
 import collections
 import itertools
-from collections import defaultdict, deque
-from functools import reduce
 import logging
 import math
 import operator as op
 import time
+from collections import defaultdict, deque
+from functools import reduce
 from typing import List
 
-from BaseClasses import DoorType, Direction, CrystalBarrier, RegionType, Polarity, PolSlot, flooded_keys, Sector
-from BaseClasses import Hook, hook_from_door, Door
-from Regions import location_events, flooded_keys_reverse
+import RaceRandom as random
+from BaseClasses import (
+    CrystalBarrier,
+    Direction,
+    Door,
+    DoorType,
+    Hook,
+    Polarity,
+    PolSlot,
+    RegionType,
+    Sector,
+    flooded_keys,
+    hook_from_door,
+)
 from Dungeons import split_region_starts
+from Regions import flooded_keys_reverse, location_events
 from RoomData import DoorKind
-
-from source.dungeon.DungeonStitcher import generate_dungeon_find_proposal
 from source.dungeon.DungeonStitcher import GenerationException as OtherGenException
+from source.dungeon.DungeonStitcher import generate_dungeon_find_proposal
 
 
 class GraphPiece:

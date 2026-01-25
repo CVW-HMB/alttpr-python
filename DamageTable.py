@@ -3,6 +3,7 @@ from typing import List
 
 import RaceRandom as random
 
+
 def _load_entries():
     entries = []
     with open("data/damage_table.bin", 'rb') as stream:

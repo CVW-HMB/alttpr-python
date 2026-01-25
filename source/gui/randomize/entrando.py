@@ -1,7 +1,9 @@
-from tkinter import ttk, Frame, E, W, LEFT, RIGHT
-import source.gui.widgets as widgets
 import json
 import os
+from tkinter import LEFT, RIGHT, E, Frame, W, ttk
+
+import source.gui.widgets as widgets
+
 
 def entrando_page(parent):
     # Entrance Randomizer

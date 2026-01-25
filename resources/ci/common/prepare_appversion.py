@@ -1,6 +1,7 @@
+import os  # for env vars
+from shutil import copy  # file manipulation
+
 import common
-import os               # for env vars
-from shutil import copy	# file manipulation
 
 env = common.prepare_env()
 

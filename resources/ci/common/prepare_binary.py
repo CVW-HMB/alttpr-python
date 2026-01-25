@@ -2,11 +2,12 @@
 Locate and prepare binary builds
 """
 # import distutils.dir_util			# for copying trees
-import os											# for env vars
+import os  # for env vars
+from shutil import move  # file manipulation
+
 # import stat										# for file stats
 # import subprocess							# do stuff at the shell level
 import common
-from shutil import move	# file manipulation
 
 env = common.prepare_env()
 

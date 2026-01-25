@@ -2,7 +2,8 @@ from collections import deque
 
 from BaseClasses import CollectionState, RegionType
 from Dungeons import dungeon_table
-from OWEdges import OWTileRegions, OWTileDistricts
+from OWEdges import OWTileDistricts, OWTileRegions
+
 
 class District(object):
 

@@ -1,7 +1,9 @@
 
-from BaseClasses import OWEdge, Direction, Terrain, WorldType, PolSlot
 from enum import Enum, unique
+
+from BaseClasses import Direction, OWEdge, PolSlot, Terrain, WorldType
 from Utils import bidict
+
 
 @unique
 class OpenStd(Enum):

@@ -1,8 +1,9 @@
-import common
-import os			# for env vars
-import sys    # for path
-import urllib.request	# for downloads
+import os  # for env vars
+import sys  # for path
+import urllib.request  # for downloads
 from shutil import unpack_archive
+
+import common
 
 # only do stuff if we don't have a UPX folder
 

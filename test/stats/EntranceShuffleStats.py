@@ -1,16 +1,16 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
-import RaceRandom as random
-import time
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+import time
 from collections import Counter, defaultdict
 
-from source.overworld.EntranceShuffle2 import link_entrances_new
+import RaceRandom as random
+
 # from source.oEntranceShuffle import link_entrances_new
 from BaseClasses import World
-from Regions import create_regions, create_dungeon_regions
-
+from Regions import create_dungeon_regions, create_regions
+from source.overworld.EntranceShuffle2 import link_entrances_new
 
 # probably deprecated
 

@@ -1,6 +1,7 @@
 import os
 import sys
 
+
 def get_py_path():
   user_paths = os.environ["PATH"].split(os.pathsep)
   (python,py) = ("","")

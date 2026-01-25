@@ -1,13 +1,17 @@
-import RaceRandom as random
 from collections import defaultdict
-from Utils import snes_to_pc
 
-from source.dungeon.EnemyList import SpriteType, EnemySprite, sprite_translation
+import RaceRandom as random
+from source.dungeon.EnemyList import EnemySprite, SpriteType, sprite_translation
 from source.dungeon.RoomList import Room010C
 from source.enemizer.SpecialEnemyModes import set_mimics, write_mimic_changes
-from source.enemizer.SpriteSheets import sub_group_choices, sheets_with_free_gfx
-from source.enemizer.SpriteSheets import randomize_underworld_sprite_sheets, randomize_overworld_sprite_sheets
+from source.enemizer.SpriteSheets import (
+    randomize_overworld_sprite_sheets,
+    randomize_underworld_sprite_sheets,
+    sheets_with_free_gfx,
+    sub_group_choices,
+)
 from source.enemizer.TilePattern import tile_patterns
+from Utils import snes_to_pc
 
 shutter_sprites = {
     0xb8: {0, 1, 2, 3, 4, 5}, 0xb: {4, 5, 6, 7, 8, 9}, 0x1b: {3, 4, 5}, 0x4b: {0, 3, 4}, 0x4: {9, 13, 14},

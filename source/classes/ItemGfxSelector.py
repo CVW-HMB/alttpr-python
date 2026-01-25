@@ -1,5 +1,20 @@
-from tkinter import Button, Canvas, Label, LabelFrame, Frame, PhotoImage, Scrollbar, Toplevel, LEFT, BOTTOM, X, RIGHT, TOP
 import os
+from tkinter import (
+    BOTTOM,
+    LEFT,
+    RIGHT,
+    TOP,
+    Button,
+    Canvas,
+    Frame,
+    Label,
+    LabelFrame,
+    PhotoImage,
+    Scrollbar,
+    Toplevel,
+    X,
+)
+
 from GuiUtils import ToolTips, set_icon
 from Utils import local_path
 

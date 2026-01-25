@@ -1,17 +1,18 @@
 import os
-import urllib.request
 import urllib.parse
-import yaml
-from typing import Any
-from yaml.representer import Representer
-from Utils import HexInt, hex_representer
+import urllib.request
 from collections import defaultdict
 from pathlib import Path
+from typing import Any
+
+import yaml
+from yaml.representer import Representer
 
 import RaceRandom as random
-from BaseClasses import LocationType, DoorType
+from BaseClasses import DoorType, LocationType
 from OverworldShuffle import default_flute_connections, flute_data
-from source.tools.MysteryUtils import roll_settings, get_weights
+from source.tools.MysteryUtils import get_weights, roll_settings
+from Utils import HexInt, hex_representer
 
 
 class CustomSettings(object):

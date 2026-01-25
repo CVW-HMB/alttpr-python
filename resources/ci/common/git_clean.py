@@ -1,5 +1,6 @@
-import subprocess	# do stuff at the shell level
 import os
+import subprocess  # do stuff at the shell level
+
 
 def git_clean(clean_ignored=True, clean_user=False):
   excludes = [

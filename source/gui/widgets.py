@@ -1,6 +1,21 @@
-from tkinter import messagebox, Checkbutton, Entry, Frame, IntVar, Label, OptionMenu, Spinbox, StringVar, LEFT, RIGHT, X
-from tkinter import Button
+from tkinter import (
+    LEFT,
+    RIGHT,
+    Button,
+    Checkbutton,
+    Entry,
+    Frame,
+    IntVar,
+    Label,
+    OptionMenu,
+    Spinbox,
+    StringVar,
+    X,
+    messagebox,
+)
+
 from source.classes.Empty import Empty
+
 
 # Override Spinbox to include mousewheel support for changing value
 class mySpinbox(Spinbox):

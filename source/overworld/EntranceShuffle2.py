@@ -1,10 +1,9 @@
-import RaceRandom as random
-import logging
 import copy
+import logging
+from collections import OrderedDict, defaultdict
 
-from collections import defaultdict, OrderedDict
+import RaceRandom as random
 from BaseClasses import RegionType
-
 from source.overworld.EntranceData import door_addresses
 
 
@@ -857,9 +856,9 @@ def get_nearby_entrances(avail, start_region):
 
 
 def get_accessible_entrances(start_region, avail, assumed_inventory=[], cross_world=False, region_rules=True, exit_rules=True, include_one_ways=False, restrictive_follower=False):
-    from Main import copy_world_premature
     from BaseClasses import CollectionState
     from Items import ItemFactory
+    from Main import copy_world_premature
     from OverworldShuffle import build_accessible_region_list, one_way_ledges
     
     for p in range(1, avail.world.players + 1):

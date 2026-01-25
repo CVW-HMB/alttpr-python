@@ -1,8 +1,8 @@
+import argparse
+import concurrent.futures
+import multiprocessing
 import subprocess
 import sys
-import multiprocessing
-import concurrent.futures
-import argparse
 from collections import OrderedDict
 
 cpu_threads = multiprocessing.cpu_count()
