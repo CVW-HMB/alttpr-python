@@ -106,7 +106,7 @@ def parse_cli(argv, no_defaults=False):
     ret = parser.parse_args(argv)
 
     if ret.keysanity:
-        ret.mapshuffle, ret.compassshuffle, ret.keyshuffle, ret.bigkeyshuffle = 'wild' * 4
+        ret.mapshuffle, ret.compassshuffle, ret.keyshuffle, ret.bigkeyshuffle = ['wild'] * 4
 
     if ret.keydropshuffle:
         ret.dropshuffle = 'keys' if ret.dropshuffle == 'none' else ret.dropshuffle
@@ -133,8 +133,8 @@ def parse_cli(argv, no_defaults=False):
             for name in ['logic', 'mode', 'swords', 'goal', 'difficulty', 'item_functionality', 'ow_shuffle',
                          'ow_terrain', 'ow_crossed', 'ow_keepsimilar', 'ow_mixed', 'ow_whirlpool', 'ow_fluteshuffle',
                          'flute_mode', 'bow_mode', 'take_any', 'boots_hint', 'shuffle_followers',
-                         'shuffle', 'door_shuffle', 'intensity', 'crystals_ganon', 'crystals_gt', 'ganon_item', 'openpyramid',
-                         'mapshuffle', 'compassshuffle', 'keyshuffle', 'bigkeyshuffle', 'prizeshuffle', 'startinventory',
+                         'shuffle', 'door_shuffle', 'intensity', 'crystals_ganon', 'crystals_gt', 'bosses_ganon', 'bosshunt_include_agas', 'ganon_item', 'openpyramid',
+                         'mapshuffle', 'compassshuffle', 'keyshuffle', 'bigkeyshuffle', 'prizeshuffle', 'showloot', 'showmap', 'startinventory',
                          'usestartinventory', 'bombbag', 'shuffleganon', 'overworld_map', 'restrict_boss_items',
                          'triforce_max_difference', 'triforce_pool_min', 'triforce_pool_max', 'triforce_goal_min', 'triforce_goal_max',
                          'triforce_min_difference', 'triforce_goal', 'triforce_pool', 'shufflelinks', 'shuffletavern',
@@ -177,6 +177,8 @@ def parse_settings():
         "goal": "ganon",
         "crystals_gt": "7",
         "crystals_ganon": "7",
+        "bosses_ganon": "8",
+        "bosshunt_include_agas": False,
         "ganon_item": "silver",
         "swords": "random",
         "flute_mode": "normal",
@@ -234,6 +236,8 @@ def parse_settings():
         "keyshuffle": "none",
         "bigkeyshuffle": "none",
         "prizeshuffle": "none",
+        "showloot": "never",
+        "showmap": "map",
         "keysanity": False,
         "door_shuffle": "vanilla",
         "intensity": 3,

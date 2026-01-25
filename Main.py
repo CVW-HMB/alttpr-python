@@ -74,6 +74,7 @@ from Rom import (
 )
 from RoomData import create_rooms
 from Rules import set_rules
+from source.classes.BabelFish import BabelFish
 from source.classes.CustomSettings import CustomSettings
 from source.enemizer.DamageTables import DamageTable
 from source.enemizer.Enemizer import randomize_enemies
@@ -92,12 +93,7 @@ from UnderworldGlitchRules import (
     create_hmg_entrances_regions,
 )
 from Utils import output_path, parse_player_names
-
-version_number = '1.5.0'
-version_branch = '-u'
-__version__ = f'{version_number}{version_branch}'
-
-from source.classes.BabelFish import BabelFish
+from Versions import DRVersion, GKVersion, ORVersion
 
 
 class EnemizerError(RuntimeError):
@@ -133,7 +129,7 @@ def random_ganon_item(sword_mode):
 
 def main(args, seed=None, fish=None):
     check_python_version()
-    
+
     if args.print_template_yaml:
         return export_yaml(args, fish)
 
@@ -175,16 +171,14 @@ def main(args, seed=None, fish=None):
     world.rom_seeds = {player: random.randint(0, 999999999) for player in range(1, world.players + 1)}
     world.finish_init()
 
-    from OverworldShuffle import __version__ as ORVersion
     logger.info(
-      world.fish.translate("cli","cli","app.title") + "\n",
-      ORVersion,
-      "%s (%s)" % (world.seed, str(args.outputname)) if str(args.outputname).startswith('M') else world.seed,
-      Settings.make_code(world, 1) if world.players == 1 else ''
+        world.fish.translate("cli","cli","app.title") + "\n",
+        GKVersion,
+        "%s (%s)" % (world.seed, str(args.outputname)) if str(args.outputname).startswith('M') else world.seed,
     )
 
-    for k,v in {"DR":__version__,"OR":ORVersion}.items():
-      logger.info((k + ' Version:').ljust(16) + '%s' % v)
+    for k,v in {"GK": GKVersion, "OR": ORVersion, "DR": DRVersion}.items():
+        logger.info((k + ' Version:').ljust(16) + '%s' % v)
 
     parsed_names = parse_player_names(args.names, world.players, args.teams)
     world.teams = len(parsed_names)
@@ -195,7 +189,7 @@ def main(args, seed=None, fish=None):
             world.player_names[player].append(name)
     logger.info('')
 
-    outfilebase = f'OR_{args.outputname if args.outputname else world.seed}'
+    outfilebase = f'GK_{args.outputname if args.outputname else world.seed}'
 
     for player in range(1, world.players + 1):
         world.difficulty_requirements[player] = difficulties[world.difficulty[player]]
@@ -474,15 +468,13 @@ def export_yaml(args, fish):
     if args.seed and int(args.seed) > 0:
         world.seed = int(args.seed)
 
-    from OverworldShuffle import __version__ as ORVersion
     logger.info(
         world.fish.translate("cli","cli","app.title") + "\n",
-        ORVersion,
+        GKVersion,
         "(%s)" % outfilebase,
-        Settings.make_code(world, 1) if world.players == 1 else ''
     )
 
-    for k,v in {"DR":__version__,"OR":ORVersion}.items():
+    for k,v in {"GK": GKVersion, "OR": ORVersion, "DR": DRVersion}.items():
         logger.info((k + ' Version:').ljust(16) + '%s' % v)
 
     for player in range(1, world.players + 1):
@@ -523,12 +515,16 @@ def init_world(args, fish):
     world.keyshuffle = args.keyshuffle.copy()
     world.bigkeyshuffle = args.bigkeyshuffle.copy()
     world.prizeshuffle = args.prizeshuffle.copy()
+    world.showloot = args.showloot.copy()
+    world.showmap = args.showmap.copy()
     world.bombbag = args.bombbag.copy()
     world.flute_mode = args.flute_mode.copy()
     world.bow_mode = args.bow_mode.copy()
     world.crystals_ganon_orig = args.crystals_ganon.copy()
     world.crystals_gt_orig = args.crystals_gt.copy()
     world.ganon_item_orig = args.ganon_item.copy()
+    world.bosses_ganon = {player: int(args.bosses_ganon[player]) for player in range(1, world.players + 1)}
+    world.bosshunt_include_agas = args.bosshunt_include_agas.copy()
     world.owTerrain = args.ow_terrain.copy()
     world.owKeepSimilar = args.ow_keepsimilar.copy()
     world.owWhirlpoolShuffle = args.ow_whirlpool.copy()
@@ -576,7 +572,7 @@ def init_world(args, fish):
     world.money_balance = args.money_balance.copy()
 
     # custom settings - these haven't been promoted to full settings yet
-    in_progress_settings = ['force_enemy', 'free_lamp_cone']
+    in_progress_settings = ['force_enemy']
     for player in range(1, world.players + 1):
         for setting in in_progress_settings:
             if world.customizer and world.customizer.has_setting(player, setting):
@@ -838,12 +834,16 @@ def copy_world(world):
     ret.keyshuffle = world.keyshuffle.copy()
     ret.bigkeyshuffle = world.bigkeyshuffle.copy()
     ret.prizeshuffle = world.prizeshuffle.copy()
+    ret.showloot = world.showloot.copy()
+    ret.showmap = world.showmap.copy()
     ret.bombbag = world.bombbag.copy()
     ret.flute_mode = world.flute_mode.copy()
     ret.bow_mode = world.bow_mode.copy()
     ret.free_lamp_cone = world.free_lamp_cone.copy()
     ret.crystals_needed_for_ganon = world.crystals_needed_for_ganon.copy()
     ret.crystals_needed_for_gt = world.crystals_needed_for_gt.copy()
+    ret.bosses_ganon = world.bosses_ganon.copy()
+    ret.bosshunt_include_agas = world.bosshunt_include_agas.copy()
     ret.ganon_item = world.ganon_item.copy()
     ret.crystals_ganon_orig = world.crystals_ganon_orig.copy()
     ret.crystals_gt_orig = world.crystals_gt_orig.copy()
@@ -1065,12 +1065,16 @@ def copy_world_premature(world, player, create_flute_exits=True):
     ret.keyshuffle = world.keyshuffle.copy()
     ret.bigkeyshuffle = world.bigkeyshuffle.copy()
     ret.prizeshuffle = world.prizeshuffle.copy()
+    ret.showloot = world.showloot.copy()
+    ret.showmap = world.showmap.copy()
     ret.bombbag = world.bombbag.copy()
     ret.flute_mode = world.flute_mode.copy()
     ret.bow_mode = world.bow_mode.copy()
     ret.free_lamp_cone = world.free_lamp_cone.copy()
     ret.crystals_needed_for_ganon = world.crystals_needed_for_ganon.copy()
     ret.crystals_needed_for_gt = world.crystals_needed_for_gt.copy()
+    ret.bosses_ganon = world.bosses_ganon.copy()
+    ret.bosshunt_include_agas = world.bosshunt_include_agas.copy()
     ret.ganon_item = world.ganon_item.copy()
     ret.crystals_ganon_orig = world.crystals_ganon_orig.copy()
     ret.crystals_gt_orig = world.crystals_gt_orig.copy()

@@ -20,8 +20,8 @@ from tkinter import (
 
 import source.classes.diags as diagnostics
 import source.gui.widgets as widgets
-from Main import __version__
 from source.classes.Empty import Empty
+from Versions import DRVersion
 
 
 def generation_page(parent,settings):
@@ -165,9 +165,9 @@ def generation_page(parent,settings):
                 "width": 120,
                 "height": 50
             }
-		    }
+        }
         diag = Tk()
-        diag.title("Door Shuffle " + __version__)
+        diag.title("Door Shuffle " + DRVersion)
         diag.geometry(str(dims["window"]["width"]) + 'x' + str(dims["window"]["height"]))
         text = Text(diag, width=dims["textarea.characters"]["width"], height=dims["textarea.characters"]["height"])
         text.pack()

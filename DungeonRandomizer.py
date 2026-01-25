@@ -11,7 +11,7 @@ import RaceRandom as random
 import source.classes.diags as diagnostics
 from CLI import get_args_priority, parse_cli
 from Fill import FillError
-from Main import EnemizerError, __version__, main
+from Main import EnemizerError, main
 from Rom import get_sprite_from_name
 from source.classes.BabelFish import BabelFish
 from Utils import close_console, is_bundled
@@ -80,7 +80,7 @@ def start():
                     break
                 except (FillError, EnemizerError, Exception, RuntimeError) as err:
                     failures.append((err, seed))
-                    logger.warning('%s: %s', fish.translate("cli","cli","generation.failed"), err)
+                    logger.exception('Attempt %d - %s: %s', trynum, fish.translate("cli","cli","generation.failed"), err)
                     logger.info('')
                 seed = random.randint(0, 999999999)
 

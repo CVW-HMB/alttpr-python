@@ -72,6 +72,7 @@
       "trinity",
       "crystals",
       "ganonhunt",
+      "bosshunt",
       "completionist",
       "sanctuary"
     ]
@@ -299,6 +300,27 @@
       "random"
     ]
   },
+  "bosses_ganon": {
+    "choices": [
+      "12",
+      "11",
+      "10",
+      "9",
+      "8",
+      "7",
+      "6",
+      "5",
+      "4",
+      "3",
+      "2",
+      "1",
+      "0"
+    ]
+  },
+  "bosshunt_include_agas": {
+    "action": "store_true",
+    "type": "bool"
+  },
   "crystals_gt": {
     "choices": [
       "7",
@@ -429,6 +451,21 @@
       "dungeon",
       "nearby",
       "wild"
+    ]
+  },
+  "showloot": {
+    "choices": [
+      "never",
+      "presence",
+      "compass",
+      "always"
+    ]
+  },
+  "showmap": {
+    "choices": [
+      "visited",
+      "map",
+      "always"
     ]
   },
   "keysanity": {

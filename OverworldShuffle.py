@@ -27,12 +27,6 @@ from Regions import mark_light_dark_world_regions
 from source.overworld.EntranceShuffle2 import connect_simple
 from Utils import bidict
 
-version_number = '0.6.1.7'
-# branch indicator is intentionally different across branches
-version_branch = ''
-
-__version__ = '%s%s' % (version_number, version_branch)
-
 parallel_links_new = None # needs to be globally available, reset every new generation/player
 
 def link_overworld(world, player):

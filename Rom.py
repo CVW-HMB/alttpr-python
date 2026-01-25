@@ -81,9 +81,10 @@ from Text import (
     text_addresses,
 )
 from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
+from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '76dc2d00e5dd5b925ad01574b327d364'
+RANDOMIZERBASEHASH = '2647cc28bca3675152576dd1f5ea0bab'
 
 
 class JsonRom(object):
@@ -201,11 +202,12 @@ class LocalRom(object):
         with open(local_path('data/base2current.bps'), 'rb') as stream:
             bps.apply.apply_to_bytearrays(bps.io.read_bps(stream), orig_buffer, self.buffer)
 
-        # verify md5
-        patchedmd5 = hashlib.md5()
-        patchedmd5.update(self.buffer)
-        if RANDOMIZERBASEHASH != patchedmd5.hexdigest():
-            raise RuntimeError('Provided Base Rom unsuitable for patching. Please provide a JAP(1.0) "Zelda no Densetsu - Kamigami no Triforce (Japan).sfc" rom to use as a base.')
+        if not os.getenv("SKIP_BASEROM_CHECK", False):
+            # verify md5
+            patchedmd5 = hashlib.md5()
+            patchedmd5.update(self.buffer)
+            if RANDOMIZERBASEHASH != patchedmd5.hexdigest():
+                raise RuntimeError('Provided Base Rom unsuitable for patching. Please provide a JAP(1.0) "Zelda no Densetsu - Kamigami no Triforce (Japan).sfc" rom to use as a base.')
 
     def write_crc(self):
         crc = (sum(self.buffer[:0x7FDC] + self.buffer[0x7FE0:]) + 0x01FE) & 0xFFFF
@@ -1225,7 +1227,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     rom.write_bytes(0x180165, [0x0E, 0x28] if world.treasure_hunt_icon[player] == 'Triforce Piece' else [0x0D, 0x28])
     if world.goal[player] in ['triforcehunt', 'trinity', 'ganonhunt']:
         rom.write_bytes(0x180167, int16_as_bytes(world.treasure_hunt_count[player]))
-    rom.write_byte(0x180194, 1)  # Must turn in triforced pieces (instant win not enabled)
+    rom.write_byte(0x180194, 1)  # Must turn in triforce pieces (instant win not enabled)
 
     rom.write_bytes(0x180213, [0x00, 0x01])  # Not a Tournament Seed
 
@@ -1254,7 +1256,6 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     rom.write_bytes(0x18016E, [0x04, 0x08, 0x10]) # Set spike cave and MM spike room Cape usage
     rom.write_bytes(0x50563, [0x3F, 0x14]) # disable below ganon chest
     rom.write_byte(0x50599, 0x00) # disable below ganon chest
-    rom.write_bytes(0xE9A5, [0x7E, 0x00, 0x24]) # disable below ganon chest
     if world.is_pyramid_open(player):
         rom.initial_sram.pre_open_pyramid_hole()
     rom.write_byte(0x18008F, 0x01 if world.is_atgt_swapped(player) else 0x00) # AT/GT swapped
@@ -1300,6 +1301,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     # 08: Goal items collected (ie. Triforce Pieces)
     # 09: Max collection rate
     # 0A: Custom goal
+    # 0B: Reserved for Bingo
+    # 0C: All bosses (prize bosses + aga1 + aga2)
 
     def get_goal_bytes(type):
         goal_bytes = []
@@ -1354,6 +1357,11 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             ganon_goal += [0x02, world.crystals_needed_for_ganon[player]]
         elif world.goal[player] in ['ganonhunt']:
             ganon_goal += [0x88] # triforce pieces
+        elif world.goal[player] in ['bosshunt']:
+            if world.bosshunt_include_agas[player]:
+                ganon_goal += [0x0C, world.bosses_ganon[player]] # total bosses
+            else:
+                ganon_goal += [0x05, world.bosses_ganon[player]] # prize bosses
         elif world.goal[player] in ['completionist']:
             ganon_goal += [0x81, 0x82, 0x06, 0x07, 0x89] # AD and max collection rate
         else:
@@ -1454,6 +1462,60 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     if world.keyshuffle[player] != 'universal' and (world.mapshuffle[player] not in ['none', 'nearby'] or world.doorShuffle[player] != 'vanilla'
           or world.dropshuffle[player] != 'none' or world.pottery[player] not in ['none', 'cave']):
         rom.write_byte(0x18003A, 0x01)  # show key counts on map pickup
+
+    loot_source = 0x09
+    if world.prizeshuffle[player] != 'none':
+        loot_source |= 0x10
+    if world.pottery[player] not in ['none', 'cave']:
+        loot_source |= 0x02
+    if world.dropshuffle[player] != 'none':
+        loot_source |= 0x04
+    rom.write_byte(0x1CFF10, loot_source)
+
+    if world.showloot[player] == 'never':
+        rom.write_bytes(0x1CFF08, [0x00, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF11, 0x00)
+    elif world.showloot[player] == 'presence':
+        rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF11, 0x00)
+    elif world.showloot[player] == 'compass':
+        rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x02, 0x00])
+        rom.write_byte(0x1CFF11, 0x01)
+    elif world.showloot[player] == 'always':
+        rom.write_bytes(0x1CFF08, [0x02, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF11, 0x00)
+
+    if world.showmap[player] == 'visited':
+        rom.write_bytes(0x1CFF00, [0x01, 0x00, 0x00, 0x05])
+    elif world.showmap[player] == 'map':
+        rom.write_bytes(0x1CFF00, [0x01, 0x05, 0x00, 0x05])
+    elif world.showmap[player] == 'always':
+        rom.write_bytes(0x1CFF00, [0x05, 0x00, 0x00, 0x00])
+
+    loot_icons = 0x1CF900
+    if world.bombbag[player]:
+        rom.write_byte(loot_icons + 0x52, 0x0B) # bomb bag is major
+
+    triforce_piece_ids = [0x6B, 0x6C]
+    if world.treasure_hunt_count[player] > 20:
+        for triforce_piece_id in triforce_piece_ids:
+            rom.write_byte(loot_icons + triforce_piece_id, 0x04)
+
+    crystal_ids = [0x20, 0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6]
+    if world.goal[player] in ['ganon', 'dungeons', 'crystals', 'trinity']:
+        crystal_category = 0x0D
+    else:
+        crystal_category = 0x06
+    for crystal_id in crystal_ids:
+        rom.write_byte(loot_icons + crystal_id, crystal_category)
+
+    pendant_ids = [0x37, 0x38, 0x39]
+    if world.goal[player] in ['pedestal', 'dungeons', 'trinity']:
+        pendant_category = 0x0C
+    else:
+        pendant_category = 0x06
+    for pendant_id in pendant_ids:
+        rom.write_byte(loot_icons + pendant_id, pendant_category)
 
     # compasses showing dungeon count
     compass_mode = 0x80 if world.compassshuffle[player] not in ['none', 'nearby'] else 0x00
@@ -1601,12 +1663,28 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     # b - Big Key
     # a - Small Key
     #
+    dungeon_items_menu = 0x00
+
+    if world.doorShuffle[player] not in ['vanilla', 'basic']:
+        dungeon_items_menu |= 0x0F
+
+    if world.keyshuffle[player] not in ['none', 'universal']:
+        dungeon_items_menu |= 0x01
+
+    if world.bigkeyshuffle[player] != 'none':
+        dungeon_items_menu |= 0x02
+
     enable_menu_map_check = (world.overworld_map[player] != 'default' and world.shuffle[player] != 'vanilla') or world.prizeshuffle[player] not in ['none', 'dungeon', 'nearby']
-    rom.write_byte(0x180045, ((0x01 if world.keyshuffle[player] not in ['none', 'universal'] else 0x00)
-                              | (0x02 if world.bigkeyshuffle[player] != 'none' else 0x00)
-                              | (0x04 if world.mapshuffle[player] != 'none' or enable_menu_map_check else 0x00)
-                              | (0x08 if world.compassshuffle[player] != 'none' else 0x00)  # free roaming items in menu
-                              | (0x10 if world.logic[player] == 'nologic' else 0)))  # boss icon
+    if world.mapshuffle[player] != 'none' or enable_menu_map_check:
+        dungeon_items_menu |= 0x04
+
+    if world.compassshuffle[player] != 'none':
+        dungeon_items_menu |= 0x08
+
+    if world.logic[player] == 'nologic' or world.goal[player] == 'bosshunt':
+        dungeon_items_menu |= 0x10
+
+    rom.write_byte(0x180045, dungeon_items_menu)
 
     def get_reveal_bytes(itemName):
         if world.prizeshuffle[player] != 'wild':
@@ -1815,30 +1893,29 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
 
     # set rom name
     # 21 bytes
-    from Main import __version__
-    from OverworldShuffle import __version__ as ORVersion
     if rom_header:
         if len(rom_header) > 21:
             raise Exception('ROM header too long. Max 21 bytes, found %d bytes.' % len(rom_header))
-        elif '|' in rom_header:
-            gen, seedstring = rom_header.split('|', 1)
-            gen = f'{gen:<3}'
-            seedstring = f'{int(seedstring):09}' if seedstring.isdigit() else seedstring[:9]
-            rom.name = bytearray(f'OR{gen}_{team+1}_{player}_{seedstring}\0', 'utf8')[:21]
-        elif len(rom_header) <= 9:
-            seedstring = f'{int(rom_header):09}' if rom_header.isdigit() else rom_header
-            rom.name = bytearray(f'OR{__version__.split("-")[0].replace(".","")[0:3]}_{team+1}_{player}_{seedstring}\0', 'utf8')[:21]
-        else:
-            rom.name = bytearray(rom_header, 'utf8')[:21]
-    else:
-        seedstring = f'{world.seed:09}' if isinstance(world.seed, int) else world.seed
-        rom.name = bytearray(f'OR{__version__.split("-")[0].replace(".","")[0:3]}_{team+1}_{player}_{seedstring}\0', 'utf8')[:21]
 
+        if world.players > 1 and len(rom_header) <= 12:
+            rom.name = bytearray(f"GK_{team + 1}_{player}_{rom_header}", 'utf8')
+        elif len(rom_header) <= 18:
+            rom.name = bytearray(f"GK_{rom_header}", 'utf8')
+        else:
+            rom.name = bytearray(rom_header, 'utf8')
+    else:
+        if world.players > 1:
+            rom.name = bytearray(f'GK_{team + 1}_{player}_{world.seed}', 'utf8')
+        else:
+            rom.name = bytearray(f'GK_{world.seed}', 'utf8')
+
+    rom.name = rom.name[:21]
     rom.name.extend([0] * (21 - len(rom.name)))
     rom.write_bytes(0x7FC0, rom.name)
 
-    rom.write_bytes(0x138010, bytearray(__version__, 'utf8'))
+    rom.write_bytes(0x138010, bytearray(DRVersion, 'utf8'))
     rom.write_bytes(0x150010, bytearray(ORVersion, 'utf8'))
+    rom.write_bytes(0x1CEEF0, bytearray(GKVersion, 'utf8'))
 
     # set player names
     for p in range(1, min(world.players, 255) + 1):
@@ -2712,12 +2789,18 @@ def write_strings(rom, world, player, team):
             tt['murahdahla'] = "Hello @. I\nam Murahdahla, brother of\nSahasrahla and Aginah. Behold the power of\ninvisibility.\n\n\n\n… … …\n\nWait! You can see me? I knew I should have\nhidden in a hollow tree. If you bring\n%d triforce pieces, I can reassemble it." % int(world.treasure_hunt_count[player])
         elif world.goal[player] == 'ganonhunt':
             tt['sign_ganon'] = 'Go find the Triforce pieces to beat Ganon'
+        elif world.goal[player] == 'bosshunt':
+            bosshunt_count = '%d guardian%s of %sdungeons' % \
+                (world.bosses_ganon[player],
+                 '' if world.bosses_ganon[player] == 1 else 's',
+                 '' if world.bosshunt_include_agas[player] else 'prize ')
+            tt['sign_ganon'] = 'To beat Ganon you must defeat %s.' % bosshunt_count
         elif world.goal[player] == 'completionist':
             tt['sign_ganon'] = 'Ganon only respects those who have done everything'
         tt['ganon_fall_in'] = Ganon1_texts[random.randint(0, len(Ganon1_texts) - 1)]
         tt['ganon_fall_in_alt'] = 'You cannot defeat me until you finish your goal!'
         tt['ganon_phase_3_alt'] = 'Got wax in\nyour ears?\nI can not die!'
-    
+
     def get_custom_goal_text(type):
         goal_text = world.custom_goals[player][type]['goaltext']
         placeholder_count = goal_text.count('%d')

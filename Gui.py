@@ -22,8 +22,6 @@ from tkinter import (
 from CLI import get_args_priority
 from DungeonRandomizer import parse_cli
 from GuiUtils import set_icon
-from Main import __version__ as ESVersion
-from OverworldShuffle import __version__ as ORVersion
 from source.classes.BabelFish import BabelFish
 from source.classes.Empty import Empty
 from source.gui.adjust.overview import adjust_page
@@ -40,13 +38,14 @@ from source.gui.randomize.generation import generation_page
 from source.gui.randomize.item import item_page
 from source.gui.randomize.overworld import overworld_page
 from source.gui.startinventory.overview import startinventory_page
+from Versions import DRVersion, GKVersion, ORVersion
 
 
 def check_python_version(fish):
     import sys
     version = sys.version_info
     if version.major < 3 or version.minor < 7:
-        messagebox.showinfo("Overworld Shuffle %s (DR %s)" % (ORVersion, ESVersion), fish.translate("cli","cli","old.python.version") % sys.version)
+        messagebox.showinfo("GwaaKiwi Randomizer %s (OR %s, DR %s)" % (GKVersion, ORVersion, DRVersion), fish.translate("cli","cli","old.python.version") % sys.version)
 
 
 # Save settings to file
@@ -95,7 +94,7 @@ def guiMain(args=None):
     mainWindow = Tk()
     self = mainWindow
 
-    mainWindow.wm_title("Overworld Shuffle %s (DR %s)" % (ORVersion, ESVersion))
+    mainWindow.wm_title("GwaaKiwi Randomizer %s (OR %s, DR %s)" % (GKVersion, ORVersion, DRVersion))
     mainWindow.protocol("WM_DELETE_WINDOW", guiExit)  # intercept when user clicks the X
 
     # set program icon

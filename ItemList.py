@@ -236,12 +236,14 @@ def get_custom_array_key(item):
 
 def generate_itempool(world, player):
     if (world.difficulty[player] not in ['normal', 'hard', 'expert']
-       or world.goal[player] not in ['ganon', 'pedestal', 'dungeons', 'triforcehunt', 'trinity', 'crystals',
-                                     'ganonhunt', 'completionist', 'sanctuary']
+       or world.goal[player] not in ['ganon', 'pedestal', 'dungeons',
+                                     'triforcehunt', 'trinity', 'crystals',
+                                     'ganonhunt', 'completionist', 'sanctuary',
+                                     'bosshunt']
        or world.mode[player] not in ['open', 'standard', 'inverted']
        or world.timer not in ['none', 'display', 'timed', 'timed-ohko', 'ohko', 'timed-countdown']
        or world.progressive not in ['on', 'off', 'random']):
-        raise NotImplementedError('Not supported yet')
+            raise NotImplementedError('Not supported yet')
 
     if world.timer in ['ohko', 'timed-ohko']:
         world.can_take_damage[player] = False
@@ -379,7 +381,7 @@ def generate_itempool(world, player):
 
     items = ItemFactory(pool, player)
     if world.shopsanity[player]:
-        for potion in ['Green Potion', 'Blue Potion', 'Red Potion']:
+        for potion in ['Green Potion', 'Blue Potion', 'Red Potion', 'Bee']:
             p_item = next(item for item in items if item.name == potion and item.player == player)
             p_item.priority = True  # don't beemize one of each potion
 
@@ -1125,7 +1127,7 @@ def get_pool_core(world, player, progressive, shuffle, difficulty, treasure_hunt
         precollected_items.append('Pegasus Boots')
         pool.remove('Pegasus Boots')
         pool.extend(['Rupees (20)'])
-    
+
     if want_progressives():
         pool.extend(progressivegloves)
     else:
@@ -1520,7 +1522,7 @@ def make_customizer_pool(world, player):
         guaranteed_items.append('Ocarina (Activated)')
     missing_items = []
     if world.shopsanity[player]:
-        guaranteed_items.extend(['Blue Potion', 'Green Potion', 'Red Potion'])
+        guaranteed_items.extend(['Blue Potion', 'Green Potion', 'Red Potion', 'Bee'])
         if world.keyshuffle[player] == 'universal':
             guaranteed_items.append('Small Key (Universal)')
     for item in guaranteed_items:

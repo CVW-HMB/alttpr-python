@@ -29,7 +29,7 @@ from source.overworld.EntranceShuffle2 import (
     link_entrances_new,
 )
 
-__version__ = '0.2-dev'
+PlandoVersion = '0.2-dev'
 
 def main(args):
     start_time = time.process_time()
@@ -47,7 +47,7 @@ def main(args):
 
     random.seed(world.seed)
 
-    logger.info('ALttP Plandomizer Version %s  -  Seed: %s\n\n', __version__, args.plando)
+    logger.info('ALttP Plandomizer Version %s  -  Seed: %s\n\n', PlandoVersion, args.plando)
 
     world.difficulty_requirements[1] = difficulties[world.difficulty[1]]
 

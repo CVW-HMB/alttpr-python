@@ -2,7 +2,7 @@
   "cli": {
     "yes": "Yes",
     "no": "No",
-    "app.title": "ALttP Overworld Randomizer Version %s : --seed %s --code %s",
+    "app.title": "ALttP GwaaKiwi Randomizer Version %s : --seed %s",
     "version": "Version",
     "seed": "Seed",
     "player": "Player",

@@ -8,6 +8,7 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from collections import defaultdict
+from hashlib import md5
 from itertools import count
 from math import factorial
 from pathlib import Path
@@ -102,31 +103,13 @@ def close_console():
             pass
 
 
-def make_new_base2current(old_rom='Zelda no Densetsu - Kamigami no Triforce (Japan).sfc', new_rom='working.sfc'):
-    import hashlib
-    import json
-    from collections import OrderedDict
-    with open(old_rom, 'rb') as stream:
-        old_rom_data = bytearray(stream.read())
+def get_new_romhash(new_rom='working.sfc'):
     with open(new_rom, 'rb') as stream:
         new_rom_data = bytearray(stream.read())
-    # extend to 2 mb
-    old_rom_data.extend(bytearray([0x00] * (2097152 - len(old_rom_data))))
 
-    out_data = OrderedDict()
-    for idx, old in enumerate(old_rom_data):
-        new = new_rom_data[idx]
-        if old != new:
-            out_data[idx] = [int(new)]
-    for offset in reversed(list(out_data.keys())):
-        if offset - 1 in out_data:
-            out_data[offset-1].extend(out_data.pop(offset))
-    with open('data/base2current.json', 'wt') as outfile:
-        json.dump([{key: value} for key, value in out_data.items()], outfile, separators=(",", ":"))
-
-    basemd5 = hashlib.md5()
+    basemd5 = md5()
     basemd5.update(new_rom_data)
-    return "New Rom Hash: " + basemd5.hexdigest()
+    return basemd5.hexdigest()
 
 
 def kth_combination(k, l, r):
@@ -768,18 +751,18 @@ class bidict(dict):
         super(bidict, self).__init__(*args, **kwargs)
         self.inverse = {}
         for key, value in self.items():
-            self.inverse.setdefault(value,[]).append(key) 
+            self.inverse.setdefault(value,[]).append(key)
 
     def __setitem__(self, key, value):
         if key in self:
-            self.inverse[self[key]].remove(key) 
+            self.inverse[self[key]].remove(key)
         super(bidict, self).__setitem__(key, value)
-        self.inverse.setdefault(value,[]).append(key)        
+        self.inverse.setdefault(value,[]).append(key)
 
     def __delitem__(self, key):
         value = self[key]
         self.inverse.setdefault(value,[]).remove(key)
-        if value in self.inverse and not self.inverse[value]: 
+        if value in self.inverse and not self.inverse[value]:
             del self.inverse[value]
         super(bidict, self).__delitem__(key)
 
@@ -787,12 +770,11 @@ class bidict(dict):
 class HexInt(int): pass
 
 def hex_representer(dumper, data):
-    import yaml
     return yaml.ScalarNode('tag:yaml.org,2002:int', f"{data:#0{4}x}")
 
 
 if __name__ == '__main__':
-    print(make_new_base2current())
+    print("New Rom Hash:", get_new_romhash())
     # read_entrance_data(old_rom=sys.argv[1])
     # room_palette_data(old_rom=sys.argv[1])
     # extract_data_from_us_rom(sys.argv[1])
