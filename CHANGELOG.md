@@ -1,5 +1,38 @@
 # Changelog
 
+# 0.7.0.1
+- Fixed buggy sprites in post-Aga Zora's Domain
+- Fixed L/R map switch when in special OW screens
+- Fixes issue not able to screen transition if bumped by enemy in water
+
+# 0.7.0.0
+- New OW Layout Shuffle Mode: Grid
+- Implemented Fog of War for Tile Flip
+
+# 0.6.1.11
+- Fixed bonk drops duplicate counting and potentially overwriting arbitrary values
+- Fixed boss icons on dungeon map check
+- Fixed dungeon counters to autotrack correctly
+- Key and chest counts in menu now display consistently (must have dungeon item or have visited dungeon to see the HUD)
+- Money balancing will fail in less scenarios
+- Fixed issue with Sanc pots not collecting
+- Enemizer now allows more enemies on water
+- Fix infinite pit fall issue with Old Man follower location
+- Fix bad overworld tilemap drawing on HC and Pyramid screens in OW Layout Shuffle
+
+## 0.6.1.10
+- Emergency fix for bonk functionality
+
+## 0.6.1.9
+- Fixed follower shuffle placement errors
+- Fixed pseudoboots ability to open Kings Tomb
+- Implemented better accurate coordinates on map check locations
+- Fixed janky icons on zoomed-in map check screen
+
+## 0.6.1.8
+- Fixed follower placement and logic
+- Fixed error with HC Courtyard Tree Pull
+
 ## 0.6.1.7
 - \~Merged in DR v1.5.2~
   - Reverted key count update
