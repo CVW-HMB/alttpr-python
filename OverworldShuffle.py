@@ -128,33 +128,33 @@ def link_overworld(world, player):
     # restructure Maze Race/Suburb/Frog/Dig Game manually due to NP/P relationship
     parallel_links_new = bidict(parallel_links) # shallow copy is enough (deep copy is broken)
     if world.owLayout[player] != 'grid':
-    if world.owKeepSimilar[player]:
-        del parallel_links_new['Maze Race ES']
-        del parallel_links_new['Kakariko Suburb WS']
-        for group in trimmed_groups.keys():
-            (std, region, axis, terrain, parallel, _, custom) = group
-            if parallel == IsParallel.Yes:
+        if world.owKeepSimilar[player]:
+            del parallel_links_new['Maze Race ES']
+            del parallel_links_new['Kakariko Suburb WS']
+            for group in trimmed_groups.keys():
+                (std, region, axis, terrain, parallel, _, custom) = group
+                if parallel == IsParallel.Yes:
+                    (forward_edges, back_edges) = trimmed_groups[group]
+                    if ['Maze Race ES'] in forward_edges:
+                        forward_edges.remove(['Maze Race ES'])
+                        trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Maze Race ES'])
+                    if ['Kakariko Suburb WS'] in back_edges:
+                        back_edges.remove(['Kakariko Suburb WS'])
+                        trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Kakariko Suburb WS'])
+                    trimmed_groups[group] = (forward_edges, back_edges)
+        else:
+            for group in trimmed_groups.keys():
+                (std, region, axis, terrain, _, _, custom) = group
                 (forward_edges, back_edges) = trimmed_groups[group]
-                if ['Maze Race ES'] in forward_edges:
-                    forward_edges.remove(['Maze Race ES'])
-                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Maze Race ES'])
-                if ['Kakariko Suburb WS'] in back_edges:
-                    back_edges.remove(['Kakariko Suburb WS'])
-                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Kakariko Suburb WS'])
+                if ['Dig Game EC', 'Dig Game ES'] in forward_edges:
+                    forward_edges.remove(['Dig Game EC', 'Dig Game ES'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][0].append(['Dig Game ES'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Dig Game EC'])
+                if ['Frog WC', 'Frog WS'] in back_edges:
+                    back_edges.remove(['Frog WC', 'Frog WS'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][1].append(['Frog WS'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Frog WC'])
                 trimmed_groups[group] = (forward_edges, back_edges)
-    else:
-        for group in trimmed_groups.keys():
-            (std, region, axis, terrain, _, _, custom) = group
-            (forward_edges, back_edges) = trimmed_groups[group]
-            if ['Dig Game EC', 'Dig Game ES'] in forward_edges:
-                forward_edges.remove(['Dig Game EC', 'Dig Game ES'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][0].append(['Dig Game ES'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Dig Game EC'])
-            if ['Frog WC', 'Frog WS'] in back_edges:
-                back_edges.remove(['Frog WC', 'Frog WS'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][1].append(['Frog WS'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Frog WC'])
-            trimmed_groups[group] = (forward_edges, back_edges)
     parallel_links_new = {**dict(parallel_links_new), **dict({e:p[0] for e, p in parallel_links_new.inverse.items()})}
 
     connected_edges = []

@@ -84,7 +84,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '7c5da63adef2706f5ce8e5003ed49900'
+RANDOMIZERBASEHASH = '33cd5e308266cf2273c80de1b1df3dac'
 
 
 class JsonRom(object):
@@ -1565,12 +1565,12 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         if ent is None or isinstance(ent, int):
             owid_map = [ 0x1E,   0x30,   0xFF,   0x7B,   0x5E,   0x70,   0x40,   0x75,   0x03,   0x58,   0x47 ]
             coord_flags = 0x0000
-        if ent is None:
+            if ent is None:
                 # HUD-style dislocated icons
                 x_map_position = [0x0050, 0x0080, 0xFF00, 0x0040, 0x0020, 0x00C0, 0x0060, 0x00A0, 0x00B0, 0x0080, 0x00E0]
                 y_map_position = [0x000C, 0x000C, 0xFF00, 0x00D4, 0x00D4, 0x00D4, 0x00D4, 0x00D4, 0x000C, 0x00D4, 0x00D4]
                 coord_flags = 0x4000 # raw OAM coord flag
-            idx = int((map_index-2)/2)
+                idx = int((map_index-2)/2)
             elif isinstance(ent, int):
                 # vanilla icon positions
                 x_map_position = [0x0F30, 0x0170, 0xFF00, 0x0790, 0x0F30, 0x0160, 0x00F0, 0x0CB0, 0x0900, 0x0240, 0x0F30]
@@ -1600,7 +1600,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                         coords = (coords[0] + 0x100, coords[1] + 0x100)
         else:
             if ent.name in ow_prize_table:
-            coords = ow_prize_table[ent.name]
+                coords = ow_prize_table[ent.name]
             elif door_addresses[ent.name][1] is not None:
                 coords = (door_addresses[ent.name][1][6], door_addresses[ent.name][1][5])
             else:
@@ -1635,13 +1635,13 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             # prize location
             write_int16s(rom, snes_to_pc(0x0ABE2E)+(map_index*6)+8, coords)
         if world.shuffle[player] == 'vanilla' or world.overworld_map[player] == 'default':
-                swap_entrances = { 'Agahnims Tower': 'Ganons Tower',
-                                    'Ganons Tower': 'Agahnims Tower' }
+            swap_entrances = { 'Agahnims Tower': 'Ganons Tower',
+                                'Ganons Tower': 'Agahnims Tower' }
             if dungeon in swap_entrances:
                 entrance_name = dungeon
                 if world.is_atgt_swapped(player):
                     entrance_name = swap_entrances[dungeon]
-            entrance = world.get_entrance(entrance_name, player)
+                entrance = world.get_entrance(entrance_name, player)
                 coords = get_entrance_coords(entrance)
             else:
                 coords = get_entrance_coords(int((map_index-2)/2))
@@ -1665,7 +1665,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             portal = world.get_portal(portal_list[portal_idx], player)
             entrance = portal.find_portal_entrance()
         coords = get_entrance_coords(entrance)
-        
+
         # figure out compass entrances and what world (light/dark)
         write_int16s(rom, snes_to_pc(0x0ABE2E)+(map_index*6), coords)
         if world.prizeshuffle[player] in ['none', 'dungeon', 'nearby'] and dungeon_table[dungeon].prize:
