@@ -49,6 +49,7 @@ dependencies = [
     { name = "aenum" },
     { name = "aioconsole", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.8'" },
     { name = "aioconsole", version = "0.8.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.8'" },
+    { name = "collections-extended" },
     { name = "colorama" },
     { name = "distro" },
     { name = "fast-enum" },
@@ -64,12 +65,22 @@ dependencies = [
 requires-dist = [
     { name = "aenum", specifier = ">=3.1.16" },
     { name = "aioconsole", specifier = ">=0.6.2" },
+    { name = "collections-extended", specifier = ">=2.0.2" },
     { name = "colorama", specifier = ">=0.4.6" },
     { name = "distro", specifier = ">=1.9.0" },
     { name = "fast-enum", specifier = ">=1.3.0" },
     { name = "python-bps-continued", specifier = ">=7" },
     { name = "pyyaml", specifier = ">=6.0.1" },
     { name = "websockets", specifier = ">=11.0.3" },
+]
+
+[[package]]
+name = "collections-extended"
+version = "2.0.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/62/40/e92bd575a99b7fb1fe9f3198ff4addc7d9f66e3d7e976b4d1b5bca6e049d/collections-extended-2.0.2.tar.gz", hash = "sha256:d68ebd1e2208444e392aa0016e5c085bd897f89296f5c1860787de5935994114", size = 22753, upload-time = "2022-01-23T18:58:38.99Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/65/8f409bbb1faf21714ebebfa553a34023a6657bbb2f85f43141be4e4ffe5e/collections_extended-2.0.2-py3-none-any.whl", hash = "sha256:bc096dda430b9455f51287943f7f63fbe53a4de78c444cc38c44e996af306ac5", size = 24330, upload-time = "2022-01-23T18:58:40.662Z" },
 ]
 
 [[package]]
