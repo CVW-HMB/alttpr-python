@@ -2788,7 +2788,7 @@ def write_strings(rom, world, player, team):
             tt['sign_ganon'] = 'Three ways to victory! %s Get to it!' % trinity_crystal_text
             tt['murahdahla'] = "Hello @. I\nam Murahdahla, brother of\nSahasrahla and Aginah. Behold the power of\ninvisibility.\n\n\n\n… … …\n\nWait! You can see me? I knew I should have\nhidden in a hollow tree. If you bring\n%d triforce pieces, I can reassemble it." % int(world.treasure_hunt_count[player])
         elif world.goal[player] == 'ganonhunt':
-            tt['sign_ganon'] = 'Go find the Triforce pieces to beat Ganon'
+            tt['sign_ganon'] = 'Go find the Triforce pieces to beat Ganon.'
         elif world.goal[player] == 'bosshunt':
             bosshunt_count = '%d guardian%s of %sdungeons' % \
                 (world.bosses_ganon[player],
@@ -2796,7 +2796,7 @@ def write_strings(rom, world, player, team):
                  '' if world.bosshunt_include_agas[player] else 'prize ')
             tt['sign_ganon'] = 'To beat Ganon you must defeat %s.' % bosshunt_count
         elif world.goal[player] == 'completionist':
-            tt['sign_ganon'] = 'Ganon only respects those who have done everything'
+            tt['sign_ganon'] = 'Ganon only respects those who have done everything.'
         tt['ganon_fall_in'] = Ganon1_texts[random.randint(0, len(Ganon1_texts) - 1)]
         tt['ganon_fall_in_alt'] = 'You cannot defeat me until you finish your goal!'
         tt['ganon_phase_3_alt'] = 'Got wax in\nyour ears?\nI can not die!'
