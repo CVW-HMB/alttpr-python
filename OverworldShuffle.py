@@ -127,37 +127,38 @@ def link_overworld(world, player):
 
     # restructure Maze Race/Suburb/Frog/Dig Game manually due to NP/P relationship
     parallel_links_new = bidict(parallel_links) # shallow copy is enough (deep copy is broken)
-    if world.owKeepSimilar[player]:
-        del parallel_links_new['Maze Race ES']
-        del parallel_links_new['Kakariko Suburb WS']
-        for group in trimmed_groups.keys():
-            (std, region, axis, terrain, parallel, _, custom) = group
-            if parallel == IsParallel.Yes:
+    if world.owLayout[player] != 'grid':
+        if world.owKeepSimilar[player]:
+            del parallel_links_new['Maze Race ES']
+            del parallel_links_new['Kakariko Suburb WS']
+            for group in trimmed_groups.keys():
+                (std, region, axis, terrain, parallel, _, custom) = group
+                if parallel == IsParallel.Yes:
+                    (forward_edges, back_edges) = trimmed_groups[group]
+                    if ['Maze Race ES'] in forward_edges:
+                        forward_edges.remove(['Maze Race ES'])
+                        trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Maze Race ES'])
+                    if ['Kakariko Suburb WS'] in back_edges:
+                        back_edges.remove(['Kakariko Suburb WS'])
+                        trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Kakariko Suburb WS'])
+                    trimmed_groups[group] = (forward_edges, back_edges)
+        else:
+            for group in trimmed_groups.keys():
+                (std, region, axis, terrain, _, _, custom) = group
                 (forward_edges, back_edges) = trimmed_groups[group]
-                if ['Maze Race ES'] in forward_edges:
-                    forward_edges.remove(['Maze Race ES'])
-                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Maze Race ES'])
-                if ['Kakariko Suburb WS'] in back_edges:
-                    back_edges.remove(['Kakariko Suburb WS'])
-                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Kakariko Suburb WS'])
+                if ['Dig Game EC', 'Dig Game ES'] in forward_edges:
+                    forward_edges.remove(['Dig Game EC', 'Dig Game ES'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][0].append(['Dig Game ES'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Dig Game EC'])
+                if ['Frog WC', 'Frog WS'] in back_edges:
+                    back_edges.remove(['Frog WC', 'Frog WS'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][1].append(['Frog WS'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Frog WC'])
                 trimmed_groups[group] = (forward_edges, back_edges)
-    else:
-        for group in trimmed_groups.keys():
-            (std, region, axis, terrain, _, _, custom) = group
-            (forward_edges, back_edges) = trimmed_groups[group]
-            if ['Dig Game EC', 'Dig Game ES'] in forward_edges:
-                forward_edges.remove(['Dig Game EC', 'Dig Game ES'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][0].append(['Dig Game ES'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Dig Game EC'])
-            if ['Frog WC', 'Frog WS'] in back_edges:
-                back_edges.remove(['Frog WC', 'Frog WS'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][1].append(['Frog WS'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Frog WC'])
-            trimmed_groups[group] = (forward_edges, back_edges)
     parallel_links_new = {**dict(parallel_links_new), **dict({e:p[0] for e, p in parallel_links_new.inverse.items()})}
 
     connected_edges = []
-    if world.owShuffle[player] != 'vanilla':
+    if world.owLayout[player] != 'vanilla':
         trimmed_groups = remove_reserved(world, trimmed_groups, connected_edges, player)
         trimmed_groups = reorganize_groups(world, trimmed_groups, player)
 
@@ -245,7 +246,7 @@ def link_overworld(world, player):
             if 'undefined_chance' in custom_crossed:
                 undefined_chance = custom_crossed['undefined_chance']
 
-    if limited_crossed > -1:
+    if limited_crossed > -1 and world.owLayout[player] != 'grid':
         # connect forced crossed non-parallel edges based on previously determined tile flips
         for edge in swapped_edges:
             if edge not in parallel_links_new:
@@ -277,10 +278,10 @@ def link_overworld(world, player):
                                                                                 s[0x30],                                s[0x35],
                                                                     s[0x41],                 s[0x3a],s[0x3b],s[0x3c],                s[0x3f])
         world.spoiler.set_map('groups', text_output, ow_crossed_tiles, player)
-    elif limited_crossed > -1 or (world.owShuffle[player] == 'vanilla' and world.owCrossed[player] == 'unrestricted'):
+    elif (limited_crossed > -1 and world.owLayout[player] != 'grid') or (world.owLayout[player] == 'vanilla' and world.owCrossed[player] == 'unrestricted'):
         crossed_candidates = list()
         for group in trimmed_groups.keys():
-            (mode, wrld, dir, terrain, parallel, count, _) = group
+            (mode, wrld, _, terrain, parallel, _, _) = group
             if wrld == WorldType.Light and mode != OpenStd.Standard:
                 for (forward_set, back_set) in zip(trimmed_groups[group][0], trimmed_groups[group][1]):
                     if forward_set[0] in parallel_links_new:
@@ -291,7 +292,7 @@ def link_overworld(world, player):
                         combine_set = forward_combine+back_combine
                         
                         skip_forward = False
-                        if world.owShuffle[player] == 'vanilla':
+                        if world.owLayout[player] == 'vanilla':
                             if any(edge in force_crossed for edge in combine_set):
                                 if not any(edge in force_noncrossed for edge in combine_set):
                                     if any(edge in force_crossed for edge in forward_combine):
@@ -425,7 +426,7 @@ def link_overworld(world, player):
     # layout shuffle
     logging.getLogger('').debug('Shuffling overworld layout')
 
-    if world.owShuffle[player] == 'vanilla':
+    if world.owLayout[player] == 'vanilla':
         # apply outstanding flips
         trimmed_groups = performSwap(trimmed_groups, edges_to_swap)
         assert len(edges_to_swap) == 0, 'Not all edges were flipped successfully: ' + ', '.join(edges_to_swap)
@@ -438,8 +439,15 @@ def link_overworld(world, player):
                 assert len(forward_set) == len(back_set)
                 for (forward_edge, back_edge) in zip(forward_set, back_set):
                     connect_two_way(world, forward_edge, back_edge, player, connected_edges)
+    elif world.owLayout[player] == 'grid':
+        from source.overworld.LayoutGenerator import generate_random_grid_layout
+
+        for exitname, destname in special_screen_connections:
+            connect_two_way(world, exitname, destname, player, connected_edges)
+
+        generate_random_grid_layout(world, player, connected_edges, ow_crossed_tiles if world.owCrossed[player] == 'grouped' else [], force_noncrossed, force_crossed, limited_crossed, undefined_chance / 100)
     else:
-        if world.owKeepSimilar[player] and world.owShuffle[player] == 'parallel':
+        if world.owKeepSimilar[player] and world.owParallel[player]:
             for exitname, destname in parallelsimilar_connections:
                 connect_two_way(world, exitname, destname, player, connected_edges)
 
@@ -589,7 +597,10 @@ def link_overworld(world, player):
                 connect_simple(world, 'Flute Spot ' + str(o + 1), regions[1], player)
     
     if world.owFluteShuffle[player] == 'vanilla':
-        connect_flutes(default_flute_connections)
+        flute_spots = default_flute_connections.copy()
+        sort_flute_spots(world, player, flute_spots)
+        world.owflutespots[player] = flute_spots
+        connect_flutes(flute_spots)
     else:
         flute_spots = 8
         flute_pool = list(flute_data.keys())
@@ -716,7 +727,7 @@ def link_overworld(world, player):
             flute_spots -= spots_to_place
         
         # connect new flute spots
-        new_spots.sort()
+        sort_flute_spots(world, player, new_spots)
         world.owflutespots[player] = new_spots
         connect_flutes(new_spots)
 
@@ -835,7 +846,7 @@ def connect_custom(world, connected_edges, groups, forced, player):
                         remove_pair_from_pool(edge1.name, edge2.name, is_crossed)
                         connect_two_way(world, edge1.name, edge2.name, player, connected_edges)
                         # resolve parallel
-                        if world.owShuffle[player] == 'parallel' and edge1.name in parallel_links_new:
+                        if world.owParallel[player] and edge1.name in parallel_links_new:
                             parallel_forward_edge = parallel_links_new[edge1.name]
                             parallel_back_edge = parallel_links_new[edge2.name]
                             if validate_crossed_allowed(parallel_forward_edge, parallel_back_edge, is_crossed):
@@ -851,13 +862,13 @@ def connect_custom(world, connected_edges, groups, forced, player):
                             connect_two_way(world, forward_edge, back_edge, player, connected_edges)
                         else:
                             raise GenerationException('Violation of force crossed rules on unresolved similars: \'%s\' <-> \'%s\'', forward_edge, back_edge)
-                        if world.owShuffle[player] == 'parallel' and forward_edge in parallel_links_new:
+                        if world.owParallel[player] and forward_edge in parallel_links_new:
                             parallel_forward_edge = parallel_links_new[forward_edge]
                             parallel_back_edge = parallel_links_new[back_edge]
                             if not validate_crossed_allowed(parallel_forward_edge, parallel_back_edge, is_crossed):
                                 raise GenerationException('Violation of force crossed rules on parallel unresolved similars: \'%s\' <-> \'%s\'', forward_edge, back_edge)
 
-def connect_two_way(world, edgename1, edgename2, player, connected_edges=None):
+def connect_two_way(world, edgename1, edgename2, player, connected_edges=None, set_spoiler=True):
     edge1 = world.get_entrance(edgename1, player)
     edge2 = world.get_entrance(edgename2, player)
     x = world.get_owedge(edgename1, player)
@@ -881,7 +892,7 @@ def connect_two_way(world, edgename1, edgename2, player, connected_edges=None):
     x.dest = y
     y.dest = x
 
-    if world.owShuffle[player] != 'vanilla' or world.owMixed[player] or world.owCrossed[player] != 'none':
+    if set_spoiler and (world.owLayout[player] != 'vanilla' or world.owMixed[player] or world.owCrossed[player] != 'none'):
         world.spoiler.set_overworld(edgename2, edgename1, 'both', player)
 
     if connected_edges is not None:
@@ -889,7 +900,7 @@ def connect_two_way(world, edgename1, edgename2, player, connected_edges=None):
         connected_edges.append(edgename2)
     
         # connecting parallel connections
-        if world.owShuffle[player] in ['vanilla', 'parallel']:
+        if world.owLayout[player] == 'vanilla' or world.owParallel[player]:
             if edgename1 in parallel_links_new:
                 try:
                     parallel_forward_edge = parallel_links_new[edgename1]
@@ -978,7 +989,7 @@ def determine_forced_flips(world, tile_ow_groups, do_grouped, player):
                         for whirl1, whirl2 in custom_whirlpools.items():
                             if [whirlpool_map[whirl1], whirlpool_map[whirl2]] not in merged_owids and should_merge_group(whirlpool_map[whirl1], whirlpool_map[whirl2]):
                                 merged_owids.append([whirlpool_map[whirl1], whirlpool_map[whirl2]])
-            if world.owShuffle[player] != 'vanilla':
+            if world.owLayout[player] != 'vanilla':
                 custom_edges = world.customizer.get_owedges()
                 if custom_edges and player in custom_edges:
                     custom_edges = custom_edges[player]
@@ -1084,6 +1095,9 @@ def shuffle_tiles(world, groups, result_list, do_grouped, forced_flips, player):
                 exist_dw_regions.extend(dw_regions)
 
         parity = [sum(group_parity[group[0][0]][i] for group in groups if group not in removed) for i in range(6)]
+        if world.owLayout[player] == 'grid':
+            parity[1] = 0
+            parity[2] = 0
         if not world.owKeepSimilar[player]:
             parity[1] += 2*parity[2]
             parity[2] = 0
@@ -1177,12 +1191,16 @@ def define_tile_groups(world, do_grouped, player):
     if world.shuffle[player] in ['vanilla', 'dungeonssimple', 'simple', 'restricted', 'district']:
         merge_groups([[0x05, 0x07]])
 
-    # all non-parallel screens
-    if world.owShuffle[player] == 'vanilla' and (world.owCrossed[player] == 'none' or do_grouped):
-        merge_groups([[0x00, 0x2d, 0x80], [0x0f, 0x81], [0x1a, 0x1b], [0x28, 0x29], [0x30, 0x3a]])
+    # special screens
+    if world.owLayout[player] != 'wild' and (world.owCrossed[player] == 'none' or do_grouped):
+        merge_groups([[0x00, 0x2d, 0x80], [0x0f, 0x81]])
+
+    # remaining non-parallel edges
+    if world.owLayout[player] == 'vanilla' and (world.owCrossed[player] == 'none' or do_grouped):
+        merge_groups([[0x1a, 0x1b], [0x28, 0x29], [0x30, 0x3a]])
 
     # special case: non-parallel keep similar
-    if world.owShuffle[player] == 'parallel' and world.owKeepSimilar[player] and (world.owCrossed[player] == 'none' or do_grouped):
+    if world.owLayout[player] == 'wild' and world.owParallel[player] and world.owKeepSimilar[player] and (world.owCrossed[player] == 'none' or do_grouped):
         merge_groups([[0x28, 0x29]])
 
     # whirlpool screens
@@ -1238,7 +1256,7 @@ def reorganize_groups(world, groups, player):
             new_group[0] = None
         if world.owTerrain[player]:
             new_group[3] = None
-        if world.owShuffle[player] != 'parallel':
+        if not world.owParallel[player]:
             new_group[4] = None
         if not world.owKeepSimilar[player]:
             new_group[5] = None
@@ -1306,6 +1324,15 @@ def adjust_edge_groups(world, trimmed_groups, edges_to_swap, player):
                             groups[key][i].remove(m)
                         groups[(mode, wrld, dir, terrain, parallel, count, group_name)][i].extend(matches)
     return groups
+
+def sort_flute_spots(world, player, flute_spots):
+    if world.owLayout[player] != 'grid':
+        flute_spots.sort(key=lambda id: flute_data[id][1] if id != 0x03 or not world.is_tile_swapped(0x03, player) else 0x04)
+    else:
+        world_layout = world.owgrid[player][0] if world.mode[player] != 'inverted' else world.owgrid[player][1]
+        layout_list = sum(world_layout, [])
+        layout_map = {id & 0xBF: i for i, id in enumerate(layout_list)}
+        flute_spots.sort(key=lambda id: layout_map[flute_data[id][1] if id != 0x03 or not world.is_tile_swapped(0x03, player) else 0x04])
 
 def create_dynamic_flute_exits(world, player):
     flute_in_pool = True if player not in world.customitemarray else any(i for i, n in world.customitemarray[player].items() if i == 'flute' and n > 0)
@@ -2347,6 +2374,11 @@ parallelsimilar_connections = [('Maze Race ES', 'Kakariko Suburb WS'),
                                ('Dig Game ES', 'Frog WS')
                             ]
 
+special_screen_connections = [('Lost Woods NW', 'Master Sword Meadow SC'),
+                               ('Stone Bridge WC', 'Hobo EC'),
+                               ('Zora Waterfall NE', 'Zoras Domain SW')
+                            ]
+
 # non shuffled overworld
 default_connections = [('Lost Woods NW', 'Master Sword Meadow SC'),
                         ('Lost Woods SW', 'Lost Woods Pass NW'),
@@ -2560,46 +2592,107 @@ isolated_regions = [
 flute_data = {
     #OWID    LW Region                         DW Region                            Slot   VRAM    BG Y    BG X   Link Y  Link X   Cam Y   Cam X   Unk1    Unk2   IconY   IconX    AltY    AltX  AltVRAM  AltBGY  AltBGX  AltCamY AltCamX AltUnk1 AltUnk2 AltIconY AltIconX
     0x00: (['Lost Woods East Area',           'Skull Woods Forest'],                0x09, 0x1042, 0x022e, 0x0202, 0x0290, 0x0288, 0x029b, 0x028f, 0xfff2, 0x000e, 0x0290, 0x0288, 0x0290, 0x0290),
-    0x02: (['Lumberjack Area',                'Dark Lumberjack Area'],              0x02, 0x059c, 0x00d6, 0x04e6, 0x0138, 0x0558, 0x0143, 0x0563, 0xfffa, 0xfffa, 0x0138, 0x0550),
-    0x03: (['West Death Mountain (Bottom)',   'West Dark Death Mountain (Top)'],    0x0b, 0x1600, 0x02ca, 0x060e, 0x0328, 0x0678, 0x0337, 0x0683, 0xfff6, 0xfff2, 0x035b, 0x0680, 0x0118, 0x0860, 0x05c0, 0x00b8, 0x07ec, 0x0127, 0x086b, 0xfff8, 0x0004, 0x0148, 0x0850),
-    0x05: (['East Death Mountain (Bottom)',   'East Dark Death Mountain (Bottom)'], 0x0e, 0x1860, 0x031e, 0x0d00, 0x0388, 0x0da8, 0x038d, 0x0d7d, 0x0000, 0x0000, 0x0388, 0x0da8),
-    0x07: (['Death Mountain TR Pegs Area',    'Turtle Rock Area'],                  0x07, 0x0804, 0x0102, 0x0e1a, 0x0160, 0x0e90, 0x016f, 0x0e97, 0xfffe, 0x0006, 0x0160, 0x0f20),
-    0x0a: (['Mountain Pass Area',             'Bumper Cave Area'],                  0x0a, 0x0180, 0x0220, 0x0406, 0x0280, 0x0488, 0x028f, 0x0493, 0x0000, 0xfffa, 0x0280, 0x0488),
-    0x0f: (['Zora Waterfall Area',            'Catfish Area'],                      0x0f, 0x0316, 0x025c, 0x0eb2, 0x02c0, 0x0f28, 0x02cb, 0x0f2f, 0x0002, 0xfffe, 0x02d0, 0x0f38),
-    0x10: (['Lost Woods Pass West Area',      'Skull Woods Pass West Area'],        0x10, 0x0080, 0x0400, 0x0000, 0x0448, 0x0058, 0x046f, 0x0085, 0x0000, 0x0000, 0x0448, 0x0058),
-    0x11: (['Kakariko Fortune Area',          'Dark Fortune Area'],                 0x11, 0x0912, 0x051e, 0x0292, 0x0588, 0x0318, 0x058d, 0x031f, 0x0000, 0xfffe, 0x0588, 0x0318),
-    0x12: (['Kakariko Pond Area',             'Outcast Pond Area'],                 0x12, 0x0890, 0x051a, 0x0476, 0x0578, 0x04f8, 0x0587, 0x0503, 0xfff6, 0x000a, 0x0578, 0x04f8),
-    0x13: (['Sanctuary Area',                 'Dark Chapel Area'],                  0x13, 0x051c, 0x04aa, 0x06de, 0x0508, 0x0758, 0x0517, 0x0763, 0xfff6, 0x0002, 0x0508, 0x0758),
-    0x14: (['Graveyard Area',                 'Dark Graveyard Area'],               0x14, 0x089c, 0x051e, 0x08e6, 0x0580, 0x0958, 0x058b, 0x0963, 0x0000, 0xfffa, 0x0580, 0x0928, 0x0580, 0x0948),
-    0x15: (['River Bend East Bank',           'Qirn Jump East Bank'],               0x15, 0x041a, 0x0486, 0x0ad2, 0x04e8, 0x0b48, 0x04f3, 0x0b4f, 0x0008, 0xfffe, 0x04f8, 0x0b60),
-    0x16: (['Potion Shop Area',               'Dark Witch Area'],                   0x16, 0x0888, 0x0516, 0x0c4e, 0x0578, 0x0cc8, 0x0583, 0x0cd3, 0xfffa, 0xfff2, 0x0598, 0x0ccf),
-    0x17: (['Zora Approach Ledge',            'Catfish Approach Ledge'],            0x17, 0x039e, 0x047e, 0x0ef2, 0x04e0, 0x0f68, 0x04eb, 0x0f6f, 0x0000, 0xfffe, 0x04e0, 0x0f68),
-    0x18: (['Kakariko Village',               'Village of Outcasts'],               0x18, 0x0b30, 0x0759, 0x017e, 0x07b7, 0x0200, 0x07c6, 0x020b, 0x0007, 0x0002, 0x07c0, 0x0210, 0x07c8, 0x01f8),
-    0x1a: (['Forgotten Forest Area',          'Shield Shop Fence'],                 0x1a, 0x081a, 0x070f, 0x04d2, 0x0770, 0x0548, 0x077c, 0x054f, 0xffff, 0xfffe, 0x0770, 0x0548),
-    0x1b: (['Hyrule Castle Courtyard',        'Pyramid Area'],                      0x1b, 0x0c30, 0x077a, 0x0786, 0x07d8, 0x07f8, 0x07e7, 0x0803, 0x0006, 0xfffa, 0x07d8, 0x07f8),
-    0x1d: (['Wooden Bridge Area',             'Broken Bridge Northeast'],           0x1d, 0x0602, 0x06c2, 0x0a0e, 0x0720, 0x0a80, 0x072f, 0x0a8b, 0xfffe, 0x0002, 0x0720, 0x0a80),
-    0x1e: (['Eastern Palace Area',            'Palace of Darkness Area'],           0x26, 0x1802, 0x091e, 0x0c0e, 0x09c0, 0x0c80, 0x098b, 0x0c8b, 0x0000, 0x0002, 0x09c0, 0x0c80),
-    0x22: (['Blacksmith Area',                'Hammer Pegs Area'],                  0x22, 0x058c, 0x08aa, 0x0462, 0x0908, 0x04d8, 0x0917, 0x04df, 0x0006, 0xfffe, 0x0908, 0x04d8),
-    0x25: (['Sand Dunes Area',                'Dark Dunes Area'],                   0x25, 0x030e, 0x085a, 0x0a76, 0x08b8, 0x0ae8, 0x08c7, 0x0af3, 0x0006, 0xfffa, 0x08b8, 0x0b08),
-    0x28: (['Maze Race Area',                 'Dig Game Area'],                     0x28, 0x0908, 0x0b1e, 0x003a, 0x0b88, 0x00b8, 0x0b8d, 0x00bf, 0x0000, 0x0006, 0x0b88, 0x00b8),
-    0x29: (['Kakariko Suburb Area',           'Frog Area'],                         0x29, 0x0408, 0x0a7c, 0x0242, 0x0ae0, 0x02c0, 0x0aeb, 0x02c7, 0x0002, 0xfffe, 0x0ae0, 0x02c0),
-    0x2a: (['Flute Boy Area',                 'Stumpy Area'],                       0x2a, 0x058e, 0x0aac, 0x046e, 0x0b10, 0x04e8, 0x0b1b, 0x04f3, 0x0002, 0x0002, 0x0b10, 0x04e8),
-    0x2b: (['Central Bonk Rocks Area',        'Dark Bonk Rocks Area'],              0x2b, 0x0620, 0x0acc, 0x0700, 0x0b30, 0x0790, 0x0b3b, 0x0785, 0xfff2, 0x0000, 0x0b30, 0x0770),
-    0x2c: (['Links House Area',               'Big Bomb Shop Area'],                0x2c, 0x0588, 0x0ab9, 0x0840, 0x0b17, 0x08b8, 0x0b26, 0x08bf, 0xfff7, 0x0000, 0x0b20, 0x08b8),
-    0x2d: (['Stone Bridge South Area',        'Hammer Bridge South Area'],          0x2d, 0x0886, 0x0b1e, 0x0a2a, 0x0ba0, 0x0aa8, 0x0b8b, 0x0aaf, 0x0000, 0x0006, 0x0bc4, 0x0ad0),
-    0x2e: (['Tree Line Area',                 'Dark Tree Line Area'],               0x2e, 0x0100, 0x0a1a, 0x0c00, 0x0a78, 0x0c30, 0x0a87, 0x0c7d, 0x0006, 0x0000, 0x0a78, 0x0c58),
-    0x2f: (['Eastern Nook Area',              'Darkness Nook Area'],                0x2f, 0x0798, 0x0afa, 0x0eb2, 0x0b58, 0x0f30, 0x0b67, 0x0f37, 0xfff6, 0x000e, 0x0b50, 0x0f30),
-    0x30: (['Desert Teleporter Ledge',        'Mire Teleporter Ledge'],             0x38, 0x1880, 0x0f1e, 0x0000, 0x0fa8, 0x0078, 0x0f8d, 0x008d, 0x0000, 0x0000, 0x0fb0, 0x0070),
-    0x32: (['Flute Boy Approach Area',        'Stumpy Approach Area'],              0x32, 0x03a0, 0x0c6c, 0x0500, 0x0cd0, 0x05a8, 0x0cdb, 0x0585, 0x0002, 0x0000, 0x0cd6, 0x0568),
-    0x33: (['C Whirlpool Outer Area',         'Dark C Whirlpool Outer Area'],       0x33, 0x0180, 0x0c20, 0x0600, 0x0c80, 0x0628, 0x0c8f, 0x067d, 0x0000, 0x0000, 0x0c80, 0x0628),
-    0x34: (['Statues Area',                   'Hype Cave Area'],                    0x34, 0x088e, 0x0d00, 0x0866, 0x0d60, 0x08d8, 0x0d6f, 0x08e3, 0x0000, 0x000a, 0x0d60, 0x08d8),
-    #0x35: (['Lake Hylia Northwest Bank',      'Ice Lake Northwest Bank'],           0x35, 0x0d00, 0x0da6, 0x0a06, 0x0e08, 0x0a80, 0x0e13, 0x0a8b, 0xfffa, 0xfffa, 0x0d88, 0x0a88),
-    0x35: (['Lake Hylia South Shore',         'Ice Lake Southeast Ledge'],          0x3e, 0x1860, 0x0f1e, 0x0d00, 0x0f98, 0x0da8, 0x0f8b, 0x0d85, 0x0000, 0x0000, 0x0f90, 0x0da4),
-    0x37: (['Ice Cave Area',                  'Shopping Mall Area'],                0x37, 0x0786, 0x0cf6, 0x0e2e, 0x0d58, 0x0ea0, 0x0d63, 0x0eab, 0x000a, 0x0002, 0x0d48, 0x0ed0),
-    0x3a: (['Desert Pass Area',               'Swamp Nook Area'],                   0x3a, 0x001a, 0x0e08, 0x04c6, 0x0e70, 0x0540, 0x0e7d, 0x054b, 0x0006, 0x000a, 0x0e70, 0x0540),
-    0x3b: (['Dam Area',                       'Swamp Area'],                        0x3b, 0x069e, 0x0edf, 0x06f2, 0x0f3d, 0x0778, 0x0f4c, 0x077f, 0xfff1, 0xfffe, 0x0f30, 0x0770),
-    0x3c: (['South Pass Area',                'Dark South Pass Area'],              0x3c, 0x0584, 0x0ed0, 0x081e, 0x0f38, 0x0898, 0x0f45, 0x08a3, 0xfffe, 0x0002, 0x0f38, 0x0898),
-    0x3f: (['Octoballoon Area',               'Bomber Corner Area'],                0x3f, 0x0810, 0x0f05, 0x0e75, 0x0f67, 0x0ef3, 0x0f72, 0x0efa, 0xfffb, 0x000b, 0x0f80, 0x0ef0)
+    0x02: (['Lumberjack Area',                'Dark Lumberjack Area'],              0x02, 0x059c, 0x00d6, 0x04e6, 0x0138, 0x0558, 0x0143, 0x0563, 0xfffa, 0xfffa, 0x01d8, 0x0518),
+    0x03: (['West Death Mountain (Bottom)',   'West Dark Death Mountain (Top)'],    0x0b, 0x1600, 0x02ca, 0x060e, 0x0328, 0x0678, 0x0337, 0x0683, 0xfff6, 0xfff2, 0x03bb, 0x0680, 0x0118, 0x0860, 0x05c0, 0x00b8, 0x07ec, 0x0127, 0x086b, 0xfff8, 0x0004, 0x0148, 0x0850),
+    0x05: (['East Death Mountain (Bottom)',   'East Dark Death Mountain (Bottom)'], 0x0e, 0x1860, 0x031e, 0x0d00, 0x0388, 0x0da8, 0x038d, 0x0d7d, 0x0000, 0x0000, 0x03c8, 0x0d98),
+    0x07: (['Death Mountain TR Pegs Area',    'Turtle Rock Area'],                  0x07, 0x0804, 0x0102, 0x0e1a, 0x0160, 0x0e90, 0x016f, 0x0e97, 0xfffe, 0x0006, 0x0150, 0x0ea0),
+    0x0a: (['Mountain Pass Area',             'Bumper Cave Area'],                  0x0a, 0x0180, 0x0220, 0x0406, 0x0280, 0x0488, 0x028f, 0x0493, 0x0000, 0xfffa, 0x0390, 0x04d8),
+    0x0f: (['Zora Waterfall Area',            'Catfish Area'],                      0x0f, 0x0316, 0x025c, 0x0eb2, 0x02c0, 0x0f28, 0x02cb, 0x0f2f, 0x0002, 0xfffe, 0x0360, 0x0f58),
+    0x10: (['Lost Woods Pass West Area',      'Skull Woods Pass West Area'],        0x10, 0x0080, 0x0400, 0x0000, 0x0448, 0x0058, 0x046f, 0x0085, 0x0000, 0x0000, 0x04f8, 0x0088),
+    0x11: (['Kakariko Fortune Area',          'Dark Fortune Area'],                 0x11, 0x0912, 0x051e, 0x0292, 0x0588, 0x0318, 0x058d, 0x031f, 0x0000, 0xfffe, 0x05f8, 0x0318),
+    0x12: (['Kakariko Pond Area',             'Outcast Pond Area'],                 0x12, 0x0890, 0x051a, 0x0476, 0x0578, 0x04f8, 0x0587, 0x0503, 0xfff6, 0x000a, 0x05b8, 0x04f8),
+    0x13: (['Sanctuary Area',                 'Dark Chapel Area'],                  0x13, 0x051c, 0x04aa, 0x06de, 0x0508, 0x0758, 0x0517, 0x0763, 0xfff6, 0x0002, 0x05b8, 0x0738),
+    0x14: (['Graveyard Area',                 'Dark Graveyard Area'],               0x14, 0x089c, 0x051e, 0x08e6, 0x0580, 0x0958, 0x058b, 0x0963, 0x0000, 0xfffa, 0x05f0, 0x0918, 0x0580, 0x0948),
+    0x15: (['River Bend East Bank',           'Qirn Jump East Bank'],               0x15, 0x041a, 0x0486, 0x0ad2, 0x04e8, 0x0b48, 0x04f3, 0x0b4f, 0x0008, 0xfffe, 0x0548, 0x0b78),
+    0x16: (['Potion Shop Area',               'Dark Witch Area'],                   0x16, 0x0888, 0x0516, 0x0c4e, 0x0578, 0x0cc8, 0x0583, 0x0cd3, 0xfffa, 0xfff2, 0x05e8, 0x0c9f),
+    0x17: (['Zora Approach Ledge',            'Catfish Approach Ledge'],            0x17, 0x039e, 0x047e, 0x0ef2, 0x04e0, 0x0f68, 0x04eb, 0x0f6f, 0x0000, 0xfffe, 0x0580, 0x0f48),
+    0x18: (['Kakariko Village',               'Village of Outcasts'],               0x18, 0x0b30, 0x0759, 0x017e, 0x07b7, 0x0200, 0x07c6, 0x020b, 0x0007, 0x0002, 0x0830, 0x0240, 0x07c8, 0x01f8),
+    0x1a: (['Forgotten Forest Area',          'Shield Shop Fence'],                 0x1a, 0x081a, 0x070f, 0x04d2, 0x0770, 0x0548, 0x077c, 0x054f, 0xffff, 0xfffe, 0x0770, 0x0518),
+    0x1b: (['Hyrule Castle Courtyard',        'Pyramid Area'],                      0x1b, 0x0c30, 0x077a, 0x0786, 0x07d8, 0x07f8, 0x07e7, 0x0803, 0x0006, 0xfffa, 0x07f8, 0x07f8),
+    0x1d: (['Wooden Bridge Area',             'Broken Bridge Northeast'],           0x1d, 0x0602, 0x06c2, 0x0a0e, 0x0720, 0x0a80, 0x072f, 0x0a8b, 0xfffe, 0x0002, 0x0750, 0x0a70),
+    0x1e: (['Eastern Palace Area',            'Palace of Darkness Area'],           0x26, 0x1802, 0x091e, 0x0c0e, 0x09c0, 0x0c80, 0x098b, 0x0c8b, 0x0000, 0x0002, 0x09a0, 0x0cb0),
+    0x22: (['Blacksmith Area',                'Hammer Pegs Area'],                  0x22, 0x058c, 0x08aa, 0x0462, 0x0908, 0x04d8, 0x0917, 0x04df, 0x0006, 0xfffe, 0x0978, 0x04e8),
+    0x25: (['Sand Dunes Area',                'Dark Dunes Area'],                   0x25, 0x030e, 0x085a, 0x0a76, 0x08b8, 0x0ae8, 0x08c7, 0x0af3, 0x0006, 0xfffa, 0x0918, 0x0b18),
+    0x28: (['Maze Race Area',                 'Dig Game Area'],                     0x28, 0x0908, 0x0b1e, 0x003a, 0x0b88, 0x00b8, 0x0b8d, 0x00bf, 0x0000, 0x0006, 0x0ba8, 0x00b8),
+    0x29: (['Kakariko Suburb Area',           'Frog Area'],                         0x29, 0x0408, 0x0a7c, 0x0242, 0x0ae0, 0x02c0, 0x0aeb, 0x02c7, 0x0002, 0xfffe, 0x0b30, 0x02e0),
+    0x2a: (['Flute Boy Area',                 'Stumpy Area'],                       0x2a, 0x058e, 0x0aac, 0x046e, 0x0b10, 0x04e8, 0x0b1b, 0x04f3, 0x0002, 0x0002, 0x0b60, 0x04f8),
+    0x2b: (['Central Bonk Rocks Area',        'Dark Bonk Rocks Area'],              0x2b, 0x0620, 0x0acc, 0x0700, 0x0b30, 0x0790, 0x0b3b, 0x0785, 0xfff2, 0x0000, 0x0b80, 0x0760),
+    0x2c: (['Links House Area',               'Big Bomb Shop Area'],                0x2c, 0x0588, 0x0ab9, 0x0840, 0x0b17, 0x08b8, 0x0b26, 0x08bf, 0xfff7, 0x0000, 0x0bb0, 0x08a8),
+    0x2d: (['Stone Bridge South Area',        'Hammer Bridge South Area'],          0x2d, 0x0886, 0x0b1e, 0x0a2a, 0x0ba0, 0x0aa8, 0x0b8b, 0x0aaf, 0x0000, 0x0006, 0x0bf0, 0x0ab8),
+    0x2e: (['Tree Line Area',                 'Dark Tree Line Area'],               0x2e, 0x0100, 0x0a1a, 0x0c00, 0x0a78, 0x0c30, 0x0a87, 0x0c7d, 0x0006, 0x0000, 0x0ac8, 0x0c70),
+    0x2f: (['Eastern Nook Area',              'Darkness Nook Area'],                0x2f, 0x0798, 0x0afa, 0x0eb2, 0x0b58, 0x0f30, 0x0b67, 0x0f37, 0xfff6, 0x000e, 0x0bc0, 0x0f00),
+    0x30: (['Desert Teleporter Ledge',        'Mire Teleporter Ledge'],             0x38, 0x1880, 0x0f1e, 0x0000, 0x0fa8, 0x0078, 0x0f8d, 0x008d, 0x0000, 0x0000, 0x0ff0, 0x0070),
+    0x32: (['Flute Boy Approach Area',        'Stumpy Approach Area'],              0x32, 0x03a0, 0x0c6c, 0x0500, 0x0cd0, 0x05a8, 0x0cdb, 0x0585, 0x0002, 0x0000, 0x0d00, 0x0528),
+    0x33: (['C Whirlpool Outer Area',         'Dark C Whirlpool Outer Area'],       0x33, 0x0180, 0x0c20, 0x0600, 0x0c80, 0x0628, 0x0c8f, 0x067d, 0x0000, 0x0000, 0x0ce0, 0x0688),
+    0x34: (['Statues Area',                   'Hype Cave Area'],                    0x34, 0x088e, 0x0d00, 0x0866, 0x0d60, 0x08d8, 0x0d6f, 0x08e3, 0x0000, 0x000a, 0x0dd0, 0x08e8),
+    #0x35: (['Lake Hylia Northwest Bank',      'Ice Lake Northwest Bank'],           0x35, 0x0d00, 0x0da6, 0x0a06, 0x0e08, 0x0a80, 0x0e13, 0x0a8b, 0xfffa, 0xfffa, 0x0dc8, 0x0a90),
+    0x35: (['Lake Hylia South Shore',         'Ice Lake Southeast Ledge'],          0x3e, 0x1860, 0x0f1e, 0x0d00, 0x0f98, 0x0da8, 0x0f8b, 0x0d85, 0x0000, 0x0000, 0x0fd8, 0x0da8),
+    0x37: (['Ice Cave Area',                  'Shopping Mall Area'],                0x37, 0x0786, 0x0cf6, 0x0e2e, 0x0d58, 0x0ea0, 0x0d63, 0x0eab, 0x000a, 0x0002, 0x0d98, 0x0ed0),
+    0x3a: (['Desert Pass Area',               'Swamp Nook Area'],                   0x3a, 0x001a, 0x0e08, 0x04c6, 0x0e70, 0x0540, 0x0e7d, 0x054b, 0x0006, 0x000a, 0x0ee0, 0x0570),
+    0x3b: (['Dam Area',                       'Swamp Area'],                        0x3b, 0x069e, 0x0edf, 0x06f2, 0x0f3d, 0x0778, 0x0f4c, 0x077f, 0xfff1, 0xfffe, 0x0fd0, 0x0770),
+    0x3c: (['South Pass Area',                'Dark South Pass Area'],              0x3c, 0x0584, 0x0ed0, 0x081e, 0x0f38, 0x0898, 0x0f45, 0x08a3, 0xfffe, 0x0002, 0x0fa8, 0x0898),
+    0x3f: (['Octoballoon Area',               'Bomber Corner Area'],                0x3f, 0x0810, 0x0f05, 0x0e75, 0x0f67, 0x0ef3, 0x0f72, 0x0efa, 0xfffb, 0x000b, 0x0fd0, 0x0ef0)
+}
+
+ow_loc_prize_table = {
+    'Master Sword Pedestal': (0x06d, 0x070),
+    'Hobo': (0xb80, 0xb90),
+    'Mushroom': (0x180, 0x140),
+    'Lost Woods Hideout Tree': (0x200, 0x320),
+    'Ether Tablet': (0x728, 0x017),
+    'Spectacle Rock': (0x7F8, 0x128),
+    'Old Man': (0x6A8, 0x3FF),
+    'Floating Island': (0xD38, 0x038),
+    'Death Mountain Bonk Rocks': (0xD48, 0x107),
+    'Mountain Pass Pull Tree': (0x4E0, 0x380),
+    'Mountain Pass Southeast Tree': (0x5A0, 0x3FF),
+    'Lost Woods Pass West Tree': (0x080, 0x540),
+    'Kakariko Portal Tree': (0x190, 0x540),
+    'Fortune Bonk Rocks': (0x288, 0x558),
+    'Bonk Rocks Tree': (0x680, 0x520),
+    'Sanctuary Tree': (0x788, 0x594),
+    'River Bend West Tree': (0xA38, 0x5FF),
+    'River Bend East Tree': (0xB88, 0x558),
+    'Bottle Merchant': (0x178, 0x7E8),
+    'Blinds Hideout Tree': (0x118, 0x6F7),
+    'Kakariko Welcome Tree': (0x358, 0x988),
+    'Hyrule Castle Tree': (0x730, 0x780),
+    'Wooden Bridge Tree': (0xA78, 0x6F0),
+    'Eastern Palace Tree': (0xEC0, 0x968),
+    'Maze Race': (0x0C0, 0xB00),
+    'Flute Spot': (0x480, 0xAC0),
+    'Flute Boy East Tree': (0x540, 0xB80),
+    'Flute Boy South Tree': (0x540, 0xB80),
+    'Central Bonk Rocks Tree': (0x768, 0xB37),
+    'Tree Line Tree 2': (0xCD8, 0xB00),
+    'Tree Line Tree 4': (0xCD8, 0xB00),
+    'Desert Ledge': (0x018, 0xE88),
+    'Bombos Tablet': (0x3E8, 0xEF8),
+    'Flute Boy Approach North Tree': (0x588, 0xD07),
+    'Flute Boy Approach South Tree': (0x588, 0xD07),
+    'Lake Hylia Island': (0xB98, 0xD88),
+    'Purple Chest': (0x588, 0xE96),
+    'Sunken Treasure': (0x6F8, 0xF48),
+
+    'Dark Lumberjack Tree': (0x438, 0x1F7),
+    'Bumper Cave Ledge': (0x538, 0x277),
+    'Catfish': (0xE80, 0x368),
+    'Dark Fortune Bonk Rocks (Drop 1)': (0x288, 0x558),
+    'Dark Fortune Bonk Rocks (Drop 2)': (0x288, 0x558),
+    'Dark Graveyard West Bonk Rocks': (0x900, 0x580),
+    'Dark Graveyard North Bonk Rocks': (0x900, 0x580),
+    'Dark Graveyard Tomb Bonk Rocks': (0x900, 0x580),
+    'Qirn Jump West Tree': (0xA98, 0x5FF),
+    'Qirn Jump East Tree': (0xB88, 0x558),
+    'Dark Witch Tree': (0xC28, 0x558),
+    'Pyramid': (0x998, 0x778),
+    'Pyramid Tree': (0x738, 0x908),
+    'Palace of Darkness Tree': (0xEC0, 0x968),
+    'Digging Game': (0x0C0, 0xB00),
+    'Dark Tree Line Tree 2': (0xCD8, 0xB00),
+    'Dark Tree Line Tree 3': (0xCD8, 0xB00),
+    'Dark Tree Line Tree 4': (0xCD8, 0xB00),
+    'Hype Cave Statue': (0x900, 0xDB0)
 }
 
 tile_swap_spoiler_table = \

@@ -1727,6 +1727,7 @@ def shuffle_event_items(world, player):
         available_quests = follower_quests.copy()
         available_pickups = [quests[0] for quests in available_quests.values()]
 
+        # finalize customizer followers first
         for loc_name in follower_quests.keys():
             loc = world.get_location(loc_name, player)
             if loc.item:
@@ -1734,7 +1735,6 @@ def shuffle_event_items(world, player):
                 available_quests.pop(loc_name)
                 available_pickups.remove(loc.item.name)
             
-
         if world.mode[player] == 'standard' and 'Zelda Herself' in available_pickups:
             zelda_dropoff = 'Zelda Pickup'
             if world.default_zelda_region[player] == 'Thieves Blind\'s Cell':
@@ -1744,20 +1744,39 @@ def shuffle_event_items(world, player):
             available_pickups.remove(zelda_pickup)
             set_event_item(world, player, zelda_dropoff, zelda_pickup)
 
-        random.shuffle(available_pickups)
+        follower_locations = [world.get_location(loc_name, player) for loc_name in available_quests.keys()]
 
-        restricted_pickups = { 'Get Frog': 'Dark Blacksmith Ruins'}
-        for pickup in restricted_pickups:
-            restricted_quests = [q for q in available_quests.keys() if q not in restricted_pickups[pickup]]
-            random.shuffle(restricted_quests)
-            quest = restricted_quests.pop()
-            available_quests.pop(quest)
-            available_pickups.remove(pickup)
-            set_event_item(world, player, quest, pickup)
+        attempts = 10
+        for attempt in range(attempts):
+            try:
+                all_state = world.get_all_state(keys=True)
+                if world.prizeshuffle[player] != 'wild':
+                    from Items import prize_item_table
+                    prizes = ItemFactory(list(prize_item_table.keys()), player)
+                    for prize in prizes:
+                        all_state.collect(prize, True)
 
-        for pickup in available_pickups:
-            quest, _ = available_quests.popitem()
-            set_event_item(world, player, quest, pickup)
+                # randomize the follower pickups, but ensure that the last items are the unrestrictive ones
+                unrestrictive_pickups = ItemFactory([p for p in ['Zelda Herself', 'Sign Vandalized'] if p in available_pickups], player)
+                restrictive_pickups = ItemFactory([p for p in available_pickups if p not in unrestrictive_pickups], player)
+                random.shuffle(restrictive_pickups)
+                random.shuffle(unrestrictive_pickups)
+                pickup_items = unrestrictive_pickups + restrictive_pickups
+                random.shuffle(follower_locations)
+
+                fill_restrictive(world, all_state, follower_locations, pickup_items, single_player_placement=True)
+                for loc_name in available_quests.keys():
+                    loc = world.get_location(loc_name, player)
+                    if loc.item:
+                        set_event_item(world, player, loc_name)
+            except FillError as e:
+                logging.getLogger('').info("Failed to place followers (%s). Will retry %s more times", e, attempts - attempt - 1)
+                for loc in follower_locations:
+                    loc.item = None
+                continue
+            break
+        else:
+            raise FillError(f'Unable to place followers: {", ".join(list(map(lambda d: d.hint_text, follower_locations)))}')
 
 
 def get_item_and_event_flag(item, world, player, dungeon_pool, prize_set, prize_pool):

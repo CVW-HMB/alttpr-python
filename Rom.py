@@ -84,7 +84,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '2647cc28bca3675152576dd1f5ea0bab'
+RANDOMIZERBASEHASH = '33cd5e308266cf2273c80de1b1df3dac'
 
 
 class JsonRom(object):
@@ -530,14 +530,15 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
 
     # patch flute spots
     owFlags = 0
-    if world.owFluteShuffle[player] == 'vanilla':
+    owFog = 0
+    if world.owFluteShuffle[player] == 'vanilla' and world.owLayout[player] != 'grid':
         flute_spots = default_flute_connections
     else:
         flute_spots = world.owflutespots[player]
         owFlags |= 0x0100
         write_int16(rom, snes_to_pc(0x0AB7F7), 0xEAEA)
 
-    flute_writes = sorted([(f, flute_data[f][1]) for f in flute_spots], key = lambda f: f[1])
+    flute_writes = [(f, flute_data[f][1]) for f in flute_spots]
     for o in range(0, len(flute_writes)):
         owid = flute_writes[o][0]
         offset = 0
@@ -550,46 +551,64 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         write_int16(rom, snes_to_pc(0x02E8D1 + (o * 2)), data[13] if offset > 0 and len(data) > 13 else data[5]) # link Y
         write_int16(rom, snes_to_pc(0x02E8F3 + (o * 2)), data[14] if offset > 0 and len(data) > 13 else data[6]) # link X
         
-        if offset == 0 or len(data) <= 15:
-            write_int16(rom, snes_to_pc(0x02E86B + (o * 2)), data[2]) # vram
-            write_int16(rom, snes_to_pc(0x02E88D + (o * 2)), data[3]) # BG scroll Y
-            write_int16(rom, snes_to_pc(0x02E8AF + (o * 2)), data[4]) # BG scroll X
-            write_int16(rom, snes_to_pc(0x02E915 + (o * 2)), data[7]) # cam Y
-            write_int16(rom, snes_to_pc(0x02E937 + (o * 2)), data[8]) # cam X
-            write_int16(rom, snes_to_pc(0x02E959 + (o * 2)), data[9]) # unknown 1
-            write_int16(rom, snes_to_pc(0x02E97B + (o * 2)), data[10]) # unknown 2
-            rom.write_byte(snes_to_pc(0x0AB783 + o), data[12] & 0xff) # flute menu blip - X low byte
-            rom.write_byte(snes_to_pc(0x0AB78B + o), data[12] // 0x100) # flute menu blip - X high byte
-            rom.write_byte(snes_to_pc(0x0AB793 + o), data[11] & 0xff) # flute menu blip - Y low byte
-            rom.write_byte(snes_to_pc(0x0AB79B + o), data[11] // 0x100) # flute menu blip - Y high byte
-        else: # use alternate flute data
-            write_int16(rom, snes_to_pc(0x02E86B + (o * 2)), data[15]) # vram
-            write_int16(rom, snes_to_pc(0x02E88D + (o * 2)), data[16]) # BG scroll Y
-            write_int16(rom, snes_to_pc(0x02E8AF + (o * 2)), data[17]) # BG scroll X
-            write_int16(rom, snes_to_pc(0x02E915 + (o * 2)), data[18]) # cam Y
-            write_int16(rom, snes_to_pc(0x02E937 + (o * 2)), data[19]) # cam X
-            write_int16(rom, snes_to_pc(0x02E959 + (o * 2)), data[20]) # unknown 1
-            write_int16(rom, snes_to_pc(0x02E97B + (o * 2)), data[21]) # unknown 2
-            rom.write_byte(snes_to_pc(0x0AB783 + o), data[23] & 0xff) # flute menu blip - X low byte
-            rom.write_byte(snes_to_pc(0x0AB78B + o), data[23] // 0x100) # flute menu blip - X high byte
-            rom.write_byte(snes_to_pc(0x0AB793 + o), data[22] & 0xff) # flute menu blip - Y low byte
-            rom.write_byte(snes_to_pc(0x0AB79B + o), data[22] // 0x100) # flute menu blip - Y high byte
+        base_index = 0
+        if not (offset == 0 or len(data) <= 15):
+            base_index = 13  # use alternate flute data
+        write_int16(rom, snes_to_pc(0x02E86B + (o * 2)), data[base_index + 2]) # vram
+        write_int16(rom, snes_to_pc(0x02E88D + (o * 2)), data[base_index + 3]) # BG scroll Y
+        write_int16(rom, snes_to_pc(0x02E8AF + (o * 2)), data[base_index + 4]) # BG scroll X
+        if base_index > 0:
+            base_index -= 2
+        write_int16(rom, snes_to_pc(0x02E915 + (o * 2)), data[base_index + 7]) # cam Y
+        write_int16(rom, snes_to_pc(0x02E937 + (o * 2)), data[base_index + 8]) # cam X
+        write_int16(rom, snes_to_pc(0x02E959 + (o * 2)), data[base_index + 9]) # unknown 1
+        write_int16(rom, snes_to_pc(0x02E97B + (o * 2)), data[base_index + 10]) # unknown 2
+        map_x, map_y = adjust_ow_coordinates_to_layout(world, player, data[base_index + 12], data[base_index + 11], world.mode[player] == 'inverted')
+        rom.write_byte(snes_to_pc(0x0AB783 + o), map_x & 0xff) # flute menu blip - X low byte
+        rom.write_byte(snes_to_pc(0x0AB78B + o), map_x // 0x100) # flute menu blip - X high byte
+        rom.write_byte(snes_to_pc(0x0AB793 + o), map_y & 0xff) # flute menu blip - Y low byte
+        rom.write_byte(snes_to_pc(0x0AB79B + o), map_y // 0x100) # flute menu blip - Y high byte
 
     # patch whirlpools
     if world.owWhirlpoolShuffle[player]:
         owFlags |= 0x01
         write_int16s(rom, snes_to_pc(0x02EA5C), world.owwhirlpools[player])
     
+    # set custom overworld map layout and fog
+    if world.owLayout[player] == 'grid':
+        owFlags |= 0x06
+        owFog = 1 if world.owParallel[player] else 2
+        grid = world.owgrid[player]
+        all_rows = grid[0] + grid[1]
+        all_cells = sum(all_rows, [])
+        rom.write_bytes(0x153C80, all_cells)
+        for pos, cell_id in enumerate(sum(grid[0], [])):
+            rom.write_byte(0x153D00 + cell_id % 0x40, pos)
+        for pos, cell_id in enumerate(sum(grid[1], [])):
+            rom.write_byte(0x153D40 + cell_id % 0x40, pos)
+    elif world.owMixed[player]:
+        owFlags |= 0x02
+        owFog = 1
+        large_screen_ids = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35, 0x40, 0x43, 0x45, 0x58, 0x5B, 0x5E, 0x70, 0x75]
+        for cell_id in range(0x80):
+            if cell_id - 0x01 in large_screen_ids:
+                screen_id = cell_id - 0x01
+            elif cell_id - 0x08 in large_screen_ids:
+                screen_id = cell_id - 0x08
+            elif cell_id - 0x09 in large_screen_ids:
+                screen_id = cell_id - 0x09
+            else:
+                screen_id = cell_id
+            world_flag = 0x40 if screen_id in world.owswaps[player][0] else 0x00
+            rom.write_byte(0x153C80 + cell_id, cell_id ^ world_flag)
+
     # patch overworld edges
     inverted_buffer = [0] * 0x82
     owMode = 0
-    if world.owShuffle[player] != 'vanilla' or world.owCrossed[player] not in ['none', 'polar'] or world.owMixed[player]:
-        if world.owShuffle[player] == 'parallel':
-            owMode = 1
-        elif world.owShuffle[player] == 'full':
-            owMode = 2
-
-        if world.owKeepSimilar[player] and (world.owShuffle[player] != 'vanilla' or world.owCrossed[player] == 'unrestricted'):
+    if world.owLayout[player] != 'vanilla' or world.owCrossed[player] not in ['none', 'polar'] or world.owMixed[player]:
+        if world.owLayout[player] != 'vanilla':
+            owMode = 1 if world.owParallel[player] else 2
+        if world.owKeepSimilar[player] and (world.owLayout[player] != 'vanilla' or world.owCrossed[player] == 'unrestricted'):
             owMode |= 0x0100
         if world.owCrossed[player] != 'none' and (world.owCrossed[player] != 'polar' or world.owMixed[player]):
             owMode |= 0x0200
@@ -624,10 +643,11 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                     rom.write_byte(0x1539B0 + b + 9, world_flag)
 
         for edge in world.owedges:
-            if edge.dest is not None and isinstance(edge.dest, OWEdge) and edge.player == player:
+            if edge.player == player:
                 write_int16(rom, edge.getAddress() + 0x0a, edge.vramLoc)
                 if not edge.specialExit:
-                    rom.write_byte(0x1539A0 + (edge.specialID - 0x80) * 2 if edge.specialEntrance else edge.getAddress() + 0x0e, edge.getTarget())
+                    destination = edge.getTarget() if edge.dest is not None and isinstance(edge.dest, OWEdge) else 0xFF
+                    rom.write_byte(0x1539A0 + (edge.specialID - 0x80) * 2 if edge.specialEntrance else edge.getAddress() + 0x0e, destination)
     
     # patch bonk prizes
     if world.shuffle_bonk_drops[player]:
@@ -656,6 +676,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
 
     write_int16(rom, 0x150002, owMode)
     write_int16(rom, 0x150004, owFlags)
+    write_int16(rom, 0x150008, owFog if world.owFog[player] else 0x00)
 
     # patch entrance/exits/holes
     for region in world.regions:
@@ -1317,8 +1338,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                 else:
                     goal_bytes += int16_as_bytes(req['target'])
             elif req['condition'] & 0x80 == 0:
-                if req['condition'] & 0x7F == 0x06 or req['condition'] & 0x7F == 0x07:
-                    # agahnims have no target value
+                if req['condition'] & 0x7F in [0x00, 0x06, 0x07]:
+                    # no target value
                     pass
                 elif req['condition'] & 0x7F < 0x08:
                     goal_bytes += [req['target']]
@@ -1459,9 +1480,15 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                                      | (0x04 if world.mapshuffle[player] != 'none' else 0x00)
                                      | (0x08 if world.bigkeyshuffle[player] != 'none' else 0x00)))  # free roaming item text boxes
     rom.write_byte(0x18003B, 0x01 if world.mapshuffle[player] not in ['none', 'nearby'] else 0x00)  # maps showing crystals on overworld
-    if world.keyshuffle[player] != 'universal' and (world.mapshuffle[player] not in ['none', 'nearby'] or world.doorShuffle[player] != 'vanilla'
-          or world.dropshuffle[player] != 'none' or world.pottery[player] not in ['none', 'cave']):
-        rom.write_byte(0x18003A, 0x01)  # show key counts on map pickup
+    map_hud_mode = 0x00
+    if world.dungeon_counters[player] == 'on':
+        map_hud_mode = 0x02  # always on
+    elif world.dungeon_counters[player] == 'off':
+        pass
+    elif world.keyshuffle[player] != 'universal' and (world.mapshuffle[player] not in ['none', 'nearby'] or world.doorShuffle[player] != 'vanilla'
+          or world.dropshuffle[player] != 'none' or world.pottery[player] not in ['none', 'cave'] or world.dungeon_counters[player] == 'pickup'):
+        map_hud_mode = 0x01  # show on pickup
+    rom.write_byte(0x18003A, map_hud_mode)
 
     loot_source = 0x09
     if world.prizeshuffle[player] != 'none':
@@ -1535,36 +1562,53 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     rom.write_byte(0x18003C, compass_mode)
 
     def get_entrance_coords(ent):
-        if ent is None:
-            owid_map =               [0x1E,   0x30,   0xFF,   0x7B,   0x5E,   0x70,   0x40,   0x75,   0x03,   0x58,   0x47]
-            x_map_position_generic = [0x03c0, 0x0740, 0xff00, 0x03c0, 0x01c0, 0x0bc0, 0x05c0, 0x09c0, 0x0ac0, 0x07c0, 0x0dc0]
-            y_map_position_generic = [0xff00, 0xff00, 0xff00, 0x0fc0, 0x0fc0, 0x0fc0, 0x0fc0, 0x0fc0, 0xff00, 0x0fc0, 0x0fc0]
-            world_indicator = 0x0000
-            idx = int((map_index-2)/2)
+        if ent is None or isinstance(ent, int):
+            owid_map = [ 0x1E,   0x30,   0xFF,   0x7B,   0x5E,   0x70,   0x40,   0x75,   0x03,   0x58,   0x47 ]
+            coord_flags = 0x0000
+            if ent is None:
+                # HUD-style dislocated icons
+                x_map_position = [0x0050, 0x0080, 0xFF00, 0x0040, 0x0020, 0x00C0, 0x0060, 0x00A0, 0x00B0, 0x0080, 0x00E0]
+                y_map_position = [0x000C, 0x000C, 0xFF00, 0x00D4, 0x00D4, 0x00D4, 0x00D4, 0x00D4, 0x000C, 0x00D4, 0x00D4]
+                coord_flags = 0x4000 # raw OAM coord flag
+                idx = int((map_index-2)/2)
+            elif isinstance(ent, int):
+                # vanilla icon positions
+                x_map_position = [0x0F30, 0x0170, 0xFF00, 0x0790, 0x0F30, 0x0160, 0x00F0, 0x0CB0, 0x0900, 0x0240, 0x0F30]
+                y_map_position = [0x06E0, 0x0E50, 0xFF00, 0x0FD0, 0x06E0, 0x0D80, 0x0160, 0x0E80, 0x0130, 0x0840, 0x01B0]
+                idx = ent
             owid = owid_map[idx]
+            map_x = x_map_position[idx]
+            map_y = y_map_position[idx]
             if owid != 0xFF:
                 if (owid < 0x40) == (world.is_tile_swapped(owid, player)):
-                    world_indicator = 0x8000
-            return [world_indicator | x_map_position_generic[idx], y_map_position_generic[idx]]
-        if type(ent) is Location:
-            from OverworldShuffle import OWTileRegions
-            if ent.name == 'Hobo':
-                coords = (0xb80, 0xb80)
-            elif ent.name == 'Master Sword Pedestal':
-                coords = (0x06d, 0x070)
+                    coord_flags |= 0x8000 # world indicator flag
+                if coord_flags & 0x4000 == 0:
+                    map_x, map_y = adjust_ow_coordinates_to_layout(world, player, map_x, map_y, coord_flags & 0x8000 != 0)
+            return (coord_flags | map_x, map_y)
+        elif type(ent) is Location:
+            from OverworldShuffle import OWTileRegions, ow_loc_prize_table
+            if ent.name in ow_loc_prize_table:
+                coords = ow_loc_prize_table[ent.name]
             else:
                 owid = OWTileRegions[ent.parent_region.name]
                 if owid == 0x81:
-                    coords = (0x220, 0xf40)
+                    coords = (0xF60, 0x280)
                 else:
                     owid = owid % 0x40
                     coords = (0x200 * (owid % 0x08) + 0x100, 0x200 * int(owid / 0x08) + 0x100)
-                    if owid in [0x00, 0x03, 0x05, 0x18, 0x1b, 0x1e, 0x30, 0x35]:
+                    if owid in [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]:
                         coords = (coords[0] + 0x100, coords[1] + 0x100)
         else:
-            coords = ow_prize_table[ent.name]
-        coords = ((0x8000 if ent.parent_region.type == RegionType.DarkWorld else 0x0000) | coords[0], coords[1])
+            if ent.name in ow_prize_table:
+                coords = ow_prize_table[ent.name]
+            elif door_addresses[ent.name][1] is not None:
+                coords = (door_addresses[ent.name][1][6], door_addresses[ent.name][1][5])
+            else:
+                raise Exception(f"No overworld map coordinates for entrance {ent.name}")
+        map_x, map_y = adjust_ow_coordinates_to_layout(world, player, coords[0], coords[1], ent.parent_region.type == RegionType.DarkWorld)
+        coords = ((0x8000 if ent.parent_region.type == RegionType.DarkWorld else 0x0000) | map_x, map_y)
         return coords
+
     if world.overworld_map[player] == 'default':
         # disable HC/AT/GT icons
         if not world.owMixed[player]:
@@ -1591,16 +1635,16 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             # prize location
             write_int16s(rom, snes_to_pc(0x0ABE2E)+(map_index*6)+8, coords)
         if world.shuffle[player] == 'vanilla' or world.overworld_map[player] == 'default':
-            # TODO: I think this is logically the same as some of the vanilla stuff below
-            vanilla_entrances = { 'Hyrule Castle': 'Hyrule Castle Entrance (South)',
-                                    'Desert Palace': 'Desert Palace Entrance (North)',
-                                    'Skull Woods': 'Skull Woods Final Section' }
-            entrance_name = vanilla_entrances[dungeon] if dungeon in vanilla_entrances else dungeon
-            if world.is_atgt_swapped(player):
-                swap_entrances = { 'Agahnims Tower': 'Ganons Tower',
-                                    'Ganons Tower': 'Agahnims Tower' }
-                entrance_name = swap_entrances[dungeon] if dungeon in swap_entrances else entrance_name
-            entrance = world.get_entrance(entrance_name, player)
+            swap_entrances = { 'Agahnims Tower': 'Ganons Tower',
+                                'Ganons Tower': 'Agahnims Tower' }
+            if dungeon in swap_entrances:
+                entrance_name = dungeon
+                if world.is_atgt_swapped(player):
+                    entrance_name = swap_entrances[dungeon]
+                entrance = world.get_entrance(entrance_name, player)
+                coords = get_entrance_coords(entrance)
+            else:
+                coords = get_entrance_coords(int((map_index-2)/2))
         else:
             if len(portal_list) == 1:
                 portal_idx = 0
@@ -1620,8 +1664,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                             offset += 4
             portal = world.get_portal(portal_list[portal_idx], player)
             entrance = portal.find_portal_entrance()
-        coords = get_entrance_coords(entrance)
-        
+            coords = get_entrance_coords(entrance)
+
         # figure out compass entrances and what world (light/dark)
         write_int16s(rom, snes_to_pc(0x0ABE2E)+(map_index*6), coords)
         if world.prizeshuffle[player] in ['none', 'dungeon', 'nearby'] and dungeon_table[dungeon].prize:
@@ -2542,7 +2586,7 @@ def write_strings(rom, world, player, team):
         if world.is_tile_swapped(0x18, player) or world.flute_mode[player] in ['active', 'pseudo']:
             items_to_hint.remove(flute_item)
             flute_item = 'Ocarina (Activated)'
-        if world.owShuffle[player] != 'vanilla' or world.owMixed[player]:
+        if world.owLayout[player] != 'vanilla' or world.owMixed[player]:
             # Adding a guaranteed hint for the Flute in overworld shuffle.
             this_location = world.find_items_not_key_only(flute_item, player)
             if this_location and this_location not in hinted_locations:
@@ -2560,7 +2604,7 @@ def write_strings(rom, world, player, team):
         random.shuffle(items_to_hint)
         hint_count = 5 if world.shuffle[player] not in ['vanilla', 'dungeonssimple', 'dungeonsfull', 'district', 'swapped'] else 8
         hint_count += 2 if world.doorShuffle[player] not in ['vanilla', 'basic'] else 0
-        hint_count += 1 if world.owShuffle[player] != 'vanilla' or world.owCrossed[player] != 'none' or world.owMixed[player] else 0
+        hint_count += 1 if world.owLayout[player] != 'vanilla' or world.owCrossed[player] != 'none' or world.owMixed[player] else 0
         while hint_count > 0 and len(items_to_hint) > 0:
             this_item = items_to_hint.pop(0)
             this_location = world.find_items_not_key_only(this_item, player)
@@ -3194,6 +3238,13 @@ def update_compasses(rom, dungeon_locations, world, player):
     if not provided_dungeon:
         rom.write_byte(0x186FFF, 0xff)
 
+def adjust_ow_coordinates_to_layout(world, player, x, y, dw_flag):
+    if world.owLayout[player] != 'grid':
+        return (x, y)
+    layout_map = world.owlayoutmap_dw[player] if dw_flag else world.owlayoutmap_lw[player]
+    original_slot_id = ((y // 0x0200) % 0x08) * 0x08 + ((x // 0x0200) % 0x08)
+    new_slot_id = layout_map[original_slot_id]
+    return ((new_slot_id % 0x08) * 0x0200 + x % 0x0200, ((new_slot_id // 0x08) % 0x08) * 0x0200 + y % 0x0200)
 
 
 InconvenientDungeonEntrances = {'Turtle Rock': 'Turtle Rock Main',
