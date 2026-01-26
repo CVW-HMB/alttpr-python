@@ -1135,9 +1135,9 @@ def balance_money_progression(world):
                 if location.item:
                     if location.item.name.startswith('Rupee'):
                         if not (location.item.name == 'Rupee (1)' and world.algorithm != 'district'):
-                        wallet[location.item.player] += rupee_chart[location.item.name]
-                        if location.item.name != 'Rupees (300)':
-                            balance_locations[location.item.player].add(location)
+                            wallet[location.item.player] += rupee_chart[location.item.name]
+                            if location.item.name != 'Rupees (300)':
+                                balance_locations[location.item.player].add(location)
                     elif interesting_item(location, location.item, world, location.item.player):
                         checked_locations.append(location)
                     elif location.item.name in acceptable_balancers:
