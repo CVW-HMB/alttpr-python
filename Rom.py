@@ -1664,7 +1664,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                             offset += 4
             portal = world.get_portal(portal_list[portal_idx], player)
             entrance = portal.find_portal_entrance()
-        coords = get_entrance_coords(entrance)
+            coords = get_entrance_coords(entrance)
 
         # figure out compass entrances and what world (light/dark)
         write_int16s(rom, snes_to_pc(0x0ABE2E)+(map_index*6), coords)
