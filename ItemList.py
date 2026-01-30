@@ -43,8 +43,8 @@ alwaysitems = ['Bombos', 'Book of Mudora', 'Cane of Somaria', 'Ether', 'Fire Rod
 progressivegloves = ['Progressive Glove'] * 2
 basicgloves = ['Power Glove', 'Titans Mitts']
 
-normalbottles = ['Bottle', 'Bottle (Red Potion)', 'Bottle (Green Potion)', 'Bottle (Blue Potion)', 'Bottle (Fairy)', 'Bottle (Bee)', 'Bottle (Good Bee)']
-hardbottles = ['Bottle', 'Bottle (Red Potion)', 'Bottle (Green Potion)', 'Bottle (Blue Potion)', 'Bottle (Bee)', 'Bottle (Good Bee)']
+normalbottles = ['Bottle (Red Potion)', 'Bottle (Green Potion)', 'Bottle (Blue Potion)', 'Bottle (Fairy)', 'Bottle (Bee)', 'Bottle (Good Bee)']
+hardbottles = ['Bottle (Red Potion)', 'Bottle (Green Potion)', 'Bottle (Blue Potion)', 'Bottle (Bee)', 'Bottle (Good Bee)']
 
 normalbaseitems = (['Magic Upgrade (1/2)', 'Single Arrow', 'Sanctuary Heart Container', 'Arrows (10)', 'Bombs (10)'] +
                    ['Rupees (300)'] * 4 + ['Boss Heart Container'] * 10 + ['Piece of Heart'] * 24)
@@ -463,11 +463,11 @@ def generate_itempool(world, player):
 
     # shuffle bottle refills
     if world.difficulty[player] in ['hard', 'expert']:
-        waterfall_bottle = hardbottles[random.randint(0, 5)]
-        pyramid_bottle = hardbottles[random.randint(0, 5)]
+        waterfall_bottle = hardbottles[random.randint(0, 4)]
+        pyramid_bottle = hardbottles[random.randint(0, 4)]
     else:
-        waterfall_bottle = normalbottles[random.randint(0, 6)]
-        pyramid_bottle = normalbottles[random.randint(0, 6)]
+        waterfall_bottle = normalbottles[random.randint(0, 5)]
+        pyramid_bottle = normalbottles[random.randint(0, 5)]
     world.bottle_refills[player] = (waterfall_bottle, pyramid_bottle)
 
     set_up_shops(world, player)
