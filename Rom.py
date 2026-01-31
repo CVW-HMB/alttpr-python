@@ -47,6 +47,7 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 from source.item.FillUtil import valid_pot_items
 from source.overworld.EntranceData import door_addresses, ow_prize_table
 from source.overworld.EntranceShuffle2 import exit_ids
+from source.overworld.FluteShuffle import default_flute_connections, flute_data
 from Text import (
     Blacksmiths_texts,
     Blind_texts,
@@ -84,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '00f12bfc7513694db032237fbc35b4f8'
+RANDOMIZERBASEHASH = '2b779fef9f1a744288cbbfdf1c55d76e'
 
 
 class JsonRom(object):
@@ -536,7 +537,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     else:
         flute_spots = world.owflutespots[player]
         owFlags |= 0x0100
-        write_int16(rom, snes_to_pc(0x0AB7F7), 0xEAEA)
+        if world.owFluteShuffle[player] != 'vanilla':
+            write_int16(rom, snes_to_pc(0x0AB80B), 0xEAEA)
 
     flute_writes = [(f, flute_data[f][1]) for f in flute_spots]
     for o in range(0, len(flute_writes)):
@@ -1580,7 +1582,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             map_x = x_map_position[idx]
             map_y = y_map_position[idx]
             if owid != 0xFF:
-                if (owid < 0x40) == (world.is_tile_swapped(owid, player)):
+                if (owid < 0x40) == (owid in world.owswaps[player][0]):
                     coord_flags |= 0x8000 # world indicator flag
                 if coord_flags & 0x4000 == 0:
                     map_x, map_y = adjust_ow_coordinates_to_layout(world, player, map_x, map_y, coord_flags & 0x8000 != 0)

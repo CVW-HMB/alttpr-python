@@ -11,6 +11,7 @@ from yaml.representer import Representer
 import RaceRandom as random
 from BaseClasses import DoorType, LocationType
 from OverworldShuffle import default_flute_connections, flute_data
+from source.overworld.FluteShuffle import default_flute_connections, flute_data
 from source.tools.MysteryUtils import get_weights, roll_settings
 from Utils import HexInt, hex_representer
 
