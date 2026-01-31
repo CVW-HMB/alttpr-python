@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '2b779fef9f1a744288cbbfdf1c55d76e'
+RANDOMIZERBASEHASH = 'a746c6916c3ca8e89df7d7ac79d354dd'
 
 
 class JsonRom(object):
@@ -1575,8 +1575,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                 idx = int((map_index-2)/2)
             elif isinstance(ent, int):
                 # vanilla icon positions
-                x_map_position = [0x0F30, 0x0170, 0xFF00, 0x0790, 0x0F30, 0x0160, 0x00F0, 0x0CB0, 0x0900, 0x0240, 0x0F30]
-                y_map_position = [0x06E0, 0x0E50, 0xFF00, 0x0FD0, 0x06E0, 0x0D80, 0x0160, 0x0E80, 0x0130, 0x0840, 0x01B0]
+                x_map_position = [0x0F40, 0x0140, 0xFF00, 0x0778, 0x0F40, 0x0148, 0x00B0, 0x0CA0, 0x0900, 0x01F8, 0x0F20]
+                y_map_position = [0x0660, 0x0D00, 0xFF00, 0x0F50, 0x0660, 0x0D00, 0x00C0, 0x0E00, 0x0100, 0x0800, 0x0100]
                 idx = ent
             owid = owid_map[idx]
             map_x = x_map_position[idx]
