@@ -389,7 +389,6 @@ DeathMountain_texts = [
 ]
 LostWoods_texts = [
     'thieves\' stump',
-    'He\'s got wood',
 ] * 2 + [
     "the forest thief",
     "dancing pickles",
