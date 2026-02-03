@@ -47,6 +47,7 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 from source.item.FillUtil import valid_pot_items
 from source.overworld.EntranceData import door_addresses, ow_prize_table
 from source.overworld.EntranceShuffle2 import exit_ids
+from source.overworld.FluteShuffle import default_flute_connections, flute_data
 from Text import (
     Blacksmiths_texts,
     Blind_texts,
@@ -84,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '00f12bfc7513694db032237fbc35b4f8'
+RANDOMIZERBASEHASH = 'a746c6916c3ca8e89df7d7ac79d354dd'
 
 
 class JsonRom(object):
@@ -536,7 +537,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     else:
         flute_spots = world.owflutespots[player]
         owFlags |= 0x0100
-        write_int16(rom, snes_to_pc(0x0AB7F7), 0xEAEA)
+        if world.owFluteShuffle[player] != 'vanilla':
+            write_int16(rom, snes_to_pc(0x0AB80B), 0xEAEA)
 
     flute_writes = [(f, flute_data[f][1]) for f in flute_spots]
     for o in range(0, len(flute_writes)):
@@ -1573,14 +1575,14 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                 idx = int((map_index-2)/2)
             elif isinstance(ent, int):
                 # vanilla icon positions
-                x_map_position = [0x0F30, 0x0170, 0xFF00, 0x0790, 0x0F30, 0x0160, 0x00F0, 0x0CB0, 0x0900, 0x0240, 0x0F30]
-                y_map_position = [0x06E0, 0x0E50, 0xFF00, 0x0FD0, 0x06E0, 0x0D80, 0x0160, 0x0E80, 0x0130, 0x0840, 0x01B0]
+                x_map_position = [0x0F40, 0x0140, 0xFF00, 0x0778, 0x0F40, 0x0148, 0x00B0, 0x0CA0, 0x0900, 0x01F8, 0x0F20]
+                y_map_position = [0x0660, 0x0D00, 0xFF00, 0x0F50, 0x0660, 0x0D00, 0x00C0, 0x0E00, 0x0100, 0x0800, 0x0100]
                 idx = ent
             owid = owid_map[idx]
             map_x = x_map_position[idx]
             map_y = y_map_position[idx]
             if owid != 0xFF:
-                if (owid < 0x40) == (world.is_tile_swapped(owid, player)):
+                if (owid < 0x40) == (owid in world.owswaps[player][0]):
                     coord_flags |= 0x8000 # world indicator flag
                 if coord_flags & 0x4000 == 0:
                     map_x, map_y = adjust_ow_coordinates_to_layout(world, player, map_x, map_y, coord_flags & 0x8000 != 0)

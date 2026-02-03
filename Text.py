@@ -135,6 +135,7 @@ Triforce_texts = [
     "   I promise the\n  next seed will\n    be better.",
     "\n       Honk.",
     "     Breakfast\n    is served!",
+    "\n    send help",
 ]
 BombShop2_texts = ['Bombs!\nBombs!\nBiggest!\nBestest!\nGreatest!\nBoomest!']
 Sahasrahla2_texts = ['You already got my item, idiot.', 'Why are you still talking to me?', 'This text won\'t change.', 'Have you met my brother, Hasarahshla?']
@@ -388,7 +389,6 @@ DeathMountain_texts = [
 ]
 LostWoods_texts = [
     'thieves\' stump',
-    'He\'s got wood',
 ] * 2 + [
     "the forest thief",
     "dancing pickles",

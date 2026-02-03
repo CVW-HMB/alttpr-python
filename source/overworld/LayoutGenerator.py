@@ -1,9 +1,10 @@
 import copy
 import logging
-import RaceRandom as random
 import random as _random
-from typing import List, Dict, Optional, Set, Tuple
-from BaseClasses import OWEdge, World, Direction, Terrain
+from typing import Dict, List, Optional, Set, Tuple
+
+import RaceRandom as random
+from BaseClasses import Direction, OWEdge, Terrain, World
 from OverworldShuffle import connect_two_way, validate_layout
 
 ENABLE_KEEP_SIMILAR_SPECIAL_HANDLING = False

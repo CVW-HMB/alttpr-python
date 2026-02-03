@@ -2,9 +2,12 @@ import logging
 import os
 from datetime import datetime
 from typing import Dict, List
+
 from PIL import Image, ImageDraw
+
 from BaseClasses import Direction, OWEdge
 from source.overworld.LayoutGenerator import Screen
+
 
 def get_edge_lists(grid: List[List[List[int]]],
                    overworld_screens: Dict[int, Screen],

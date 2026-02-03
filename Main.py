@@ -50,7 +50,6 @@ from Items import ItemFactory
 from KeyDoorShuffle import validate_key_placement
 from OverworldGlitchRules import create_owg_connections
 from OverworldShuffle import (
-    create_dynamic_flute_exits,
     create_dynamic_mirror_exits,
     link_overworld,
     update_world_regions,
@@ -86,6 +85,7 @@ from source.item.FillUtil import (
     verify_item_pool_config,
 )
 from source.overworld.EntranceShuffle2 import link_entrances_new
+from source.overworld.FluteShuffle import create_dynamic_flute_exits
 from source.rom.DataTables import init_data_tables
 from source.tools.BPS import create_bps_from_data
 from UnderworldGlitchRules import (
