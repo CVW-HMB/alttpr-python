@@ -1507,7 +1507,7 @@ def make_customizer_pool(world, player):
     elif timer == 'ohko':
         clock_mode = 'ohko'
 
-    if goal in ['sanctuary']:
+    if world.goal[player] in ['sanctuary']:
         place_item('Sanctuary', 'Triforce')
     if world.custom_goals[player]['pedgoal'] and 'requirements' in world.custom_goals[player]['pedgoal'] and world.custom_goals[player]['pedgoal']['requirements'][0]['condition'] == 0x00:
         place_item('Master Sword Pedestal', 'Nothing')
