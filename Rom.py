@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'a746c6916c3ca8e89df7d7ac79d354dd'
+RANDOMIZERBASEHASH = '8945e9fdcefc02eb3ff3ad2a8892a180'
 
 
 class JsonRom(object):
@@ -738,15 +738,15 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     if world.mirrorscroll[player] or world.doorShuffle[player] != 'vanilla':
         dr_flags |= DROptions.Town_Portal
     if world.doorShuffle[player] == 'vanilla':
-        dr_flags |= DROptions.Eternal_Mini_Bosses 
+        dr_flags |= DROptions.Eternal_Mini_Bosses
     if world.doorShuffle[player] not in  ['vanilla', 'basic']:
         dr_flags |= DROptions.Map_Info
     if ((world.collection_rate[player] or world.goal[player] == 'completionist')
-       and world.goal[player] not in ['triforcehunt', 'trinity', 'ganonhunt']):
+            and world.goal[player] not in ['triforcehunt', 'trinity', 'ganonhunt']):
         dr_flags |= DROptions.Debug
         rom.write_byte(snes_to_pc(0x308039), 1)
-    if world.doorShuffle[player] not in ['vanilla', 'basic'] and world.logic[player] != 'nologic'\
-       and world.mixed_travel[player] == 'prevent':
+    if world.doorShuffle[player] not in ['vanilla', 'basic'] and world.logic[player] != 'nologic' \
+            and world.mixed_travel[player] == 'prevent':
         # PoD Falling Bridge or Hammjump
         # 1FA607: db $2D, $79, $69 ; 0x0069: Vertical Rail ↕ | { 0B, 1E } | Size: 05
         # 1FA60A: db $14, $99, $5D ; 0x005D: Large Horizontal Rail ↔ | { 05, 26 } | Size: 01
@@ -844,9 +844,9 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     if world.doorShuffle[player] == 'basic':
         rom.write_byte(0x138002, 1)
     for door in world.doors:
-        if door.dest is not None and isinstance(door.dest, Door) and\
-             door.player == player and door.type in [DoorType.Normal, DoorType.SpiralStairs,
-                                                     DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
+        if door.dest is not None and isinstance(door.dest, Door) and \
+                door.player == player and door.type in [DoorType.Normal, DoorType.SpiralStairs,
+                                                        DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
             rom.write_bytes(door.getAddress(), door.dest.getTarget(door))
     for paired_door in world.paired_doors[player]:
         rom.write_bytes(paired_door.address_a(world, player), paired_door.rom_data_a(world, player))
@@ -1256,7 +1256,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
 
     gametype = 0x04 # item
     if (world.shuffle[player] != 'vanilla' or world.doorShuffle[player] != 'vanilla'
-       or world.dropshuffle[player] != 'none' or world.pottery[player] != 'none'):
+            or world.dropshuffle[player] != 'none' or world.pottery[player] != 'none'):
         gametype |= 0x02  # entrance/door
     rom.write_byte(0x180211, gametype)  # Game type
 
@@ -1779,38 +1779,38 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     rom.write_bytes(0x180188, [0, 0, 0])  # Zelda respawn refills (magic, bombs, arrows)
     rom.write_bytes(0x18018B, [0, 0, 0])  # Mantle respawn refills (magic, bombs, arrows)
     bow_max, bomb_max, magic_max = 0, 0, 0
-    bow_small, magic_small = 0, 0
+    bow_small, bomb_small, magic_small = 10, 3, 0x20
     if world.mode[player] == 'standard':
         if uncle_location.item is not None and uncle_location.item.name in ['Bow', 'Progressive Bow']:
             rom.write_byte(0x18004E, 1)  # Escape Fill (arrows)
             write_int16(rom, 0x180183, 300)  # Escape fill rupee bow
             rom.write_bytes(0x180185, [0, 0, 70])  # Uncle respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x180188, [0, 0, 10])  # Zelda respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x18018B, [0, 0, 10])  # Mantle respawn refills (magic, bombs, arrows)
-            bow_max, bow_small = 70, 10
+            rom.write_bytes(0x180188, [0, 0, 70])  # Zelda respawn refills (magic, bombs, arrows)
+            rom.write_bytes(0x18018B, [0, 0, 70])  # Mantle respawn refills (magic, bombs, arrows)
+            bow_max = 70
         elif uncle_location.item is not None and uncle_location.item.name in ['Bomb Upgrade (+10)' if world.bombbag[player] else 'Bombs (10)']:
             rom.write_byte(0x18004E, 2)  # Escape Fill (bombs)
             rom.write_bytes(0x180185, [0, 50, 0])  # Uncle respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x180188, [0, 3, 0])  # Zelda respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x18018B, [0, 3, 0])  # Mantle respawn refills (magic, bombs, arrows)
+            rom.write_bytes(0x180188, [0, 50, 0])  # Zelda respawn refills (magic, bombs, arrows)
+            rom.write_bytes(0x18018B, [0, 50, 0])  # Mantle respawn refills (magic, bombs, arrows)
             bomb_max = 50
         elif uncle_location.item is not None and uncle_location.item.name in ['Cane of Somaria', 'Cane of Byrna', 'Fire Rod']:
             rom.write_byte(0x18004E, 4)  # Escape Fill (magic)
             rom.write_bytes(0x180185, [0x80, 0, 0])  # Uncle respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x180188, [0x20, 0, 0])  # Zelda respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x18018B, [0x20, 0, 0])  # Mantle respawn refills (magic, bombs, arrows)
-            magic_max, magic_small = 0x80, 0x20
+            rom.write_bytes(0x180188, [0x80, 0, 0])  # Zelda respawn refills (magic, bombs, arrows)
+            rom.write_bytes(0x18018B, [0x80, 0, 0])  # Mantle respawn refills (magic, bombs, arrows)
+            magic_max = 0x80
         if world.doorShuffle[player] not in ['vanilla', 'basic']:
             # Uncle respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x180185, [max(0x20, magic_max), max(3, bomb_max), max(10, bow_max)])
+            rom.write_bytes(0x180185, [max(magic_small, magic_max), max(bomb_small, bomb_max), max(bow_small, bow_max)])
             # Zelda respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x180188, [max(0x20, magic_max), max(3, bomb_max), max(10, bow_max)])
+            rom.write_bytes(0x180188, [max(magic_small, magic_max), max(bomb_small, bomb_max), max(bow_small, bow_max)])
             # Mantle respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x18018B, [max(0x20, magic_max), max(3, bomb_max), max(10, bow_max)])
+            rom.write_bytes(0x18018B, [max(magic_small, magic_max), max(bomb_small, bomb_max), max(bow_small, bow_max)])
         elif world.doorShuffle[player] == 'basic':  # just in case a bomb is needed to get to a chest
-            rom.write_bytes(0x180185, [max(0x00, magic_max), max(3, bomb_max), max(0, bow_max)])
-            rom.write_bytes(0x180188, [magic_small, 3, bow_small])  # Zelda respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x18018B, [magic_small, 3, bow_small])  # Mantle respawn refills (magic, bombs, arrows)
+            rom.write_bytes(0x180185, [max(magic_small, magic_max), max(bomb_small, bomb_max), max(bow_small, bow_max)])
+            rom.write_bytes(0x180188, [magic_small, max(bomb_small, bomb_max), bow_small])  # Zelda respawn refills (magic, bombs, arrows)
+            rom.write_bytes(0x18018B, [magic_small, max(bomb_small, bomb_max), bow_small])  # Mantle respawn refills (magic, bombs, arrows)
 
     # patch swamp: Need to enable permanent drain of water as dam or swamp were moved
     rom.write_byte(0x18003D, 0x01 if world.swamp_patch_required[player] else 0x00)
@@ -1913,7 +1913,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     write_enemy_shuffle_settings(world, player, rom)
 
     if (world.doorShuffle[player] != 'vanilla' or world.dropshuffle[player] != 'none'
-       or world.pottery[player] != 'none'):
+            or world.pottery[player] != 'none'):
         for room in world.rooms:
             if room.player == player and room.modified:
                 if room.index in world.data_tables[player].room_list:
@@ -1975,7 +1975,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         (hashint >> 10) & 0x1F,
         (hashint >> 5) & 0x1F,
         hashint & 0x1F,
-    ]
+        ]
     rom.write_bytes(0x180215, code)
     rom.hash = code
 
@@ -2397,6 +2397,9 @@ def write_strings(rom, world, player, team):
             "    Crosskeys\n"
             "    Tournament\n"
             "    Winners\n{HARP}\n"
+            "    ~~~2025~~~\n      humbugh\n\n"
+            "    ~~~2024~~~\n    Gammachuu\n\n"
+            "    ~~~2023~~~\n    WallKicks\n\n"            
             "    ~~~2022~~~\n     Schulzer\n\n"
             "    ~~~2021~~~\n      Goomba\n\n"
             "    ~~~2020~~~\n    Linlinlin\n\n"
@@ -2764,16 +2767,19 @@ def write_strings(rom, world, player, team):
         loc.item = i
         return loc
     (crystal5, crystal6, greenpendant) = tuple([x[0] if x else missing_prize() for x in [crystal5, crystal6, greenpendant]])
+    bigbomb_follower = 'Big Bomb?\n'
+    if world.shuffle_followers[player]:
+        bigbomb_follower = ''
     if world.prizeshuffle[player] in ['none', 'dungeon']:
         (crystal5, crystal6, greenpendant) = tuple([x.parent_region.dungeon.name for x in [crystal5, crystal6, greenpendant]])
-        tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (crystal5, crystal6)
+        tt['bomb_shop'] = f'{bigbomb_follower}My supply is blocked until you clear %s and %s.' % (crystal5, crystal6)
         tt['sahasrahla_bring_courage'] = 'I lost my family heirloom in %s' % greenpendant
     elif world.prizeshuffle[player] == 'nearby':
         (crystal5, crystal6, greenpendant) = tuple([x.item.dungeon_object.name for x in [crystal5, crystal6, greenpendant]])
-        tt['bomb_shop'] = 'Big Bomb?\nThe crystals can be found near %s and %s.' % (crystal5, crystal6)
+        tt['bomb_shop'] = f'{bigbomb_follower}The crystals can be found near %s and %s.' % (crystal5, crystal6)
         tt['sahasrahla_bring_courage'] = 'I lost my family heirloom near %s' % greenpendant
     else:
-        tt['bomb_shop'] = 'Big Bomb?\nThe crystals can be found %s and %s.' % (crystal5.hint_text, crystal6.hint_text)
+        tt['bomb_shop'] = f'{bigbomb_follower}The crystals can be found %s and %s.' % (crystal5.hint_text, crystal6.hint_text)
         tt['sahasrahla_bring_courage'] = 'My family heirloom can be found %s' % greenpendant.hint_text
 
     tt['sign_ganons_tower'] = ('You need %d crystal to enter.' if world.crystals_needed_for_gt[player] == 1 else 'You need %d crystals to enter.') % world.crystals_needed_for_gt[player]

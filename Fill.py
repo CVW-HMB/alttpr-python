@@ -117,7 +117,7 @@ def fill_dungeons_restrictive(world, shuffled_locations):
     for attempt in range(15):
         try:
             for player in range(1, world.players + 1):
-                if world.prizeshuffle[player] == 'nearby':
+                if world.prizeshuffle[player] == 'nearby' and world.algorithm != 'vanilla_fill':
                     dungeon_pool = []
                     for dungeon in world.dungeons:
                         from Dungeons import dungeon_table
@@ -148,6 +148,14 @@ def fill_dungeons_restrictive(world, shuffled_locations):
         break
     else:
         raise FillError(f'Unable to place dungeon prizes: {", ".join(list(map(lambda d: d.name, prizes)))}')
+
+    if world.algorithm == 'vanilla_fill':
+        for prize in prizes_copy:
+            if prize.is_near_dungeon_item(world):
+                if prize.location and prize.location.parent_region.dungeon:
+                    dungeon = prize.location.parent_region.dungeon
+                    dungeon.prize = prize
+                    prize.dungeon_object = dungeon
 
     random.shuffle(shuffled_locations)
     fill(all_state_base, others, shuffled_locations)
@@ -240,7 +248,8 @@ def verify_spot_to_fill(location, item_to_place, max_exp_state, single_player_pl
         test_state.sweep_for_events()
         if location.can_fill(test_state, item_to_place, perform_access_check):
             if valid_key_placement(item_to_place, location, key_pool, test_state, world):
-                if (item_to_place.prize and world.prizeshuffle[item_to_place.player] == 'none') \
+                if (item_to_place.prize and (world.prizeshuffle[item_to_place.player] == 'none' \
+                        or (world.algorithm == 'vanilla_fill' and item_to_place.is_near_dungeon_item(world)))) \
                         or valid_dungeon_placement(item_to_place, location, world):
                     return location
     if item_to_place.smallkey or item_to_place.bigkey or item_to_place.prize:
@@ -336,6 +345,10 @@ def track_dungeon_items(item, location, world):
         if item.prize:
             location.parent_region.dungeon.prize = item
             item.dungeon_object = location.parent_region.dungeon
+    elif world.algorithm == 'vanilla_fill' and item.prize and location.parent_region.dungeon:
+        dungeon = location.parent_region.dungeon
+        dungeon.prize = item
+        item.dungeon_object = dungeon
 
 
 def is_dungeon_item(item, world):
@@ -728,8 +741,13 @@ def fast_fill_pot_for_multiworld(world, item_pool, fill_locations):
         flex = 256 - world.data_tables[player].pot_secret_table.multiworld_count
         fill_count = len(pot_fill_locations[player]) - flex
         if fill_count > 0:
-            fill_spots = random.sample(pot_fill_locations[player], fill_count)
-            fill_items = random.sample(pot_item_pool[player], fill_count)
+            first_count = min(fill_count, len(pot_item_pool[player]))
+            fill_items = random.sample(pot_item_pool[player], first_count)
+            remaining = fill_count - first_count
+            if remaining > 0:
+                other_items = [i for i in item_pool if i.player == player and i not in pot_item_pool[player]]
+                fill_items += random.sample(other_items, min(remaining, len(other_items)))
+            fill_spots = random.sample(pot_fill_locations[player], len(fill_items))
             for x in fill_items:
                 item_pool.remove(x)
             for x in fill_spots:
