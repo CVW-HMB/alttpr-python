@@ -202,6 +202,7 @@ class World(object):
             set_player_attr('damage_challenge', 'normal')
             set_player_attr('shuffle_damage_table', 'vanilla')
             set_player_attr('crystal_book', False)
+            set_player_attr('extra_keys', 0)
             set_player_attr('collection_rate', False)
             set_player_attr('colorizepots', True)
             set_player_attr('pot_pool', {})
@@ -1978,6 +1979,7 @@ class Dungeon(object):
         self.prize = None
         self.big_key = big_key
         self.small_keys = small_keys
+        self.extra_small_keys = 0
         self.dungeon_items = dungeon_items
         self.bosses = dict()
         self.player = player
@@ -3174,6 +3176,7 @@ class Spoiler(object):
                          'damage_challenge': self.world.damage_challenge,
                          'shuffle_damage_table': self.world.shuffle_damage_table,
                          'crystal_book': self.world.crystal_book,
+                         'extra_keys': self.world.extra_keys,
                          'triforcegoal': self.world.treasure_hunt_count,
                          'triforcepool': self.world.treasure_hunt_total,
                          'race': self.world.settings.world_rep['meta']['race'],
@@ -3453,6 +3456,7 @@ class Spoiler(object):
                     outfile.write('Damage Challenge:'.ljust(line_width) + '%s\n' % self.metadata['damage_challenge'][player])
                     outfile.write('Damage Table Randomization:'.ljust(line_width) + '%s\n' % self.metadata['shuffle_damage_table'][player])
                     outfile.write('Crystal Book:'.ljust(line_width) + '%s\n' % yn(self.metadata['crystal_book'][player]))
+                    outfile.write('Extra Keys:'.ljust(line_width) + '%d%%\n' % self.metadata['extra_keys'][player])
                     outfile.write('Hints:'.ljust(line_width) + '%s\n' % yn(self.metadata['hints'][player]))
                     outfile.write('Race:'.ljust(line_width) + '%s\n' % yn(self.world.settings.world_rep['meta']['race']))
             

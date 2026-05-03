@@ -163,8 +163,8 @@ def parse_cli(argv, no_defaults=False):
                          'shuffletavern', 'skullwoods', 'linked_drops',
                          'pseudoboots', 'mirrorscroll', 'dark_rooms',
                          'damage_challenge', 'shuffle_damage_table',
-                         'crystal_book', 'retro', 'accessibility', 'hints',
-                         'beemizer', 'experimental', 'dungeon_counters',
+                         'crystal_book', 'extra_keys', 'retro', 'accessibility',
+                         'hints', 'beemizer', 'experimental', 'dungeon_counters',
                          'shufflebosses', 'shuffleenemies', 'enemy_health',
                          'enemy_damage', 'shufflepots', 'ow_palettes',
                          'uw_palettes', 'sprite', 'triforce_gfx', 'disablemusic',
@@ -254,6 +254,7 @@ def parse_settings():
         "damage_challenge": "normal",
         "shuffle_damage_table": "vanilla",
         "crystal_book": False,
+        "extra_keys": 0,
 
         "shuffleenemies": "none",
         "shufflebosses": "none",

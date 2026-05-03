@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '8945e9fdcefc02eb3ff3ad2a8892a180'
+RANDOMIZERBASEHASH = '8a6d769751e2676e8d9da48871cb7634'
 
 
 class JsonRom(object):
@@ -818,11 +818,13 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         rom.write_byte(0x138002, 2)
         for name, layout in world.key_layout[player].items():
             offset = compass_data[name][4]//2
+            dungeon = world.get_dungeon(name, player)
             if world.keyshuffle[player] == 'universal':
                 rom.write_byte(0x187010+offset, layout.max_chests + layout.max_drops)
             else:
-                rom.write_byte(0x13f020+offset, layout.max_chests + layout.max_drops)  # not currently used
-                rom.write_byte(0x187010+offset, layout.max_chests)
+                rom.write_byte(0x13f020+offset, layout.max_chests + layout.max_drops + dungeon.extra_small_keys)  # not currently used
+                rom.write_byte(0x187010+offset, layout.max_chests + dungeon.extra_small_keys)
+                rom.write_byte(0x187000+offset, dungeon.extra_small_keys)
             builder = world.dungeon_layouts[player][name]
             bk_status = 1 if builder.bk_required else 0
             bk_status = 2 if builder.bk_provided else bk_status

@@ -665,6 +665,9 @@
     "action": "store_true",
     "type": "bool"
   },
+  "extra_keys": {
+    "type": "int"
+  },
   "calc_playthrough": {
     "action": "store_false",
     "type": "bool"
