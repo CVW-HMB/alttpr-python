@@ -486,6 +486,14 @@
       "always"
     ]
   },
+  "loothud": {
+    "choices": [
+      "never",
+      "presence",
+      "value",
+      "dungeon_value"
+    ]
+  },
   "showmap": {
     "choices": [
       "visited",

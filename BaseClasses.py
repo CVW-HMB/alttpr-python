@@ -164,6 +164,7 @@ class World(object):
             set_player_attr('bigkeyshuffle', 'none')
             set_player_attr('prizeshuffle', 'none')
             set_player_attr('showloot', 'never')
+            set_player_attr('loothud', 'never')
             set_player_attr('showmap', 'map')
             set_player_attr('restrict_boss_items', 'none')
             set_player_attr('bombbag', False)
@@ -3156,6 +3157,7 @@ class Spoiler(object):
                          'bigkeyshuffle': self.world.bigkeyshuffle,
                          'prizeshuffle': self.world.prizeshuffle,
                          'showloot': self.world.showloot,
+                         'loothud': self.world.loothud,
                          'showmap': self.world.showmap,
                          'boss_shuffle': self.world.boss_shuffle,
                          'enemy_shuffle': self.world.enemy_shuffle,
@@ -3430,6 +3432,7 @@ class Spoiler(object):
                     outfile.write('Big Key Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['bigkeyshuffle'][player])
                     outfile.write('Prize Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['prizeshuffle'][player])
                     outfile.write('Show Value of Checks:'.ljust(line_width) + '%s\n' % self.metadata['showloot'][player])
+                    outfile.write('Show Value of Checks on HUD:'.ljust(line_width) + '%s\n' % self.metadata['loothud'][player])
                     outfile.write('Show Map:'.ljust(line_width) + '%s\n' % self.metadata['showmap'][player])
                     outfile.write('Key Logic Algorithm:'.ljust(line_width) + '%s\n' % self.metadata['key_logic'][player])
                     outfile.write('\n')
