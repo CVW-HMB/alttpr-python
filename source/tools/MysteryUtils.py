@@ -121,8 +121,16 @@ def roll_settings(weights):
     ret.accessibility = get_choice('accessibility')
     ret.restrict_boss_items = get_choice('restrict_boss_items')
 
+    overworld_layout = get_choice('overworld_layout')
+    ret.ow_layout = overworld_layout if overworld_layout != 'none' else 'vanilla'
+    ret.ow_parallel = get_choice_bool('overworld_parallel')
     overworld_shuffle = get_choice('overworld_shuffle')
-    ret.ow_shuffle = overworld_shuffle if overworld_shuffle != 'none' else 'vanilla'
+    if overworld_shuffle == 'parallel':
+        ret.ow_layout = 'wild'
+        ret.ow_parallel = True
+    elif overworld_shuffle == 'full':
+        ret.ow_layout = 'wild'
+        ret.ow_parallel = False
     ret.ow_terrain = get_choice_bool('overworld_terrain')
     valid_options = {'none': 'none', 'polar': 'polar', 'grouped': 'polar', 'chaos': 'unrestricted', 'unrestricted': 'unrestricted'}
     ret.ow_crossed = get_choice('overworld_crossed')
@@ -132,6 +140,7 @@ def roll_settings(weights):
     ret.ow_whirlpool = get_choice_bool('whirlpool_shuffle')
     overworld_flute = get_choice('flute_shuffle')
     ret.ow_fluteshuffle = overworld_flute if overworld_flute != 'none' else 'vanilla'
+    ret.ow_fog = get_choice_bool('overworld_fog')
     ret.shuffle_followers = get_choice_bool('shuffle_followers')
     ret.bonk_drops = get_choice_bool('bonk_drops')
     entrance_shuffle = get_choice('entrance_shuffle')
@@ -148,11 +157,7 @@ def roll_settings(weights):
     ret.door_self_loops = get_choice_bool('door_self_loops')
     ret.experimental = get_choice_bool('experimental')
     ret.collection_rate = get_choice_bool('collection_rate')
-
     ret.dungeon_counters = get_choice_non_bool('dungeon_counters') if 'dungeon_counters' in weights else 'default'
-    if ret.dungeon_counters == 'default':
-        ret.dungeon_counters = 'pickup' if ret.door_shuffle != 'vanilla' or ret.compassshuffle != 'none' else 'off'
-
     ret.pseudoboots = get_choice_bool('pseudoboots')
     ret.mirrorscroll = get_choice_bool('mirrorscroll')
     ret.shopsanity = get_choice_bool('shopsanity')

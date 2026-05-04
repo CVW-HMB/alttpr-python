@@ -117,7 +117,7 @@ def fill_dungeons_restrictive(world, shuffled_locations):
     for attempt in range(15):
         try:
             for player in range(1, world.players + 1):
-                if world.prizeshuffle[player] == 'nearby':
+                if world.prizeshuffle[player] == 'nearby' and world.algorithm != 'vanilla_fill':
                     dungeon_pool = []
                     for dungeon in world.dungeons:
                         from Dungeons import dungeon_table
@@ -148,6 +148,14 @@ def fill_dungeons_restrictive(world, shuffled_locations):
         break
     else:
         raise FillError(f'Unable to place dungeon prizes: {", ".join(list(map(lambda d: d.name, prizes)))}')
+
+    if world.algorithm == 'vanilla_fill':
+        for prize in prizes_copy:
+            if prize.is_near_dungeon_item(world):
+                if prize.location and prize.location.parent_region.dungeon:
+                    dungeon = prize.location.parent_region.dungeon
+                    dungeon.prize = prize
+                    prize.dungeon_object = dungeon
 
     random.shuffle(shuffled_locations)
     fill(all_state_base, others, shuffled_locations)
@@ -240,7 +248,8 @@ def verify_spot_to_fill(location, item_to_place, max_exp_state, single_player_pl
         test_state.sweep_for_events()
         if location.can_fill(test_state, item_to_place, perform_access_check):
             if valid_key_placement(item_to_place, location, key_pool, test_state, world):
-                if (item_to_place.prize and world.prizeshuffle[item_to_place.player] == 'none') \
+                if (item_to_place.prize and (world.prizeshuffle[item_to_place.player] == 'none' \
+                        or (world.algorithm == 'vanilla_fill' and item_to_place.is_near_dungeon_item(world)))) \
                         or valid_dungeon_placement(item_to_place, location, world):
                     return location
     if item_to_place.smallkey or item_to_place.bigkey or item_to_place.prize:
@@ -336,6 +345,10 @@ def track_dungeon_items(item, location, world):
         if item.prize:
             location.parent_region.dungeon.prize = item
             item.dungeon_object = location.parent_region.dungeon
+    elif world.algorithm == 'vanilla_fill' and item.prize and location.parent_region.dungeon:
+        dungeon = location.parent_region.dungeon
+        dungeon.prize = item
+        item.dungeon_object = dungeon
 
 
 def is_dungeon_item(item, world):
@@ -728,8 +741,13 @@ def fast_fill_pot_for_multiworld(world, item_pool, fill_locations):
         flex = 256 - world.data_tables[player].pot_secret_table.multiworld_count
         fill_count = len(pot_fill_locations[player]) - flex
         if fill_count > 0:
-            fill_spots = random.sample(pot_fill_locations[player], fill_count)
-            fill_items = random.sample(pot_item_pool[player], fill_count)
+            first_count = min(fill_count, len(pot_item_pool[player]))
+            fill_items = random.sample(pot_item_pool[player], first_count)
+            remaining = fill_count - first_count
+            if remaining > 0:
+                other_items = [i for i in item_pool if i.player == player and i not in pot_item_pool[player]]
+                fill_items += random.sample(other_items, min(remaining, len(other_items)))
+            fill_spots = random.sample(pot_fill_locations[player], len(fill_items))
             for x in fill_items:
                 item_pool.remove(x)
             for x in fill_spots:
@@ -1030,7 +1048,10 @@ def balance_money_progression(world):
                    'Rupees (100)': 100, 'Rupees (300)': 300}
     rupee_rooms = {'Eastern Rupees': 90, 'Mire Key Rupees': 45, 'Mire Shooter Rupees': 90,
                    'TR Rupees': 270, 'PoD Dark Basement': 270}
-    acceptable_balancers = ['Bombs (3)', 'Arrows (10)', 'Bombs (10)']
+    acceptable_balancers = ['Single Bomb', 'Bombs (3)', 'Bombs (10)',
+                            'Single Arrow', 'Arrows (5)', 'Arrows (10)',
+                            'Small Magic', 'Big Magic', 'Small Heart',
+                            'Fairy', 'Chicken', 'Nothing']
 
     base_value = sum(rupee_rooms.values())
     available_money = {player: base_value for player in range(1, world.players+1)}
@@ -1060,6 +1081,8 @@ def balance_money_progression(world):
         return [loc for loc in locations if sphere_state.can_reach(loc) and sphere_state.not_flooding_a_key(sphere_state.world, loc)]
 
     def interesting_item(location, item, world, player):
+        if location.event or location.locked:
+            return True
         if item.advancement:
             return True
         if item.type is not None or item.name.startswith('Rupee'):
@@ -1107,7 +1130,7 @@ def balance_money_progression(world):
                 slot = shop_to_location_table[location.parent_region.name].index(location.name)
                 shop = location.parent_region.shop
                 shop_item = shop.inventory[slot]
-                if location.item and interesting_item(location, location.item, world, location.item.player):
+                if shop_item and location.item and interesting_item(location, location.item, world, location.item.player):
                     if location.item.name.startswith('Rupee') and loc_player == location.item.player:
                         if shop_item['price'] < rupee_chart[location.item.name]:
                             wallet[loc_player] -= shop_item['price']  # will get picked up in the location_free block
@@ -1129,10 +1152,11 @@ def balance_money_progression(world):
                 unchecked_locations.remove(location)
                 if location.item:
                     if location.item.name.startswith('Rupee'):
-                        wallet[location.item.player] += rupee_chart[location.item.name]
-                        if location.item.name != 'Rupees (300)':
-                            balance_locations[location.item.player].add(location)
-                    if interesting_item(location, location.item, world, location.item.player):
+                        if not (location.item.name == 'Rupee (1)' and world.algorithm != 'district'):
+                            wallet[location.item.player] += rupee_chart[location.item.name]
+                            if location.item.name != 'Rupees (300)':
+                                balance_locations[location.item.player].add(location)
+                    elif interesting_item(location, location.item, world, location.item.player):
                         checked_locations.append(location)
                     elif location.item.name in acceptable_balancers:
                         balance_locations[location.item.player].add(location)
@@ -1176,7 +1200,11 @@ def balance_money_progression(world):
                     if len(increase_targets) == 0:
                         increase_targets = [x for x in balance_locations[target_player] if (rupee_chart[x.item.name] if x.item.name in rupee_chart else 0) < best_value]
                     if len(increase_targets) == 0:
-                        raise Exception('No early sphere swaps for rupees - money grind would be required - bailing for now')
+                        if state.can_farm_rupees(target_player):
+                            logger.warning(f'No more swap targets available. Short by {difference} rupees, but continuing (player can farm)')
+                            break
+                        else:
+                            raise Exception(f'No early sphere swaps for rupees - money grind would be required - bailing for now')
                     best_target = min(increase_targets, key=lambda t: rupee_chart[t.item.name] if t.item.name in rupee_chart else 0)
                     make_item_free = wallet[target_player] < 20
                     old_value = 0 if make_item_free else (rupee_chart[best_target.item.name] if best_target.item.name in rupee_chart else 0)

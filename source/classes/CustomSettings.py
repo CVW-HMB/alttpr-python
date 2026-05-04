@@ -11,6 +11,7 @@ from yaml.representer import Representer
 import RaceRandom as random
 from BaseClasses import DoorType, LocationType
 from OverworldShuffle import default_flute_connections, flute_data
+from source.overworld.FluteShuffle import default_flute_connections, flute_data
 from source.tools.MysteryUtils import get_weights, roll_settings
 from Utils import HexInt, hex_representer
 
@@ -90,7 +91,8 @@ class CustomSettings(object):
                     args.mystery = True
                 else:
                     settings = defaultdict(lambda: None, player_setting)
-                args.ow_shuffle[p] = get_setting(settings['ow_shuffle'], args.ow_shuffle[p])
+                args.ow_layout[p] = get_setting(settings['ow_layout'], args.ow_layout[p])
+                args.ow_parallel[p] = get_setting(settings['ow_parallel'], args.ow_parallel[p])
                 args.ow_terrain[p] = get_setting(settings['ow_terrain'], args.ow_terrain[p])
                 args.ow_crossed[p] = get_setting(settings['ow_crossed'], args.ow_crossed[p])
                 if args.ow_crossed[p] == 'chaos':
@@ -101,6 +103,7 @@ class CustomSettings(object):
                 args.ow_mixed[p] = get_setting(settings['ow_mixed'], args.ow_mixed[p])
                 args.ow_whirlpool[p] = get_setting(settings['ow_whirlpool'], args.ow_whirlpool[p])
                 args.ow_fluteshuffle[p] = get_setting(settings['ow_fluteshuffle'], args.ow_fluteshuffle[p])
+                args.ow_fog[p] = get_setting(settings['ow_fog'], args.ow_fog[p])
                 args.shuffle_followers[p] = get_setting(settings['shuffle_followers'], args.shuffle_followers[p])
                 args.bonk_drops[p] = get_setting(settings['bonk_drops'], args.bonk_drops[p])
                 args.shuffle[p] = get_setting(settings['shuffle'], args.shuffle[p])
@@ -135,6 +138,14 @@ class CustomSettings(object):
                         args.bow_mode[p] = 'retro_silvers'
                     args.take_any[p] = 'random' if args.take_any[p] == 'none' else args.take_any[p]
                     args.keyshuffle[p] = 'universal'
+
+                ow_shuffle = get_setting(settings['ow_shuffle'], args.ow_shuffle[p])
+                if ow_shuffle == 'parallel':
+                    args.ow_layout = 'wild'
+                    args.ow_parallel = True
+                elif ow_shuffle == 'full':
+                    args.ow_layout = 'wild'
+                    args.ow_parallel = False
 
                 args.mixed_travel[p] = get_setting(settings['mixed_travel'], args.mixed_travel[p])
                 args.standardize_palettes[p] = get_setting(settings['standardize_palettes'],
@@ -236,6 +247,11 @@ class CustomSettings(object):
             return self.file_source['item_pool']
         return None
 
+    def get_item_pool_adjust(self):
+        if 'item_pool_adjust' in self.file_source:
+            return self.file_source['item_pool_adjust']
+        return None
+
     def get_placements(self):
         if 'placements' in self.file_source:
             return self.file_source['placements']
@@ -252,6 +268,11 @@ class CustomSettings(object):
     def get_owedges(self):
         if 'ow-edges' in self.file_source:
             return self.file_source['ow-edges']
+        return None
+
+    def get_owgrid(self):
+        if 'ow-grid' in self.file_source:
+            return self.file_source['ow-grid']
         return None
 
     def get_owcrossed(self):
@@ -357,13 +378,15 @@ class CustomSettings(object):
             self.world_rep['start_inventory'] = start_inv = {}
         for p in self.player_range:
             settings_dict[p] = {}
-            settings_dict[p]['ow_shuffle'] = world.owShuffle[p]
+            settings_dict[p]['ow_layout'] = world.owLayout[p]
+            settings_dict[p]['ow_parallel'] = world.owParallel[p]
             settings_dict[p]['ow_terrain'] = world.owTerrain[p]
             settings_dict[p]['ow_crossed'] = world.owCrossed[p]
             settings_dict[p]['ow_keepsimilar'] = world.owKeepSimilar[p]
             settings_dict[p]['ow_mixed'] = world.owMixed[p]
             settings_dict[p]['ow_whirlpool'] = world.owWhirlpoolShuffle[p]
             settings_dict[p]['ow_fluteshuffle'] = world.owFluteShuffle[p]
+            settings_dict[p]['ow_fog'] = world.owFog[p]
             settings_dict[p]['shuffle_followers'] = world.shuffle_followers[p]
             settings_dict[p]['bonk_drops'] = world.shuffle_bonk_drops[p]
             settings_dict[p]['shuffle'] = world.shuffle[p]
@@ -488,6 +511,7 @@ class CustomSettings(object):
         self.world_rep['ow-whirlpools'] = whirlpools = {}
         self.world_rep['ow-tileflips'] = flips = {}
         self.world_rep['ow-flutespots'] = flute = {}
+        self.world_rep['ow-grid'] = owgrid = {}
         for p in self.player_range:
             connections = edges[p] = {}
             connections['two-way'] = {}
@@ -508,6 +532,57 @@ class CustomSettings(object):
             else:
                 flute[p]['force'] = list(HexInt(id) for id in sorted(default_flute_connections))
             flute[p]['forbid'] = []
+            # layout grid
+            owgrid[p] = {}
+            grid = world.owgrid[p]
+            if grid is None:
+                grid = [
+                    [[HexInt(row * 8 + col) for col in range(8)] for row in range(8)],
+                    [[HexInt(row * 8 + col) for col in range(8)] for row in range(8)]
+                ]
+            else:
+                grid = [
+                    [[HexInt(cell & 0xBF) for cell in row] for row in grid[0]],
+                    [[HexInt(cell & 0xBF) for cell in row] for row in grid[1]]
+                ]
+            # Create fixed_arrangements for both worlds
+            owgrid[p]['fixed_arrangements'] = [
+                {
+                    'arrangement': [' '.join(f'0x{cell:02X}' for cell in row) for row in grid[0]],
+                    'world': 'light'
+                },
+                {
+                    'arrangement': [' '.join(f'0x{cell:02X}' for cell in row) for row in grid[1]],
+                    'world': 'dark'
+                }
+            ]
+            # Pin top left corners to position 0x00
+            owgrid[p]['restricted_positions'] = [
+                {
+                    'cells': [HexInt(grid[0][0][0])],
+                    'positions': [HexInt(0x00)],
+                    'world': 'light'
+                },
+                {
+                    'cells': [HexInt(grid[1][0][0])],
+                    'positions': [HexInt(0x00)],
+                    'world': 'dark'
+                }
+            ]
+            # Set advanced grid options
+            horizontal_wrap = False
+            vertical_wrap = False
+            split_large_screens = False
+            if world.customizer:
+                grid_options = world.customizer.get_owgrid()
+                if grid_options and p in grid_options:
+                    grid_options = grid_options[p]
+                    horizontal_wrap = 'wrap_horizontal' in grid_options and grid_options['wrap_horizontal'] == True
+                    vertical_wrap = 'wrap_vertical' in grid_options and grid_options['wrap_vertical'] == True
+                    split_large_screens = 'split_large_screens' in grid_options and grid_options['split_large_screens'] == True
+            owgrid[p]['wrap_horizontal'] = horizontal_wrap
+            owgrid[p]['wrap_vertical'] = vertical_wrap
+            owgrid[p]['split_large_screens'] = split_large_screens
         for key, data in world.spoiler.overworlds.items():
             player = data['player'] if 'player' in data else 1
             connections = edges[player]
@@ -515,7 +590,7 @@ class CustomSettings(object):
             connections[sub][data['entrance']] = data['exit']
         for key, data in world.spoiler.whirlpools.items():
             player = data['player'] if 'player' in data else 1
-            whirlconnects = whirlconnects[player]
+            whirlconnects = whirlpools[player]
             sub = 'two-way' if data['direction'] == 'both' else 'one-way'
             whirlconnects[sub][data['entrance']] = data['exit']
 

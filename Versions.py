@@ -1,3 +1,3 @@
-GKVersion = '1.0.0'
-ORVersion = '0.6.1.7'
-DRVersion = '1.5.0-u'
+GKVersion = '1.1.0'
+ORVersion = '0.7.0.3'
+DRVersion = '1.5.6-u'

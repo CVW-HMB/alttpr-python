@@ -135,6 +135,7 @@ Triforce_texts = [
     "   I promise the\n  next seed will\n    be better.",
     "\n       Honk.",
     "     Breakfast\n    is served!",
+    "\n    send help",
 ]
 BombShop2_texts = ['Bombs!\nBombs!\nBiggest!\nBestest!\nGreatest!\nBoomest!']
 Sahasrahla2_texts = ['You already got my item, idiot.', 'Why are you still talking to me?', 'This text won\'t change.', 'Have you met my brother, Hasarahshla?']
@@ -388,7 +389,6 @@ DeathMountain_texts = [
 ]
 LostWoods_texts = [
     'thieves\' stump',
-    'He\'s got wood',
 ] * 2 + [
     "the forest thief",
     "dancing pickles",
@@ -1801,6 +1801,7 @@ class TextTable(object):
         text['telepathic_tile_ice_stalfos_knights_room'] = CompressedTextMapper.convert("{NOBORDER}\nKnock 'em down and then bomb them dead.")
         text['telepathic_tile_tower_of_hera_entrance'] = CompressedTextMapper.convert("{NOBORDER}\nThis is a bad place, with a guy who will make you fall…\n\n\na lot.")
         text['houlihan_room'] = CompressedTextMapper.convert("Randomizer tournament winners\n{HARP}\n"
+                                                             "  ~~~2025~~~\nGammachuu\n\n"
                                                              "  ~~~2024~~~\nGammachuu\n\n"
                                                              "  ~~~2023~~~\nGanonsGoneWild\n\n"
                                                              "  ~~~2022~~~\nObscure\n\n"

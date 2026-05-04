@@ -43,8 +43,8 @@ alwaysitems = ['Bombos', 'Book of Mudora', 'Cane of Somaria', 'Ether', 'Fire Rod
 progressivegloves = ['Progressive Glove'] * 2
 basicgloves = ['Power Glove', 'Titans Mitts']
 
-normalbottles = ['Bottle', 'Bottle (Red Potion)', 'Bottle (Green Potion)', 'Bottle (Blue Potion)', 'Bottle (Fairy)', 'Bottle (Bee)', 'Bottle (Good Bee)']
-hardbottles = ['Bottle', 'Bottle (Red Potion)', 'Bottle (Green Potion)', 'Bottle (Blue Potion)', 'Bottle (Bee)', 'Bottle (Good Bee)']
+normalbottles = ['Bottle (Red Potion)', 'Bottle (Green Potion)', 'Bottle (Blue Potion)', 'Bottle (Fairy)', 'Bottle (Bee)', 'Bottle (Good Bee)']
+hardbottles = ['Bottle (Red Potion)', 'Bottle (Green Potion)', 'Bottle (Blue Potion)', 'Bottle (Bee)', 'Bottle (Good Bee)']
 
 normalbaseitems = (['Magic Upgrade (1/2)', 'Single Arrow', 'Sanctuary Heart Container', 'Arrows (10)', 'Bombs (10)'] +
                    ['Rupees (300)'] * 4 + ['Boss Heart Container'] * 10 + ['Piece of Heart'] * 24)
@@ -325,6 +325,42 @@ def generate_itempool(world, player):
             for _ in range(0, amt):
                 pool.append('Rupees (20)')
 
+    if world.shopsanity[player] and not skip_pool_adjustments:
+        for shop in world.shops[player]:
+            if shop.region.name in shop_to_location_table:
+                for index, slot in enumerate(shop.inventory):
+                    if slot:
+                        item = slot['item']
+                        if shop.region.name == 'Capacity Upgrade' and world.difficulty[player] != 'normal':
+                            pool.append('Rupees (20)')
+                        else:
+                            pool.append(item)
+
+    if (world.customizer and world.customizer.get_item_pool_adjust()
+            and player in world.customizer.get_item_pool_adjust()):
+        diff = difficulties[world.difficulty[player]]
+        for item_name, delta in world.customizer.get_item_pool_adjust()[player].items():
+            if not isinstance(delta, int):
+                continue
+            if delta > 0:
+                if item_name == 'Bottle (Random)':
+                    for _ in range(delta):
+                        pool.append(random.choice(diff.bottles))
+                else:
+                    pool.extend([item_name] * delta)
+            elif delta < 0:
+                remove_count = abs(delta)
+                if item_name == 'Bottle (Random)':
+                    bottle_names = set(diff.bottles)
+                    for _ in range(remove_count):
+                        bottle = next((x for x in pool if x in bottle_names), None)
+                        if bottle:
+                            pool.remove(bottle)
+                else:
+                    for _ in range(remove_count):
+                        if item_name in pool:
+                            pool.remove(item_name)
+
     if world.logic[player] == 'hybridglitches' and world.pottery[player] not in ['none', 'cave'] \
             and world.keyshuffle[player] not in ['none', 'nearby']:
         # In HMG force swamp smalls in pots to allow getting out of swamp palace
@@ -364,20 +400,10 @@ def generate_itempool(world, player):
             world.escape_assist[player].append('bombs')
 
     for (location, item) in placed_items.items():
-        world.push_item(world.get_location(location, player), ItemFactory(item, player), False)
-        world.get_location(location, player).event = True
-        world.get_location(location, player).locked = True
-
-    if world.shopsanity[player] and not skip_pool_adjustments:
-        for shop in world.shops[player]:
-            if shop.region.name in shop_to_location_table:
-                for index, slot in enumerate(shop.inventory):
-                    if slot:
-                        item = slot['item']
-                        if shop.region.name == 'Capacity Upgrade' and world.difficulty[player] != 'normal':
-                            pool.append('Rupees (20)')
-                        else:
-                            pool.append(item)
+        loc = world.get_location(location, player)
+        world.push_item(loc, ItemFactory(item, player), False)
+        loc.event = True
+        loc.locked = True
 
     items = ItemFactory(pool, player)
     if world.shopsanity[player]:
@@ -463,11 +489,11 @@ def generate_itempool(world, player):
 
     # shuffle bottle refills
     if world.difficulty[player] in ['hard', 'expert']:
-        waterfall_bottle = hardbottles[random.randint(0, 5)]
-        pyramid_bottle = hardbottles[random.randint(0, 5)]
+        waterfall_bottle = hardbottles[random.randint(0, 4)]
+        pyramid_bottle = hardbottles[random.randint(0, 4)]
     else:
-        waterfall_bottle = normalbottles[random.randint(0, 6)]
-        pyramid_bottle = normalbottles[random.randint(0, 6)]
+        waterfall_bottle = normalbottles[random.randint(0, 5)]
+        pyramid_bottle = normalbottles[random.randint(0, 5)]
     world.bottle_refills[player] = (waterfall_bottle, pyramid_bottle)
 
     set_up_shops(world, player)
@@ -1727,6 +1753,7 @@ def shuffle_event_items(world, player):
         available_quests = follower_quests.copy()
         available_pickups = [quests[0] for quests in available_quests.values()]
 
+        # finalize customizer followers first
         for loc_name in follower_quests.keys():
             loc = world.get_location(loc_name, player)
             if loc.item:
@@ -1734,7 +1761,6 @@ def shuffle_event_items(world, player):
                 available_quests.pop(loc_name)
                 available_pickups.remove(loc.item.name)
             
-
         if world.mode[player] == 'standard' and 'Zelda Herself' in available_pickups:
             zelda_dropoff = 'Zelda Pickup'
             if world.default_zelda_region[player] == 'Thieves Blind\'s Cell':
@@ -1744,20 +1770,39 @@ def shuffle_event_items(world, player):
             available_pickups.remove(zelda_pickup)
             set_event_item(world, player, zelda_dropoff, zelda_pickup)
 
-        random.shuffle(available_pickups)
+        follower_locations = [world.get_location(loc_name, player) for loc_name in available_quests.keys()]
 
-        restricted_pickups = { 'Get Frog': 'Dark Blacksmith Ruins'}
-        for pickup in restricted_pickups:
-            restricted_quests = [q for q in available_quests.keys() if q not in restricted_pickups[pickup]]
-            random.shuffle(restricted_quests)
-            quest = restricted_quests.pop()
-            available_quests.pop(quest)
-            available_pickups.remove(pickup)
-            set_event_item(world, player, quest, pickup)
+        attempts = 10
+        for attempt in range(attempts):
+            try:
+                all_state = world.get_all_state(keys=True)
+                if world.prizeshuffle[player] != 'wild':
+                    from Items import prize_item_table
+                    prizes = ItemFactory(list(prize_item_table.keys()), player)
+                    for prize in prizes:
+                        all_state.collect(prize, True)
 
-        for pickup in available_pickups:
-            quest, _ = available_quests.popitem()
-            set_event_item(world, player, quest, pickup)
+                # randomize the follower pickups, but ensure that the last items are the unrestrictive ones
+                unrestrictive_pickups = ItemFactory([p for p in ['Zelda Herself', 'Sign Vandalized'] if p in available_pickups], player)
+                restrictive_pickups = ItemFactory([p for p in available_pickups if p not in unrestrictive_pickups], player)
+                random.shuffle(restrictive_pickups)
+                random.shuffle(unrestrictive_pickups)
+                pickup_items = unrestrictive_pickups + restrictive_pickups
+                random.shuffle(follower_locations)
+
+                fill_restrictive(world, all_state, follower_locations, pickup_items, single_player_placement=True)
+                for loc_name in available_quests.keys():
+                    loc = world.get_location(loc_name, player)
+                    if loc.item:
+                        set_event_item(world, player, loc_name)
+            except FillError as e:
+                logging.getLogger('').info("Failed to place followers (%s). Will retry %s more times", e, attempts - attempt - 1)
+                for loc in follower_locations:
+                    loc.item = None
+                continue
+            break
+        else:
+            raise FillError(f'Unable to place followers: {", ".join(list(map(lambda d: d.hint_text, follower_locations)))}')
 
 
 def get_item_and_event_flag(item, world, player, dungeon_pool, prize_set, prize_pool):

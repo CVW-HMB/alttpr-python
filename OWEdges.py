@@ -326,11 +326,19 @@ def create_owedges(world, player):
         
     world.owedges += edges
     world.initialize_owedges(edges)
+    set_parallel_owedge_links(world, player, edges)
 
 def create_owedge(player, name, owIndex, direction, terrain, edge_id, owSlotIndex=0xff):
     if name not in OWExitTypes['OWEdge']:
         OWExitTypes['OWEdge'].append(name)
     return OWEdge(player, name, owIndex, direction, terrain, edge_id, owSlotIndex)
+
+def set_parallel_owedge_links(world, player, edges):
+    for edge in edges:
+        if edge.name in parallel_links:
+            dw_edge = world.get_owedge(parallel_links[edge.name], player)
+            edge.parallel = dw_edge
+            dw_edge.parallel = edge
 
 
 OWEdgeGroups = {

@@ -1,5 +1,58 @@
 # Changelog
 
+# 0.7.0.3
+- Further updates and new yamls for Grid OW Shuffle
+- Further customizer options for Grid OW Shuffle like defining screens that should stay together
+- Fix buffer sword slash when dashing into water
+- Fixed bug with MSU-1 GT2 track not falling back to GT track
+- Fix for Kiki unfollowing after certain entrance transition conditions
+- Fixed bug/oversight with vanilla_fill and prize_shuffle
+- Changed big bomb shop vendor text to be follower agnostic
+- Updated crosskeys winners (thanks clearmouse)
+- Fixed bug with potential locale determination (thanks Esme)
+- \~Merged in DR v1.5.6~
+
+# 0.7.0.2
+- Fixed money error for bombbag/take-anys
+- Fixed palette issue for map check/flute menu
+- Fixed issue with dungeon icons showing in opposite world in Inverted
+- Fixed Links position in map checks when in Special OW areas
+- Fixed buffered sword issue in OW Shuffle water transitions
+- Added PlasmaKappa tribute TF room text
+
+# 0.7.0.1
+- Fixed buggy sprites in post-Aga Zora's Domain
+- Fixed L/R map switch when in special OW screens
+- Fixes issue not able to screen transition if bumped by enemy in water
+
+# 0.7.0.0
+- New OW Layout Shuffle Mode: Grid
+- Implemented Fog of War for Tile Flip
+
+# 0.6.1.11
+- Fixed bonk drops duplicate counting and potentially overwriting arbitrary values
+- Fixed boss icons on dungeon map check
+- Fixed dungeon counters to autotrack correctly
+- Key and chest counts in menu now display consistently (must have dungeon item or have visited dungeon to see the HUD)
+- Money balancing will fail in less scenarios
+- Fixed issue with Sanc pots not collecting
+- Enemizer now allows more enemies on water
+- Fix infinite pit fall issue with Old Man follower location
+- Fix bad overworld tilemap drawing on HC and Pyramid screens in OW Layout Shuffle
+
+## 0.6.1.10
+- Emergency fix for bonk functionality
+
+## 0.6.1.9
+- Fixed follower shuffle placement errors
+- Fixed pseudoboots ability to open Kings Tomb
+- Implemented better accurate coordinates on map check locations
+- Fixed janky icons on zoomed-in map check screen
+
+## 0.6.1.8
+- Fixed follower placement and logic
+- Fixed error with HC Courtyard Tree Pull
+
 ## 0.6.1.7
 - \~Merged in DR v1.5.2~
   - Reverted key count update

@@ -111,11 +111,11 @@
 
     "randomizer.dungeon.experimental": "Enable Experimental Features",
 
-    "randomizer.dungeon.dungeon_counters": "Dungeon Chest Counters",
+    "randomizer.dungeon.dungeon_counters": "Dungeon Counters",
     "randomizer.dungeon.dungeon_counters.default": "Auto",
     "randomizer.dungeon.dungeon_counters.off": "Off",
     "randomizer.dungeon.dungeon_counters.on": "On",
-    "randomizer.dungeon.dungeon_counters.pickup": "On Compass Pickup",
+    "randomizer.dungeon.dungeon_counters.pickup": "On Item Pickup",
 
     "randomizer.dungeon.mixed_travel": "Mixed Dungeon Travel ",
     "randomizer.dungeon.mixed_travel.prevent": "Prevent Mixed Dungeon Travel",
@@ -157,10 +157,12 @@
     "randomizer.enemizer.enemylogic.allow_all": "Allow special enemies anywhere",
 
 
-    "randomizer.overworld.overworldshuffle": "Layout Shuffle",
-    "randomizer.overworld.overworldshuffle.vanilla": "Vanilla",
-    "randomizer.overworld.overworldshuffle.parallel": "Parallel",
-    "randomizer.overworld.overworldshuffle.full": "Full",
+    "randomizer.overworld.layout": "Layout Shuffle",
+    "randomizer.overworld.layout.vanilla": "Vanilla",
+    "randomizer.overworld.layout.grid": "Grid",
+    "randomizer.overworld.layout.wild": "Wild",
+
+    "randomizer.overworld.parallel": "Keep Worlds Parallel",
 
     "randomizer.overworld.terrain": "Free Terrain",
 
@@ -180,6 +182,8 @@
     "randomizer.overworld.overworldflute.vanilla": "Vanilla",
     "randomizer.overworld.overworldflute.balanced": "Balanced",
     "randomizer.overworld.overworldflute.random": "Random",
+
+    "randomizer.overworld.fog": "Overworld Map Fog",
 
     
     "randomizer.entrance.openpyramid": "Pre-open Pyramid Hole",

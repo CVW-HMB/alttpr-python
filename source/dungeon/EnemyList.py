@@ -450,7 +450,7 @@ def init_enemy_stats():
         EnemySprite.Stalfos: EnemyStats(EnemySprite.Stalfos, False, True, 6, health=4, dmg=1),
         EnemySprite.GreenZirro: EnemyStats(EnemySprite.GreenZirro, False, False, 1, health=4, dmg=5, dmask=0x80),
         EnemySprite.BlueZirro: EnemyStats(EnemySprite.BlueZirro, False, False, 7, health=8, dmg=3, dmask=0x80),
-        EnemySprite.Pikit: EnemyStats(EnemySprite.Pikit, False, True, 2, health=12, dmg=5),
+        EnemySprite.Pikit: EnemyStats(EnemySprite.Pikit, False, False, 2, health=12, dmg=5),
 
         EnemySprite.OldMan: EnemyStats(EnemySprite.OldMan, True, dmg=0),
         EnemySprite.PipeDown: EnemyStats(EnemySprite.PipeDown, True, dmg=0),
@@ -2116,8 +2116,13 @@ class EnemyTable:
         self.room_map = defaultdict(list)
         self.special_bitmasks = None
 
-    def write_sprite_data_to_rom(self, rom):
-        pointer_address = snes_to_pc(0x09D62E)
+    def write_sprite_data_to_rom(self, rom, pointer_table):
+        ow_data_end = pointer_table['ow_sprites'][0] + pointer_table['ow_sprites'][1]
+        if ow_data_end > pointer_table['uw_sprites'][2]:
+            # moving pointer table down
+            pointer_table['uw_sprites'][2] = ow_data_end
+            rom.write_bytes(snes_to_pc(pointer_table['uw_sprites'][3]), int16_as_bytes(ow_data_end & 0xFFFF))
+        pointer_address = snes_to_pc(pointer_table['uw_sprites'][2])
         data_pointer = snes_to_pc(0x288000)
         empty_pointer = pc_to_snes(data_pointer) & 0xFFFF
         rom.write_bytes(data_pointer, [0x00, 0xff])

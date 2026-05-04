@@ -120,33 +120,64 @@ def parse_cli(argv, no_defaults=False):
         ret.take_any = 'random' if ret.take_any == 'none' else ret.take_any
         ret.keyshuffle = 'universal'
 
+    if ret.ow_unparallel:
+        ret.ow_parallel = False
+
+    if ret.ow_shuffle == 'parallel':
+        ret.ow_layout = 'wild'
+        ret.ow_parallel = True
+    elif ret.ow_shuffle == 'full':
+        ret.ow_layout = 'wild'
+        ret.ow_parallel = False
+
+    if ret.ow_no_fog:
+        ret.ow_fog = False
+
     if player_num:
         defaults = copy.deepcopy(ret)
         for player in range(1, player_num + 1):
             playerargs = parse_cli(shlex.split(getattr(ret, f"p{player}")), True)
-            
+
             if playerargs.filename:
                 playersettings = apply_settings_file({}, playerargs.filename)
                 for k, v in playersettings.items():
                     setattr(playerargs, k, v)
 
-            for name in ['logic', 'mode', 'swords', 'goal', 'difficulty', 'item_functionality', 'ow_shuffle',
-                         'ow_terrain', 'ow_crossed', 'ow_keepsimilar', 'ow_mixed', 'ow_whirlpool', 'ow_fluteshuffle',
-                         'flute_mode', 'bow_mode', 'take_any', 'boots_hint', 'shuffle_followers',
-                         'shuffle', 'door_shuffle', 'intensity', 'crystals_ganon', 'crystals_gt', 'bosses_ganon', 'bosshunt_include_agas', 'ganon_item', 'openpyramid',
-                         'mapshuffle', 'compassshuffle', 'keyshuffle', 'bigkeyshuffle', 'prizeshuffle', 'showloot', 'showmap', 'startinventory',
-                         'usestartinventory', 'bombbag', 'shuffleganon', 'overworld_map', 'restrict_boss_items',
-                         'triforce_max_difference', 'triforce_pool_min', 'triforce_pool_max', 'triforce_goal_min', 'triforce_goal_max',
-                         'triforce_min_difference', 'triforce_goal', 'triforce_pool', 'shufflelinks', 'shuffletavern',
-                         'skullwoods', 'linked_drops',
-                         'pseudoboots', 'mirrorscroll', 'dark_rooms', 'damage_challenge', 'shuffle_damage_table', 'crystal_book', 'retro', 'accessibility', 'hints', 'beemizer', 'experimental', 'dungeon_counters',
-                         'shufflebosses', 'shuffleenemies', 'enemy_health', 'enemy_damage', 'shufflepots',
-                         'ow_palettes', 'uw_palettes', 'sprite', 'triforce_gfx', 'disablemusic', 'quickswap', 'fastmenu', 'heartcolor',
-                         'heartbeep', 'remote_items', 'shopsanity', 'dropshuffle', 'pottery', 'keydropshuffle',
-                         'mixed_travel', 'standardize_palettes', 'code', 'reduce_flashing', 'shuffle_sfx', 'shuffle_sfxinstruments',
-                         'shuffle_songinstruments', 'msu_resume', 'collection_rate', 'colorizepots', 'decoupledoors', 'door_type_mode',
-                         'bonk_drops', 'trap_door_mode', 'key_logic_algorithm', 'door_self_loops', 'any_enemy_logic', 'aga_randomness',
-                         'money_balance']:
+            for name in ['logic', 'mode', 'swords', 'goal', 'difficulty',
+                         'item_functionality', 'ow_shuffle', 'ow_layout',
+                         'ow_parallel', 'ow_terrain', 'ow_crossed',
+                         'ow_keepsimilar', 'ow_mixed', 'ow_whirlpool',
+                         'ow_fluteshuffle', 'ow_fog', 'flute_mode', 'bow_mode',
+                         'take_any', 'boots_hint', 'shuffle_followers',
+                         'shuffle', 'door_shuffle', 'intensity',
+                         'crystals_ganon', 'crystals_gt', 'bosses_ganon',
+                         'bosshunt_include_agas', 'ganon_item', 'openpyramid',
+                         'mapshuffle', 'compassshuffle', 'keyshuffle',
+                         'bigkeyshuffle', 'prizeshuffle', 'showloot', 'showmap',
+                         'startinventory', 'usestartinventory', 'bombbag',
+                         'shuffleganon', 'overworld_map', 'restrict_boss_items',
+                         'triforce_max_difference', 'triforce_pool_min',
+                         'triforce_pool_max', 'triforce_goal_min',
+                         'triforce_goal_max', 'triforce_min_difference',
+                         'triforce_goal', 'triforce_pool', 'shufflelinks',
+                         'shuffletavern', 'skullwoods', 'linked_drops',
+                         'pseudoboots', 'mirrorscroll', 'dark_rooms',
+                         'damage_challenge', 'shuffle_damage_table',
+                         'crystal_book', 'retro', 'accessibility', 'hints',
+                         'beemizer', 'experimental', 'dungeon_counters',
+                         'shufflebosses', 'shuffleenemies', 'enemy_health',
+                         'enemy_damage', 'shufflepots', 'ow_palettes',
+                         'uw_palettes', 'sprite', 'triforce_gfx', 'disablemusic',
+                         'quickswap', 'fastmenu', 'heartcolor', 'heartbeep',
+                         'remote_items', 'shopsanity', 'dropshuffle', 'pottery',
+                         'keydropshuffle', 'mixed_travel',
+                         'standardize_palettes', 'code', 'reduce_flashing',
+                         'shuffle_sfx', 'shuffle_sfxinstruments',
+                         'shuffle_songinstruments', 'msu_resume',
+                         'collection_rate', 'colorizepots', 'decoupledoors',
+                         'door_type_mode', 'bonk_drops', 'trap_door_mode',
+                         'key_logic_algorithm', 'door_self_loops',
+                         'any_enemy_logic', 'aga_randomness', 'money_balance']:
                 value = getattr(defaults, name) if getattr(playerargs, name) is None else getattr(playerargs, name)
                 if player == 1:
                     setattr(ret, name, {1: value})
@@ -196,13 +227,18 @@ def parse_settings():
         # Shuffle Ganon defaults to TRUE
         "openpyramid": "auto",
         "shuffleganon": True,
-        "ow_shuffle": "vanilla",
+        "ow_shuffle": "vanilla", # for backwards compatibility
+        "ow_layout": "vanilla",
+        "ow_parallel": True,
+        "ow_unparallel": False,
         "ow_terrain": False,
         "ow_crossed": "none",
         "ow_keepsimilar": False,
         "ow_mixed": False,
         "ow_whirlpool": False,
         "ow_fluteshuffle": "vanilla",
+        "ow_fog": True,
+        "ow_no_fog": False,
         "shuffle_followers": False,
         "bonk_drops": False,
         "shuffle": "vanilla",
