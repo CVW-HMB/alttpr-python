@@ -3184,7 +3184,7 @@ class Spoiler(object):
                          'race': self.world.settings.world_rep['meta']['race'],
                          'user_notes': self.world.settings.world_rep['meta']['user_notes'],
                          'code': {p: Settings.make_code(self.world, p) for p in range(1, self.world.players + 1)},
-                         'hashes': [{p: self.hashes[p, t] for p in range(1, self.world.players + 1)} for t in range(self.world.teams)],
+                         'hash': {p: self.hashes[p, 0] for p in range(1, self.world.players + 1)},  # TODO: make this work for multiple teams
                          'seed': self.world.seed
                          }
 
