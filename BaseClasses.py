@@ -3187,7 +3187,7 @@ class Spoiler(object):
                          'seed': self.world.seed
                          }
         if self.hashes:
-            self.metadata['hashes'] = {p: self.hashes[p, 0] for p in range(1, self.world.players + 1)}  # TODO: make this work for multiple teams
+            self.metadata['hash'] = {p: self.hashes[p, 0] for p in range(1, self.world.players + 1)}  # TODO: make this work for multiple teams
 
         for p in range(1, self.world.players + 1):
             from ItemList import set_default_triforce
