@@ -3541,7 +3541,10 @@ Prizes = ['Green Pendant',
            ]
 
 hash_alphabet = [
-    "Bow", "Boomerang", "Hookshot", "Bomb", "Mushroom", "Powder", "Rod", "Pendant", "Bombos", "Ether", "Quake",
-    "Lamp", "Hammer", "Shovel", "Ocarina", "Bug Net", "Book", "Bottle", "Potion", "Cane", "Cape", "Mirror", "Boots",
-    "Gloves", "Flippers", "Pearl", "Shield", "Tunic", "Heart", "Map", "Compass", "Key"
+    "Bow", "Boomerang", "Hookshot", "Bomb", "Mushroom", "Powder",
+    "Ice Rod", "Green Pendant", "Bombos", "Ether", "Quake", "Lamp",
+    "Hammer", "Shovel", "Ocarina", "Bug Net", "Book", "Bottle",
+    "Green Potion", "Somaria", "Cape", "Mirror", "Boots", "Gloves",
+    "Flippers", "Pearl", "Shield", "Green Tunic", "Heart", "Map",
+    "Compass", "Key",
 ]
