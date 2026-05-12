@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'c5e123bcd2723114e1ecc8b42d0c5efa'
+RANDOMIZERBASEHASH = 'beae4c06c4841030709639215e2b03c3'
 
 
 class JsonRom(object):
@@ -1503,19 +1503,6 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         loot_source |= 0x04
     rom.write_byte(0x1CFF10, loot_source)
 
-    if world.showloot[player] == 'never':
-        rom.write_bytes(0x1CFF08, [0x00, 0x00, 0x00, 0x00])
-        rom.write_byte(0x1CFF11, 0x00)
-    elif world.showloot[player] == 'presence':
-        rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x00, 0x00])
-        rom.write_byte(0x1CFF11, 0x00)
-    elif world.showloot[player] == 'compass':
-        rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x02, 0x00])
-        rom.write_byte(0x1CFF11, 0x01)
-    elif world.showloot[player] == 'always':
-        rom.write_bytes(0x1CFF08, [0x02, 0x00, 0x00, 0x00])
-        rom.write_byte(0x1CFF11, 0x00)
-
     if world.loothud[player] == 'never':
         rom.write_byte(0x1CFF12, 0x00)
     elif world.showloot[player] == 'presence':
@@ -1527,6 +1514,20 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     elif world.showloot[player] == 'dungeon_value':
         rom.write_byte(0x1CFF12, 0x01)
         rom.write_bytes(0x1CFF0E, [0xFF, 0x01])
+
+    if world.showloot[player] == 'never':
+        rom.write_bytes(0x1CFF08, [0x00, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF11, 0x00)
+        rom.write_byte(0x1CFF12, 0x00)  # turn off hud icon too just to be safe
+    elif world.showloot[player] == 'presence':
+        rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF11, 0x00)
+    elif world.showloot[player] == 'compass':
+        rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x02, 0x00])
+        rom.write_byte(0x1CFF11, 0x01)
+    elif world.showloot[player] == 'always':
+        rom.write_bytes(0x1CFF08, [0x02, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF11, 0x00)
 
     if world.showmap[player] == 'visited':
         rom.write_bytes(0x1CFF00, [0x01, 0x00, 0x00, 0x05])
