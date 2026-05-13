@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'beae4c06c4841030709639215e2b03c3'
+RANDOMIZERBASEHASH = '40c072b56aef71fb7754c1153b877594'
 
 
 class JsonRom(object):
@@ -1505,13 +1505,13 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
 
     if world.loothud[player] == 'never':
         rom.write_byte(0x1CFF12, 0x00)
-    elif world.showloot[player] == 'presence':
+    elif world.loothud[player] == 'presence':
         rom.write_byte(0x1CFF12, 0x01)
         rom.write_bytes(0x1CFF0E, [0x01, 0x01])
-    elif world.showloot[player] == 'value':
+    elif world.loothud[player] == 'value':
         rom.write_byte(0x1CFF12, 0x01)
         rom.write_bytes(0x1CFF0E, [0xFF, 0xFF])
-    elif world.showloot[player] == 'dungeon_value':
+    elif world.loothud[player] == 'dungeon_value':
         rom.write_byte(0x1CFF12, 0x01)
         rom.write_bytes(0x1CFF0E, [0xFF, 0x01])
 
