@@ -2896,6 +2896,10 @@ class Item(object):
         return self.type == 'Compass'
 
     @property
+    def event(self):
+        return self.type == 'Event'
+
+    @property
     def dungeon(self):
         if not self.smallkey and not self.bigkey and not self.map and not self.compass:
             return None

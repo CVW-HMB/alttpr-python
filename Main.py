@@ -335,7 +335,7 @@ def main(args, seed=None, fish=None):
     for player in range(1, world.players+1):
         if world.shopsanity[player]:
             customize_shops(world, player)
-    if args.algorithm in ['balanced', 'equitable']:
+    if not args.skip_money_balance and args.algorithm in ['balanced', 'equitable']:
         balance_money_progression(world)
     ensure_good_items(world, True)
 
@@ -572,7 +572,7 @@ def init_world(args, fish):
     world.collection_rate = args.collection_rate.copy()
     world.colorizepots = args.colorizepots.copy()
     world.aga_randomness = args.aga_randomness.copy()
-    world.money_balance = args.money_balance.copy()
+    world.money_balance = {player: int(args.money_balance[player]) for player in range(1, world.players + 1)}
 
     # custom settings - these haven't been promoted to full settings yet
     in_progress_settings = ['force_enemy']
@@ -1288,6 +1288,8 @@ def create_playthrough(world):
         for location in sphere:
             if world.goal[location.player] == 'completionist':
                 continue  # every location for that player is required
+            if location.item.type == "SmallKey":
+                continue
             # we remove the item at location and check if game is still beatable
             logging.getLogger('').debug('Checking if %s (Player %d) is required to beat the game.', location.item.name, location.item.player)
             old_item = location.item

@@ -252,6 +252,7 @@ def verify_spot_to_fill(location, item_to_place, max_exp_state, single_player_pl
                         or (world.algorithm == 'vanilla_fill' and item_to_place.is_near_dungeon_item(world)))) \
                         or valid_dungeon_placement(item_to_place, location, world):
                     return location
+
     if item_to_place.smallkey or item_to_place.bigkey or item_to_place.prize:
         location.item = None
         location.event = False
@@ -311,7 +312,9 @@ def valid_dungeon_placement(item, location, world):
             dungeon = check_dungeon
     if dungeon:
         layout = world.dungeon_layouts[location.player][dungeon.name]
-        if not is_dungeon_item(item, world) or item.player != location.player:
+        if item.event:
+            return True
+        elif not is_dungeon_item(item, world) or item.player != location.player:
             if item.prize and item.is_near_dungeon_item(world):
                 return item.dungeon_object == dungeon and layout.free_items > 0
             return layout.free_items > 0
