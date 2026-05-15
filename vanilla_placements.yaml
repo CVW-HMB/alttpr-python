@@ -241,6 +241,22 @@ placements:
     "Ganons Tower - Mini Helmasaur Room - Right": Bombs (3)
     "Ganons Tower - Pre-Moldorm Chest": Small Key (Ganons Tower)
     "Ganons Tower - Validation Chest": Rupees (20)
+drops:
+  1:
+    Pack 1: ["Small Heart", "Small Heart", "Small Heart", "Small Heart", "Rupee (1)", "Small Heart", "Small Heart", "Rupee (1)"]
+    Pack 2: ["Rupees (5)", "Rupee (1)", "Rupees (5)", "Rupees (20)", "Rupees (5)", "Rupee (1)", "Rupees (5)", "Rupees (5)"]
+    Pack 3: ["Big Magic", "Small Magic", "Small Magic", "Rupees (5)", "Big Magic", "Small Magic", "Small Heart", "Small Magic"]
+    Pack 4: ["Single Bomb", "Single Bomb", "Single Bomb", "Bombs (4)", "Single Bomb", "Single Bomb", "Bombs (8)", "Single Bomb"]
+    Pack 5: ["Arrows (5)", "Small Heart", "Arrows (5)", "Arrows (10)", "Arrows (5)", "Small Heart", "Arrows (5)", "Arrows (10)"]
+    Pack 6: ["Small Magic", "Rupee (1)", "Small Heart", "Arrows (5)", "Small Magic", "Single Bomb", "Rupee (1)", "Small Heart"]
+    Pack 7: ["Small Heart", "Fairy", "Big Magic", "Rupees (20)", "Bombs (8)", "Small Heart", "Rupees (20)", "Arrows (10)"]
+    Tree Pull Tier 1: "Rupee (1)"
+    Tree Pull Tier 2: "Rupees (5)"
+    Tree Pull Tier 3: "Rupees (20)"
+    Crab Normal: "Rupee (1)"
+    Crab Special: "Rupees (20)"
+    Stun Prize: "Rupee (1)"
+    Fish: "Rupees (20)"
 medallions:
   1:
     "Misery Mire": Ether
