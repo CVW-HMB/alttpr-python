@@ -2088,6 +2088,49 @@ def hud_format_text(text):
         output += b'\x7f\x00'
     return output[:32]
 
+def read_bytes(f, count):
+    values = f.read(count)
+    if len(values) < count:
+        raise EOFError
+    return values
+
+def apply_rom_patches(rom, patches):
+    for patch in patches:
+        if not os.path.exists(f"patches/{patch}.ips"):
+            logging.getLogger('').warning("Patch %s not found -- skipping", patch)
+            continue
+
+        with open(f"patches/{patch}.ips", "rb") as f:
+            byte_changes = []
+            try:
+                header = read_bytes(f, 5)
+                if header != b"PATCH":
+                    logging.getLogger('').warning("Patch %s invalid -- skipping", patch)
+                    continue
+
+                while True:
+                    address = read_bytes(f, 3)
+                    if address == b"EOF":
+                        break
+
+                    address = int.from_bytes(address, byteorder="big")
+                    length = int.from_bytes(read_bytes(f, 2), byteorder="big")
+
+                    if length > 0:
+                        byte_changes.append((address, list(f.read(length))))
+                    else:
+                        length = int.from_bytes(read_bytes(f, 2), byteorder="big")
+                        value = read_bytes(f, 1)
+                        byte_changes.append((address, length * list(value)))
+
+                for address, values in byte_changes:
+                    rom.write_bytes(address, values)
+
+                logging.getLogger("").info("Patch %s applied successfully", patch)
+
+            except EOFError:
+                logging.getLogger('').warning("Patch %s invalid -- skipping", patch)
+                continue
 
 def apply_rom_settings(rom, beep, color, quickswap, fastmenu, disable_music, sprite, triforce_gfx,
                        ow_palettes, uw_palettes, reduce_flashing, shuffle_sfx,

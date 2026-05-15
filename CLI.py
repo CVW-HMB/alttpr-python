@@ -179,7 +179,7 @@ def parse_cli(argv, no_defaults=False):
                          'decoupledoors', 'door_type_mode', 'bonk_drops',
                          'trap_door_mode', 'key_logic_algorithm',
                          'door_self_loops', 'any_enemy_logic', 'aga_randomness',
-                         'money_balance']:
+                         'money_balance', 'patches']:
                 value = getattr(defaults, name) if getattr(playerargs, name) is None else getattr(playerargs, name)
                 if player == 1:
                     setattr(ret, name, {1: value})

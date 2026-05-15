@@ -754,6 +754,10 @@
     "type": "bool"
   },
   "money_balance": {},
+  "patches": {
+    "type": "str",
+    "help": "suppress"
+  },
   "settingsonload": {
     "choices": [
       "default",
