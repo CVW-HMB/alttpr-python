@@ -1,0 +1,264 @@
+item_pool_adjust:
+  1:
+    "Bottle (Random)": -4
+    "Bottle": 4
+
+    "Bombs (10)": -1
+    "Bombs (3)": 1
+
+    "Rupees (5)": -1
+    "Arrows (10)": -1
+    "Rupees (20)": -8
+
+    "Small Key (Universal)": 5
+placements:
+  1:
+    "Master Sword Pedestal": Master Sword
+    "Mushroom": Mushroom
+    "Ether Tablet": Ether
+    "Spectacle Rock": Piece of Heart
+    "Old Man": Magic Mirror
+    "Floating Island": Piece of Heart
+    "King Zora": Flippers
+    "Zora's Ledge": Piece of Heart
+    "Bottle Merchant": Bottle
+    "Maze Race": Piece of Heart
+    "Flute Spot": Ocarina
+    "Hobo": Bottle
+    "Desert Ledge": Piece of Heart
+    "Bombos Tablet": Bombos
+    "Lake Hylia Island": Piece of Heart
+    "Purple Chest": Bottle
+    "Sunken Treasure": Piece of Heart
+    "Bumper Cave Ledge": Piece of Heart
+    "Catfish": Quake
+    "Pyramid": Piece of Heart
+    "Digging Game": Piece of Heart
+    "Stumpy": Shovel
+    "Lost Woods Hideout": Piece of Heart
+    "Lumberjack Tree": Piece of Heart
+    "Spectacle Rock Cave": Piece of Heart
+    "Spiral Cave": Rupees (50)
+    "Mimic Cave": Piece of Heart
+    "Paradox Cave Lower - Far Left": Rupees (20)
+    "Paradox Cave Lower - Left": Rupees (20)
+    "Paradox Cave Lower - Right": Rupees (20)
+    "Paradox Cave Lower - Far Right": Rupees (20)
+    "Paradox Cave Lower - Middle": Rupees (20)
+    "Paradox Cave Upper - Left": Bombs (3)
+    "Paradox Cave Upper - Right": Arrows (10)
+    "Waterfall Fairy - Left": Red Boomerang
+    "Waterfall Fairy - Right": Red Shield
+    "Bonk Rock Cave": Piece of Heart
+    "Graveyard Cave": Piece of Heart
+    "King's Tomb": Cape
+    "Potion Shop": Magic Powder
+    "Kakariko Well - Left": Rupees (20)
+    "Kakariko Well - Middle": Rupees (20)
+    "Kakariko Well - Right": Rupees (20)
+    "Kakariko Well - Bottom": Bombs (3)
+    "Kakariko Well - Top": Piece of Heart
+    "Blind's Hideout - Left": Rupees (20)
+    "Blind's Hideout - Right": Rupees (20)
+    "Blind's Hideout - Far Left": Rupees (20)
+    "Blind's Hideout - Far Right": Rupees (20)
+    "Blind's Hideout - Top": Piece of Heart
+    "Chicken House": Arrows (10)  # TODO: VERIFY
+    "Sick Kid": Bug Catching Net
+    "Kakariko Tavern": Bottle
+    "Link's Uncle": Fighter Sword
+    "Secret Passage": Blue Shield
+#   "Secret Passage": Lamp
+    "Sahasrahla's Hut - Left": Rupees (50)
+    "Sahasrahla's Hut - Middle": Bombs (3)
+    "Sahasrahla's Hut - Right": Rupees (50)
+    "Sahasrahla": Pegasus Boots
+    "Blacksmith": Tempered Sword
+    "Magic Bat": Magic Upgrade (1/2)
+    "Library": Book of Mudora
+    "Link's House": Rupees (5)
+#   "Link's House": Lamp
+    "Checkerboard Cave": Piece of Heart
+    "Aginah's Cave": Piece of Heart
+    "Cave 45": Piece of Heart
+    "Mini Moldorm Cave - Far Left": Bombs (3)
+    "Mini Moldorm Cave - Left": Rupees (20)
+    "Mini Moldorm Cave - Right": Rupees (20)
+    "Mini Moldorm Cave - Far Right": Arrows (10)
+    "Mini Moldorm Cave - Generous Guy": Rupees (300)
+    "Ice Rod Cave": Ice Rod
+    "Floodgate Chest": Bombs (3)
+    "Spike Cave": Cane of Byrna
+    "Hookshot Cave - Bottom Right": Rupees (50)
+    "Hookshot Cave - Top Right": Rupees (50)
+    "Hookshot Cave - Top Left": Rupees (50)
+    "Hookshot Cave - Bottom Left": Rupees (50)
+    "Superbunny Cave - Top": Bombs (3)
+    "Superbunny Cave - Bottom": Rupees (20)
+    "Chest Game": Piece of Heart
+    "C-Shaped House": Rupees (300)
+    "Brewery": Rupees (300)
+    "Pyramid Fairy - Left": Golden Sword
+    "Pyramid Fairy - Right": Silver Arrows
+    "Peg Cave": Piece of Heart
+    "Mire Shed - Left": Piece of Heart
+    "Mire Shed - Right": Rupees (20)
+    "Hype Cave - Top": Rupees (20)
+    "Hype Cave - Middle Right": Rupees (20)
+    "Hype Cave - Middle Left": Rupees (20)
+    "Hype Cave - Bottom": Rupees (20)
+    "Hype Cave - Generous Guy": Rupees (300)
+    "Hyrule Castle - Map Chest": Map (Escape)
+    "Hyrule Castle - Boomerang Chest": Blue Boomerang
+    "Hyrule Castle - Zelda's Chest": Lamp
+    "Sewers - Dark Cross": Small Key (Universal)
+    "Sewers - Secret Room - Left": Bombs (3)
+    "Sewers - Secret Room - Middle": Rupees (300)
+    "Sewers - Secret Room - Right": Arrows (10)
+    "Sanctuary": Sanctuary Heart Container
+    "Eastern Palace - Cannonball Chest": Rupees (100)
+    "Eastern Palace - Map Chest": Map (Eastern Palace)
+    "Eastern Palace - Compass Chest": Compass (Eastern Palace)
+    "Eastern Palace - Big Chest": Bow
+    "Eastern Palace - Big Key Chest": Big Key (Eastern Palace)
+    "Eastern Palace - Boss": Boss Heart Container
+    "Eastern Palace - Prize": Green Pendant
+    "Desert Palace - Compass Chest": Compass (Desert Palace)
+    "Desert Palace - Big Key Chest": Big Key (Desert Palace)
+    "Desert Palace - Map Chest": Map (Desert Palace)
+    "Desert Palace - Torch": Small Key (Universal)
+    "Desert Palace - Big Chest": Power Glove
+    "Desert Palace - Boss": Boss Heart Container
+    "Desert Palace - Prize": Blue Pendant
+    "Tower of Hera - Map Chest": Map (Tower of Hera)
+    "Tower of Hera - Basement Cage": Small Key (Universal)
+    "Tower of Hera - Big Key Chest": Big Key (Tower of Hera)
+    "Tower of Hera - Compass Chest": Compass (Tower of Hera)
+    "Tower of Hera - Big Chest": Moon Pearl
+    "Tower of Hera - Boss": Boss Heart Container
+    "Tower of Hera - Prize": Red Pendant
+    "Castle Tower - Room 03": Small Key (Universal)
+    "Castle Tower - Dark Maze": Small Key (Universal)
+    "Palace of Darkness - Shooter Room": Small Key (Universal)
+    "Palace of Darkness - The Arena - Bridge": Small Key (Universal)
+    "Palace of Darkness - The Arena - Ledge": Small Key (Universal)
+    "Palace of Darkness - Map Chest": Map (Palace of Darkness)
+    "Palace of Darkness - Stalfos Basement": Small Key (Universal)
+    "Palace of Darkness - Big Key Chest": Big Key (Palace of Darkness)
+    "Palace of Darkness - Dark Maze - Top": Bombs (3)
+    "Palace of Darkness - Dark Maze - Bottom": Small Key (Universal)
+    "Palace of Darkness - Big Chest": Hammer
+    "Palace of Darkness - Compass Chest": Compass (Palace of Darkness)
+    "Palace of Darkness - Dark Basement - Left": Single Arrow
+    "Palace of Darkness - Dark Basement - Right": Small Key (Universal)
+    "Palace of Darkness - Harmless Hellway": Rupees (5)
+    "Palace of Darkness - Boss": Boss Heart Container
+    "Palace of Darkness - Prize": Crystal 1
+    "Swamp Palace - Entrance": Small Key (Universal)
+    "Swamp Palace - Map Chest": Map (Swamp Palace)
+    "Swamp Palace - Big Chest": Hookshot
+    "Swamp Palace - Compass Chest": Compass (Swamp Palace)
+    "Swamp Palace - Big Key Chest": Big Key (Swamp Palace)
+    "Swamp Palace - West Chest": Rupees (20)
+    "Swamp Palace - Flooded Room - Left": Rupees (20)
+    "Swamp Palace - Flooded Room - Right": Rupees (20)
+    "Swamp Palace - Waterfall Room": Rupees (20)
+    "Swamp Palace - Boss": Boss Heart Container
+    "Swamp Palace - Prize": Crystal 2
+    "Skull Woods - Map Chest": Map (Skull Woods)
+    "Skull Woods - Big Chest": Fire Rod
+    "Skull Woods - Pinball Room": Small Key (Universal)
+    "Skull Woods - Pot Prison": Small Key (Universal)
+    "Skull Woods - Compass Chest": Compass (Skull Woods)
+    "Skull Woods - Big Key Chest": Big Key (Skull Woods)
+    "Skull Woods - Bridge Room": Small Key (Universal)
+    "Skull Woods - Boss": Boss Heart Container
+    "Skull Woods - Prize": Crystal 3
+    "Thieves' Town - Map Chest": Map (Thieves Town)
+    "Thieves' Town - Ambush Chest": Rupees (20)
+    "Thieves' Town - Compass Chest": Compass (Thieves Town)
+    "Thieves' Town - Big Key Chest": Big Key (Thieves Town)
+    "Thieves' Town - Attic": Bombs (3)
+    "Thieves' Town - Blind's Cell": Small Key (Universal)
+    "Thieves' Town - Big Chest": Titans Mitts
+    "Thieves' Town - Boss": Boss Heart Container
+    "Thieves' Town - Prize": Crystal 4
+    "Ice Palace - Compass Chest": Compass (Ice Palace)
+    "Ice Palace - Big Key Chest": Big Key (Ice Palace)
+    "Ice Palace - Spike Room": Small Key (Universal)
+    "Ice Palace - Map Chest": Map (Ice Palace)
+    "Ice Palace - Freezor Chest": Bombs (3)
+    "Ice Palace - Iced T Room": Small Key (Universal)
+    "Ice Palace - Big Chest": Blue Mail
+    "Ice Palace - Boss": Boss Heart Container
+    "Ice Palace - Prize": Crystal 5
+    "Misery Mire - Main Lobby": Small Key (Universal)
+    "Misery Mire - Big Chest": Cane of Somaria
+    "Misery Mire - Map Chest": Map (Misery Mire)
+    "Misery Mire - Spike Chest": Small Key (Universal)
+    "Misery Mire - Bridge Chest": Small Key (Universal)
+    "Misery Mire - Compass Chest": Compass (Misery Mire)
+    "Misery Mire - Big Key Chest": Big Key (Misery Mire)
+    "Misery Mire - Boss": Boss Heart Container
+    "Misery Mire - Prize": Crystal 6
+    "Turtle Rock - Compass Chest": Compass (Turtle Rock)
+    "Turtle Rock - Roller Room - Left": Map (Turtle Rock)
+    "Turtle Rock - Roller Room - Right": Small Key (Universal)
+    "Turtle Rock - Chain Chomps": Small Key (Universal)
+    "Turtle Rock - Big Key Chest": Big Key (Turtle Rock)
+    "Turtle Rock - Big Chest": Mirror Shield
+    "Turtle Rock - Crystaroller Room": Small Key (Universal)
+    "Turtle Rock - Eye Bridge - Bottom Left": Small Key (Universal)
+    "Turtle Rock - Eye Bridge - Bottom Right": Rupees (20)
+    "Turtle Rock - Eye Bridge - Top Left": Rupees (5)
+    "Turtle Rock - Eye Bridge - Top Right": Rupee (1)
+    "Turtle Rock - Boss": Boss Heart Container
+    "Turtle Rock - Prize": Crystal 7
+    "Ganons Tower - Bob's Torch": Small Key (Universal)
+    "Ganons Tower - Hope Room - Left": Arrows (10)
+    "Ganons Tower - Hope Room - Right": Bombs (3)
+    "Ganons Tower - Big Chest": Red Mail
+    "Ganons Tower - Bob's Chest": Arrows (10)
+    "Ganons Tower - Tile Room": Small Key (Universal)
+    "Ganons Tower - Compass Room - Top Left": Compass (Ganons Tower)
+    "Ganons Tower - Compass Room - Top Right": Rupee (1)
+    "Ganons Tower - Compass Room - Bottom Left": Rupees (20)
+    "Ganons Tower - Compass Room - Bottom Right": Arrows (10)
+    "Ganons Tower - Map Chest": Map (Ganons Tower)
+    "Ganons Tower - Firesnake Room": Small Key (Universal)
+    "Ganons Tower - DMs Room - Top Left": Bombs (3)
+    "Ganons Tower - DMs Room - Top Right": Arrows (10)
+    "Ganons Tower - DMs Room - Bottom Left": Rupees (20)
+    "Ganons Tower - DMs Room - Bottom Right": Rupees (20)
+    "Ganons Tower - Randomizer Room - Top Left": Arrows (10)
+    "Ganons Tower - Randomizer Room - Top Right": Arrows (10)
+    "Ganons Tower - Randomizer Room - Bottom Left": Bombs (3)
+    "Ganons Tower - Randomizer Room - Bottom Right": Bombs (3)
+    "Ganons Tower - Big Key Room - Left": Arrows (10)
+    "Ganons Tower - Big Key Room - Right": Bombs (3)
+    "Ganons Tower - Big Key Chest": Big Key (Ganons Tower)
+    "Ganons Tower - Mini Helmasaur Room - Left": Bombs (3)
+    "Ganons Tower - Mini Helmasaur Room - Right": Bombs (3)
+    "Ganons Tower - Pre-Moldorm Chest": Small Key (Universal)
+    "Ganons Tower - Validation Chest": Rupees (20)
+drops:
+  1:
+    Pack 1: ["Small Heart", "Small Heart", "Small Heart", "Small Heart", "Rupee (1)", "Small Heart", "Small Heart", "Rupee (1)"]
+    Pack 2: ["Rupees (5)", "Rupee (1)", "Rupees (5)", "Rupees (20)", "Rupees (5)", "Rupee (1)", "Rupees (5)", "Rupees (5)"]
+    Pack 3: ["Big Magic", "Small Magic", "Small Magic", "Rupees (5)", "Big Magic", "Small Magic", "Small Heart", "Small Magic"]
+    Pack 4: ["Single Bomb", "Single Bomb", "Single Bomb", "Bombs (4)", "Single Bomb", "Single Bomb", "Bombs (8)", "Single Bomb"]
+    Pack 5: ["Arrows (5)", "Small Heart", "Arrows (5)", "Arrows (10)", "Arrows (5)", "Small Heart", "Arrows (5)", "Arrows (10)"]
+    Pack 6: ["Small Magic", "Rupee (1)", "Small Heart", "Arrows (5)", "Small Magic", "Single Bomb", "Rupee (1)", "Small Heart"]
+    Pack 7: ["Small Heart", "Fairy", "Big Magic", "Rupees (20)", "Bombs (8)", "Small Heart", "Rupees (20)", "Arrows (10)"]
+    Tree Pull Tier 1: "Rupee (1)"
+    Tree Pull Tier 2: "Rupees (5)"
+    Tree Pull Tier 3: "Rupees (20)"
+    Crab Normal: "Rupee (1)"
+    Crab Special: "Rupees (20)"
+    Stun Prize: "Rupee (1)"
+    Fish: "Rupees (20)"
+medallions:
+  1:
+    "Misery Mire": Ether
+    "Turtle Rock": Quake
+

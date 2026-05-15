@@ -107,7 +107,14 @@ def parse_cli(argv, no_defaults=False):
     ret = parser.parse_args(argv)
 
     if ret.keysanity:
-        ret.mapshuffle, ret.compassshuffle, ret.keyshuffle, ret.bigkeyshuffle = ['wild'] * 4
+        if ret.mapshuffle == "none":
+            ret.mapshuffle = "wild"
+        if ret.compassshuffle == "none":
+            ret.compassshuffle = "wild"
+        if ret.keyshuffle == "none":
+            ret.keyshuffle = "wild"
+        if ret.bigkeyshuffle == "none":
+            ret.bigkeyshuffle = "wild"
 
     if ret.keydropshuffle:
         ret.dropshuffle = 'keys' if ret.dropshuffle == 'none' else ret.dropshuffle
