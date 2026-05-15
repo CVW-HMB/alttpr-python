@@ -3,10 +3,13 @@ item_pool_adjust:
     "Bottle (Random)": -4
     "Bottle": 4
 
+    "Fighter Sword": -1
+    "Blue Shield": -1
+    "Sword and Shield": 1
+
     "Bombs (10)": -1
     "Bombs (3)": 1
 
-    "Rupees (5)": -1
     "Arrows (10)": -1
     "Rupees (20)": 2
 placements:
@@ -61,12 +64,11 @@ placements:
     "Blind's Hideout - Far Left": Rupees (20)
     "Blind's Hideout - Far Right": Rupees (20)
     "Blind's Hideout - Top": Piece of Heart
-    "Chicken House": Arrows (10)  # TODO: VERIFY
+    "Chicken House": Arrows (10)  # Blue Boomerang that turns into 10 arrows
     "Sick Kid": Bug Catching Net
     "Kakariko Tavern": Bottle
-    "Link's Uncle": Fighter Sword
-    "Secret Passage": Blue Shield
-#   "Secret Passage": Lamp
+    "Link's Uncle": Sword and Shield
+    "Secret Passage": Rupees (5)  # Lamp that turns into blue rupee
     "Sahasrahla's Hut - Left": Rupees (50)
     "Sahasrahla's Hut - Middle": Bombs (3)
     "Sahasrahla's Hut - Right": Rupees (50)
@@ -74,8 +76,7 @@ placements:
     "Blacksmith": Tempered Sword
     "Magic Bat": Magic Upgrade (1/2)
     "Library": Book of Mudora
-    "Link's House": Rupees (5)
-#   "Link's House": Lamp
+    "Link's House": Rupees (5)  # Lamp that turns into blue rupee
     "Checkerboard Cave": Piece of Heart
     "Aginah's Cave": Piece of Heart
     "Cave 45": Piece of Heart
@@ -95,7 +96,7 @@ placements:
     "Superbunny Cave - Bottom": Rupees (20)
     "Chest Game": Piece of Heart
     "C-Shaped House": Rupees (300)
-    "Brewery": Rupees (300)
+    "Brewery": Rupees (300)  # Red Boomerang that turns into 300 rupees
     "Pyramid Fairy - Left": Golden Sword
     "Pyramid Fairy - Right": Silver Arrows
     "Peg Cave": Piece of Heart
