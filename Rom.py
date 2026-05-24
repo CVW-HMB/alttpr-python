@@ -994,7 +994,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     set_inverted_mode(world, player, rom, inverted_buffer)
 
     uncle_location = world.get_location('Link\'s Uncle', player)
-    if uncle_location.item is None or uncle_location.item.name not in ['Master Sword', 'Tempered Sword', 'Fighter Sword', 'Golden Sword', 'Progressive Sword']:
+    if uncle_location.item is None or uncle_location.item.name not in ['Master Sword', 'Tempered Sword', 'Fighter Sword', 'Golden Sword', 'Progressive Sword', 'Sword and Shield']:
         # disable sword sprite from uncle
         rom.write_bytes(0x6D263, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
         rom.write_bytes(0x6D26B, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
@@ -1779,14 +1779,15 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     rom.write_byte(0x180358, 0x01 if glitches_enabled else 0x00)
     rom.write_byte(0x18008B, 0x01 if glitches_enabled else 0x00)
 
-    # remove shield from uncle
-    rom.write_bytes(0x6D253, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
-    rom.write_bytes(0x6D25B, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
-    rom.write_bytes(0x6D283, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
-    rom.write_bytes(0x6D28B, [0x00, 0x00, 0xf7, 0xff, 0x00, 0x0E])
-    rom.write_bytes(0x6D2CB, [0x00, 0x00, 0xf6, 0xff, 0x02, 0x0E])
-    rom.write_bytes(0x6D2FB, [0x00, 0x00, 0xf7, 0xff, 0x02, 0x0E])
-    rom.write_bytes(0x6D313, [0x00, 0x00, 0xe4, 0xff, 0x08, 0x0E])
+    if uncle_location.item is None or uncle_location.item.name not in ['Sword and Shield']:
+        # remove shield from uncle
+        rom.write_bytes(0x6D253, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
+        rom.write_bytes(0x6D25B, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
+        rom.write_bytes(0x6D283, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
+        rom.write_bytes(0x6D28B, [0x00, 0x00, 0xf7, 0xff, 0x00, 0x0E])
+        rom.write_bytes(0x6D2CB, [0x00, 0x00, 0xf6, 0xff, 0x02, 0x0E])
+        rom.write_bytes(0x6D2FB, [0x00, 0x00, 0xf7, 0xff, 0x02, 0x0E])
+        rom.write_bytes(0x6D313, [0x00, 0x00, 0xe4, 0xff, 0x08, 0x0E])
 
     write_int16(rom, 0x180183, 0)  # Escape fill rupee bow
     # Uncle / Zelda / Mantle respawn refills (magic, bombs, arrows)
@@ -2074,6 +2075,49 @@ def hud_format_text(text):
         output += b'\x7f\x00'
     return output[:32]
 
+def read_bytes(f, count):
+    values = f.read(count)
+    if len(values) < count:
+        raise EOFError
+    return values
+
+def apply_rom_patches(rom, patches):
+    for patch in patches:
+        if not os.path.exists(f"patches/{patch}.ips"):
+            logging.getLogger('').warning("Patch %s not found -- skipping", patch)
+            continue
+
+        with open(f"patches/{patch}.ips", "rb") as f:
+            byte_changes = []
+            try:
+                header = read_bytes(f, 5)
+                if header != b"PATCH":
+                    logging.getLogger('').warning("Patch %s invalid -- skipping", patch)
+                    continue
+
+                while True:
+                    address = read_bytes(f, 3)
+                    if address == b"EOF":
+                        break
+
+                    address = int.from_bytes(address, byteorder="big")
+                    length = int.from_bytes(read_bytes(f, 2), byteorder="big")
+
+                    if length > 0:
+                        byte_changes.append((address, list(f.read(length))))
+                    else:
+                        length = int.from_bytes(read_bytes(f, 2), byteorder="big")
+                        value = read_bytes(f, 1)
+                        byte_changes.append((address, length * list(value)))
+
+                for address, values in byte_changes:
+                    rom.write_bytes(address, values)
+
+                logging.getLogger("").info("Patch %s applied successfully", patch)
+
+            except EOFError:
+                logging.getLogger('').warning("Patch %s invalid -- skipping", patch)
+                continue
 
 def apply_rom_settings(rom, beep, color, quickswap, fastmenu, disable_music, sprite, triforce_gfx,
                        ow_palettes, uw_palettes, reduce_flashing, shuffle_sfx,

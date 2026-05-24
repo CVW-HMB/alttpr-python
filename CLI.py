@@ -89,6 +89,7 @@ def parse_cli(argv, no_defaults=False):
     parser.add_argument('--count', default=defval(int(settings["count"]) if settings["count"] != "" and settings["count"] is not None else 1), help="\n".join(fish.translate("cli", "help", "count")), type=int)
     parser.add_argument('--tries', default=defval(int(settings["tries"]) if settings["tries"] != "" and settings["tries"] is not None else 1), help="\n".join(fish.translate("cli", "help", "tries")), type=int)
     parser.add_argument('--customitemarray', default={}, help=argparse.SUPPRESS)
+    parser.add_argument('--skip_money_balance', action="store_true", help=argparse.SUPPRESS)
 
     # included for backwards compatibility
     parser.add_argument('--multi', default=defval(settings["multi"]), type=lambda value: min(max(int(value), 1), 255))
@@ -106,7 +107,14 @@ def parse_cli(argv, no_defaults=False):
     ret = parser.parse_args(argv)
 
     if ret.keysanity:
-        ret.mapshuffle, ret.compassshuffle, ret.keyshuffle, ret.bigkeyshuffle = ['wild'] * 4
+        if ret.mapshuffle == "none":
+            ret.mapshuffle = "wild"
+        if ret.compassshuffle == "none":
+            ret.compassshuffle = "wild"
+        if ret.keyshuffle == "none":
+            ret.keyshuffle = "wild"
+        if ret.bigkeyshuffle == "none":
+            ret.bigkeyshuffle = "wild"
 
     if ret.keydropshuffle:
         ret.dropshuffle = 'keys' if ret.dropshuffle == 'none' else ret.dropshuffle
@@ -178,7 +186,7 @@ def parse_cli(argv, no_defaults=False):
                          'decoupledoors', 'door_type_mode', 'bonk_drops',
                          'trap_door_mode', 'key_logic_algorithm',
                          'door_self_loops', 'any_enemy_logic', 'aga_randomness',
-                         'money_balance']:
+                         'money_balance', 'patches']:
                 value = getattr(defaults, name) if getattr(playerargs, name) is None else getattr(playerargs, name)
                 if player == 1:
                     setattr(ret, name, {1: value})

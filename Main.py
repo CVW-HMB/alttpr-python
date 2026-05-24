@@ -67,6 +67,7 @@ from Rom import (
     JsonRom,
     LocalRom,
     apply_rom_settings,
+    apply_rom_patches,
     get_hash_string,
     patch_race_rom,
     patch_rom,
@@ -335,7 +336,7 @@ def main(args, seed=None, fish=None):
     for player in range(1, world.players+1):
         if world.shopsanity[player]:
             customize_shops(world, player)
-    if args.algorithm in ['balanced', 'equitable']:
+    if not args.skip_money_balance and args.algorithm in ['balanced', 'equitable']:
         balance_money_progression(world)
     ensure_good_items(world, True)
 
@@ -364,6 +365,8 @@ def main(args, seed=None, fish=None):
                 rom_names.append((player, team, list(rom.name)))
                 world.spoiler.hashes[(player, team)] = get_hash_string(rom.hash)
 
+                if args.patches[player]:
+                    apply_rom_patches(rom, map(lambda arg: arg.strip(), args.patches[player].split(",")))
                 apply_rom_settings(rom, args.heartbeep[player], args.heartcolor[player], args.quickswap[player],
                                    args.fastmenu[player], args.disablemusic[player], args.sprite[player], args.triforce_gfx[player],
                                    args.ow_palettes[player], args.uw_palettes[player], args.reduce_flashing[player],
@@ -572,7 +575,7 @@ def init_world(args, fish):
     world.collection_rate = args.collection_rate.copy()
     world.colorizepots = args.colorizepots.copy()
     world.aga_randomness = args.aga_randomness.copy()
-    world.money_balance = args.money_balance.copy()
+    world.money_balance = {player: int(args.money_balance[player]) for player in range(1, world.players + 1)}
 
     # custom settings - these haven't been promoted to full settings yet
     in_progress_settings = ['force_enemy']

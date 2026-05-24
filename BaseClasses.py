@@ -1519,7 +1519,10 @@ class CollectionState(object):
         if not item:
             return
         changed = False
-        if item.name.startswith('Progressive '):
+        if item.name == "Sword and Shield":
+            self.prog_items["Fighter Sword", item.player] += 1
+            self.prog_items["Blue Shield", item.player] += 1
+        elif item.name.startswith('Progressive '):
             if 'Sword' in item.name:
                 if self.has('Golden Sword', item.player):
                     pass
@@ -2894,6 +2897,10 @@ class Item(object):
     @property
     def compass(self):
         return self.type == 'Compass'
+
+    @property
+    def event(self):
+        return self.type == 'Event'
 
     @property
     def dungeon(self):
