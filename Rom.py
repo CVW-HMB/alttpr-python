@@ -1931,7 +1931,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
 
     write_enemizer_tweaks(rom, world, player)
     randomize_damage_table(rom, world, player)
-    write_strings(rom, world, player, team)
+    write_strings(rom, world, player, team, is_mystery)
 
     # write initial sram
     rom.write_initial_sram()
@@ -2390,7 +2390,7 @@ def write_string_to_rom(rom, target, string):
     rom.write_bytes(address, MultiByteTextMapper.convert(string, maxbytes))
 
 
-def write_strings(rom, world, player, team):
+def write_strings(rom, world, player, team, is_mystery=False):
     tt = TextTable()
     tt.removeUnwantedText()
     if world.shuffle[player] != 'vanilla':
@@ -2905,7 +2905,22 @@ def write_strings(rom, world, player, team):
         sanc_text = "Dark Chapel"
     tt['menu_start_2'] = "{MENU}\n{SPEED0}\n≥@'s " + lh_text + "\n " + sanc_text + "\n{CHOICE3}"
     tt['menu_start_3'] = "{MENU}\n{SPEED0}\n≥@'s " + lh_text + "\n " + sanc_text + "\n Mountain Cave\n{CHOICE2}"
-    if world.mode[player] == 'inverted':
+
+    if is_mystery:
+        tt['intro_main'] = CompressedTextMapper.convert(
+            "{INTRO}\n    Episode III"
+            + "{PAUSE3}\n A Link to the Past"
+            + "{PAUSE3}\n Mystery Randomizer"
+            + "{PAUSE3}\n\n\n"
+            + "{PAUSE3}\nAfter mostly disregarding what happened in the first two games,"
+            + "{PAUSE3}\nLink awakens to a massive mystery."
+            + "{PAUSE3}\nHe doesn't know why he's here, or what he must do."
+            + "{PAUSE3} {CHANGEPIC}\nGanon has moved around all the items in Hyrule."
+            + "{PAUSE7}\nYou will have to find all the items necessary to achieve your goal."
+            + "{PAUSE7}\nThis is your chance to be a hero."
+            + "{PAUSE3} {CHANGEPIC}\nYou must determine and achieve your goal."
+            + "{PAUSE9} {CHANGEPIC}", False)
+    elif world.mode[player] == 'inverted':
         tt['intro_main'] = CompressedTextMapper.convert(
             "{INTRO}\n    Episode III"
             + "{PAUSE3}\n A Link to the Past"
@@ -2919,6 +2934,7 @@ def write_strings(rom, world, player, team):
             + "{PAUSE7}\nThis is your chance to be a hero."
             + "{PAUSE3} {CHANGEPIC}\nYou must get the 7 crystals to beat Ganon."
             + "{PAUSE9} {CHANGEPIC}", False)
+
     rom.write_bytes(0xE0000, tt.getBytes())
 
     credits = Credits()
