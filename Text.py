@@ -1766,7 +1766,7 @@ class TextTable(object):
         text['sign_catfish'] = CompressedTextMapper.convert("Toss rocks\nToss items\nToss cookies")
         text['sign_north_village_of_outcasts'] = CompressedTextMapper.convert("↑ Skull Woods\n\n↓ Steve's Town")
         text['sign_south_of_bumper_cave'] = CompressedTextMapper.convert("\n→ Karkats cave")
-        text['sign_east_of_pyramid'] = CompressedTextMapper.convert("\n→ Dark Palace")
+        text['sign_east_of_pyramid'] = CompressedTextMapper.convert("\n→ Palace of Darkness")
         text['sign_east_of_bomb_shop'] = CompressedTextMapper.convert("\n← Bomb Shoppe")
         text['sign_east_of_mire'] = CompressedTextMapper.convert("\n← Misery Mire\n no way in.\n no way out.")
         text['sign_village_of_outcasts'] = CompressedTextMapper.convert("Have a Trulie Awesome Day!")
