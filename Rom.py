@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '9086f874ec9ae0d2f581e9bf0b43b60d'
+RANDOMIZERBASEHASH = '44a806e1c56abb7e68266e345577badc'
 
 
 class JsonRom(object):
@@ -1497,7 +1497,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     loot_source = 0x09
     if world.prizeshuffle[player] != 'none':
         loot_source |= 0x10
-    if world.pottery[player] not in ['none', 'cave']:
+    if world.pottery[player] != 'none':
         loot_source |= 0x02
     if world.dropshuffle[player] != 'none':
         loot_source |= 0x04
