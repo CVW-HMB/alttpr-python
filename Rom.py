@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '100c3e1da68680a0f3d8e1fc94568de6'
+RANDOMIZERBASEHASH = '52dd9045023e436a59bf75652f757c1d'
 
 
 class JsonRom(object):
@@ -1504,21 +1504,21 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     rom.write_byte(0x1CFF10, loot_source)
 
     if world.loothud[player] == 'never':
-        rom.write_byte(0x1CFF12, 0x00)
+        rom.write_byte(0x1CFF13, 0x00)
     elif world.loothud[player] == 'presence':
-        rom.write_byte(0x1CFF12, 0x01)
+        rom.write_byte(0x1CFF13, 0x01)
         rom.write_bytes(0x1CFF0E, [0x01, 0x01])
     elif world.loothud[player] == 'value':
-        rom.write_byte(0x1CFF12, 0x01)
+        rom.write_byte(0x1CFF13, 0x01)
         rom.write_bytes(0x1CFF0E, [0xFF, 0xFF])
     elif world.loothud[player] == 'dungeon_value':
-        rom.write_byte(0x1CFF12, 0x01)
+        rom.write_byte(0x1CFF13, 0x01)
         rom.write_bytes(0x1CFF0E, [0xFF, 0x01])
 
     if world.showloot[player] == 'never':
-        rom.write_bytes(0x1CFF08, [0x00, 0x00, 0x00, 0x00])
+        rom.write_bytes(0x1CFF08, [0x02, 0x00, 0x00, 0x00])
         rom.write_byte(0x1CFF11, 0x00)
-        rom.write_byte(0x1CFF12, 0x00)  # turn off hud icon too just to be safe
+        rom.write_byte(0x1CFF12, 0x00)
     elif world.showloot[player] == 'presence':
         rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x00, 0x00])
         rom.write_byte(0x1CFF11, 0x00)
