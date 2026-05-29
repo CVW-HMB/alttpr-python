@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'e6d4fd01beef37b55e26d7c4479624d3'
+RANDOMIZERBASEHASH = '5c4c3cbe6d3fee849e66d4ac4a059792'
 
 
 class JsonRom(object):
@@ -2485,6 +2485,15 @@ def write_strings(rom, world, player, team, is_mystery=False):
 
     # For hints, first we write hints about entrances, some from the inconvenient list others from all reasonable entrances.
     if world.hints[player]:
+        zoraitem = world.get_location('King Zora', player).item.hint_text
+        if len(zoraitem) <= 15:
+            tt['zora_meeting'] = f"Whaddaya want?\n  ≥ {zoraitem.title()}\n    Nothin'{{CHOICE}}"
+        else:
+            tt['zora_meeting'] = f"Do you want {zoraitem}?\n  ≥ I'll pay\n    No thanks{{CHOICE}}"
+
+        bottleitem = world.get_location('Bottle Merchant', player).item.hint_text
+        tt['bottle_vendor_choice'] = f"Do you want {bottleitem}?\n  ≥ I'll take it\n    No thanks!\n{{CHOICE}}"
+
         tt['sign_north_of_links_house'] = '> Randomizer The telepathic tiles can have hints!'
         hint_locations = HintLocations.copy()
         random.shuffle(hint_locations)
