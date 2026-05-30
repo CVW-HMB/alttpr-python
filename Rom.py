@@ -1007,6 +1007,10 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         rom.write_bytes(0x6D31B, [0x00, 0x00, 0xe4, 0xff, 0x08, 0x0E])
         rom.write_bytes(0x6D323, [0x00, 0x00, 0xe4, 0xff, 0x08, 0x0E])
 
+    bridge_item = world.get_location("Hobo", player).item
+    if bridge_item is None or not bridge_item.name.startswith("Bottle"):
+        rom.write_bytes(0x1E9C0, [0xFB, 0xFF, 0x03, 0x00, 0xAB, 0x00, 0x00, 0x00])
+
     # set light cones
     if world.dark_rooms[player] == 'no_dark_rooms':
         light_cone = 0x20
@@ -1779,7 +1783,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     rom.write_byte(0x180358, 0x01 if glitches_enabled else 0x00)
     rom.write_byte(0x18008B, 0x01 if glitches_enabled else 0x00)
 
-    if uncle_location.item is None or uncle_location.item.name not in ['Sword and Shield']:
+    if uncle_location.item is None or uncle_location.item.name not in ['Blue Shield', 'Red Shield', 'Mirror Shield', 'Progressive Shield', 'Sword and Shield']:
         # remove shield from uncle
         rom.write_bytes(0x6D253, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
         rom.write_bytes(0x6D25B, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
@@ -2971,7 +2975,7 @@ def write_strings(rom, world, player, team, is_mystery=False):
             + "{PAUSE3} {CHANGEPIC}\nGanon has moved around all the items in Hyrule."
             + "{PAUSE7}\nYou will have to find all the items necessary to achieve your goal."
             + "{PAUSE7}\nThis is your chance to be a hero."
-            + "{PAUSE3} {CHANGEPIC}\nYou must determine and achieve your goal."
+            + "{PAUSE3} {CHANGEPIC}\nGood luck out there, and try not to die."
             + "{PAUSE9} {CHANGEPIC}", False)
     elif world.mode[player] == 'inverted':
         tt['intro_main'] = CompressedTextMapper.convert(
