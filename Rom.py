@@ -1545,7 +1545,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         rom.write_byte(loot_icons + 0x52, 0x0B) # bomb bag is major
 
     triforce_piece_ids = [0x6B, 0x6C]
-    if world.treasure_hunt_count[player] > 20:
+    if world.treasure_hunt_count[player] > 100:
         for triforce_piece_id in triforce_piece_ids:
             rom.write_byte(loot_icons + triforce_piece_id, 0x04)
 
