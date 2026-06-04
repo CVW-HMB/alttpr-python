@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '5c4c3cbe6d3fee849e66d4ac4a059792'
+RANDOMIZERBASEHASH = 'cd81a8bfc1d67c6a13fe806c7f35a15f'
 
 
 class JsonRom(object):
@@ -1505,33 +1505,36 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         loot_source |= 0x02
     if world.dropshuffle[player] != 'none':
         loot_source |= 0x04
-    rom.write_byte(0x1CFF10, loot_source)
+    rom.write_byte(0x1CFF20, loot_source)
 
     if world.loothud[player] == 'never':
-        rom.write_byte(0x1CFF13, 0x00)
+        rom.write_bytes(0x1CFF10, [0x00, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF17, 0x00)
     elif world.loothud[player] == 'presence':
-        rom.write_byte(0x1CFF13, 0x01)
-        rom.write_bytes(0x1CFF0E, [0x01, 0x01])
+        rom.write_bytes(0x1CFF10, [0x01, 0x01, 0x00, 0x00])
+        rom.write_byte(0x1CFF17, 0x01)
     elif world.loothud[player] == 'value':
-        rom.write_byte(0x1CFF13, 0x01)
-        rom.write_bytes(0x1CFF0E, [0xFF, 0xFF])
+        rom.write_bytes(0x1CFF10, [0x03, 0x03, 0x00, 0x00])
+        rom.write_byte(0x1CFF17, 0x01)
     elif world.loothud[player] == 'dungeon_value':
-        rom.write_byte(0x1CFF13, 0x01)
-        rom.write_bytes(0x1CFF0E, [0xFF, 0x01])
+        rom.write_bytes(0x1CFF10, [0x01, 0x03, 0x00, 0x00])
+        rom.write_byte(0x1CFF17, 0x01)
+    elif world.loothud[player] == 'cave_value':
+        rom.write_bytes(0x1CFF10, [0x03, 0x01, 0x00, 0x00])
+        rom.write_byte(0x1CFF17, 0x01)
 
     if world.showloot[player] == 'never':
-        rom.write_bytes(0x1CFF08, [0x02, 0x00, 0x00, 0x00])
-        rom.write_byte(0x1CFF11, 0x00)
-        rom.write_byte(0x1CFF12, 0x00)
+        rom.write_bytes(0x1CFF08, [0x00, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF0F, 0x00)
     elif world.showloot[player] == 'presence':
         rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x00, 0x00])
-        rom.write_byte(0x1CFF11, 0x00)
+        rom.write_byte(0x1CFF0F, 0x01)
     elif world.showloot[player] == 'compass':
-        rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x02, 0x00])
-        rom.write_byte(0x1CFF11, 0x01)
+        rom.write_bytes(0x1CFF08, [0x02, 0x00, 0x03, 0x00])
+        rom.write_byte(0x1CFF0F, 0x01)
     elif world.showloot[player] == 'always':
-        rom.write_bytes(0x1CFF08, [0x02, 0x00, 0x00, 0x00])
-        rom.write_byte(0x1CFF11, 0x00)
+        rom.write_bytes(0x1CFF08, [0x03, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF0F, 0x01)
 
     if world.showmap[player] == 'visited':
         rom.write_bytes(0x1CFF00, [0x01, 0x00, 0x00, 0x05])

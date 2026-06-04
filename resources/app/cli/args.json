@@ -491,7 +491,8 @@
       "never",
       "presence",
       "value",
-      "dungeon_value"
+      "dungeon_value",
+      "cave_value"
     ]
   },
   "showmap": {
