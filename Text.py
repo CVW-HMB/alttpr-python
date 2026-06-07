@@ -376,31 +376,30 @@ Sahasrahla_names = [
 
 Kakariko_texts = ["{}'s homecoming"]
 Blacksmiths_texts = [
-    'frogs for bread',
-    'That\'s not a sword',
-    'The Rupeesmiths'
-] * 1 + [
-    "the dwarven breadsmiths"
+    "Frogs for bread",
+    "That's not a sword",
+    "The rupeesmiths",
+    "The dwarven breadsmiths",
 ]
 DeathMountain_texts = [
-    "the lost old man",
-    "gary the old man",
-    "Your ad here"
+    "The lost old man",
+    "Gary the old man",
+    "Your ad here",
 ]
 LostWoods_texts = [
-    'thieves\' stump',
-] * 2 + [
-    "the forest thief",
-    "dancing pickles",
-    "flying crows",
+    "Thieves' stump",
+    "Thieves' stump",
+    "The forest thief",
+    "Dancing pickles",
+    "Flying crows",
 ]
 WishingWell_texts = [
-    "venus. queen of faeries",
+    "Venus, Queen of Faeries",
     "Venus was her name",
     "I'm your Venus",
-    "Yeah, baby, shes got it",
+    "Yeah, baby, she's got it",
     "Venus, I'm your fire",
-    "Venus, At your desire",
+    "Venus, at your desire",
     "Venus Love Chain",
     "Venus Crescent Beam",
 ]
@@ -1870,7 +1869,7 @@ class TextTable(object):
         # 100
         text['dark_sanctuary_no'] = CompressedTextMapper.convert("Then go away!")
         text['dark_sanctuary_hint_1'] = CompressedTextMapper.convert("There is a thief in the desert, he can open creepy chests that follow you. But now that we have that out of the way, Do you like my hair? I've spent eons getting it this way.")
-        text['dark_sanctuary_yes'] = CompressedTextMapper.convert("With Crystals 5&6, you can find a great fairy in the pyramid.\n\nFlomp Flomp, Whizzle Whomp")
+        text['dark_sanctuary_yes'] = CompressedTextMapper.convert("With crystals 5 and 6, you can find a great fairy in the pyramid.\n\nFlomp Flomp, Whizzle Whomp")
         text['dark_sanctuary_hint_2'] = CompressedTextMapper.convert(
             "All I can say is that my life is pretty plain,\n"
             + "I like watchin' the puddles gather rain,\n"
