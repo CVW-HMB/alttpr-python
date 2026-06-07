@@ -872,7 +872,7 @@ def set_up_shops(world, player):
                 rss.locked = True
                 cap_shop = world.get_region('Capacity Upgrade', player).shop
                 cap_shop.inventory[1] = None  # remove arrow capacity upgrades in retro
-            for shop in random.sample([s for s in world.shops[player] if not s.locked and s.region.player == player], 5):
+            for shop in random.sample([s for s in world.shops[player] if not s.locked and s.region.name != "Red Shield Shop" and s.region.player == player], 5):
                 shop.custom = True
                 shop.locked = True
                 if retro_bow:

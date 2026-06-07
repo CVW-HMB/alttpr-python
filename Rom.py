@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '2d99cd9f4d6919d35dd2f4c1bfee248f'
+RANDOMIZERBASEHASH = 'abaa7ce289fd18e0ab898f2ca1263db1'
 
 
 class JsonRom(object):
@@ -948,7 +948,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             rom.write_byte(cr_pc+0x1e, 0xEE)  # slash
             rom.write_byte(cr_pc+0x1f, thousands_bot)
             # modify stat config
-            stat_address = 0x23983E
+            stat_address = 0xA39895
             stat_pc = snes_to_pc(stat_address)
             rom.write_byte(stat_pc, 0xa9)  # change to pos 21 (from b1)
             rom.write_byte(stat_pc+2, 0xc0)  # change to 12 bits (from a0)
