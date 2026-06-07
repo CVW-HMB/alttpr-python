@@ -509,7 +509,7 @@ boots_clips = [
 
 mirror_clips_local = [
     ('Desert East Mirror Clip', 'Mire Area', 'Desert Mouth'),
-    ('EDDM Mirror Clip', 'East Dark Death Mountain (Bottom Left)', 'East Dark Death Mountain (Bottom)'),
+    ('EDDM Bridge Mirror Clip', 'East Dark Death Mountain (Bottom Left)', 'East Dark Death Mountain (Bottom)'),
     ('EDDM Mirror Clip', 'East Dark Death Mountain (Top)', 'Dark Death Mountain Ledge')
 ]
 

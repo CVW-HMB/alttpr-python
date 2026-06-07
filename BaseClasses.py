@@ -164,6 +164,7 @@ class World(object):
             set_player_attr('bigkeyshuffle', 'none')
             set_player_attr('prizeshuffle', 'none')
             set_player_attr('showloot', 'never')
+            set_player_attr('loothud', 'never')
             set_player_attr('showmap', 'map')
             set_player_attr('restrict_boss_items', 'none')
             set_player_attr('bombbag', False)
@@ -202,6 +203,7 @@ class World(object):
             set_player_attr('damage_challenge', 'normal')
             set_player_attr('shuffle_damage_table', 'vanilla')
             set_player_attr('crystal_book', False)
+            set_player_attr('extra_keys', 0)
             set_player_attr('collection_rate', False)
             set_player_attr('colorizepots', True)
             set_player_attr('pot_pool', {})
@@ -1517,7 +1519,10 @@ class CollectionState(object):
         if not item:
             return
         changed = False
-        if item.name.startswith('Progressive '):
+        if item.name == "Sword and Shield":
+            self.prog_items["Fighter Sword", item.player] += 1
+            self.prog_items["Blue Shield", item.player] += 1
+        elif item.name.startswith('Progressive '):
             if 'Sword' in item.name:
                 if self.has('Golden Sword', item.player):
                     pass
@@ -1978,6 +1983,7 @@ class Dungeon(object):
         self.prize = None
         self.big_key = big_key
         self.small_keys = small_keys
+        self.extra_small_keys = 0
         self.dungeon_items = dungeon_items
         self.bosses = dict()
         self.player = player
@@ -2893,6 +2899,10 @@ class Item(object):
         return self.type == 'Compass'
 
     @property
+    def event(self):
+        return self.type == 'Event'
+
+    @property
     def dungeon(self):
         if not self.smallkey and not self.bigkey and not self.map and not self.compass:
             return None
@@ -3154,6 +3164,7 @@ class Spoiler(object):
                          'bigkeyshuffle': self.world.bigkeyshuffle,
                          'prizeshuffle': self.world.prizeshuffle,
                          'showloot': self.world.showloot,
+                         'loothud': self.world.loothud,
                          'showmap': self.world.showmap,
                          'boss_shuffle': self.world.boss_shuffle,
                          'enemy_shuffle': self.world.enemy_shuffle,
@@ -3174,6 +3185,7 @@ class Spoiler(object):
                          'damage_challenge': self.world.damage_challenge,
                          'shuffle_damage_table': self.world.shuffle_damage_table,
                          'crystal_book': self.world.crystal_book,
+                         'extra_keys': self.world.extra_keys,
                          'triforcegoal': self.world.treasure_hunt_count,
                          'triforcepool': self.world.treasure_hunt_total,
                          'race': self.world.settings.world_rep['meta']['race'],
@@ -3181,6 +3193,8 @@ class Spoiler(object):
                          'code': {p: Settings.make_code(self.world, p) for p in range(1, self.world.players + 1)},
                          'seed': self.world.seed
                          }
+        if self.hashes:
+            self.metadata['hash'] = {p: self.hashes[p, 0] for p in range(1, self.world.players + 1)}  # TODO: make this work for multiple teams
 
         for p in range(1, self.world.players + 1):
             from ItemList import set_default_triforce
@@ -3427,6 +3441,7 @@ class Spoiler(object):
                     outfile.write('Big Key Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['bigkeyshuffle'][player])
                     outfile.write('Prize Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['prizeshuffle'][player])
                     outfile.write('Show Value of Checks:'.ljust(line_width) + '%s\n' % self.metadata['showloot'][player])
+                    outfile.write('Show Value of Checks on HUD:'.ljust(line_width) + '%s\n' % self.metadata['loothud'][player])
                     outfile.write('Show Map:'.ljust(line_width) + '%s\n' % self.metadata['showmap'][player])
                     outfile.write('Key Logic Algorithm:'.ljust(line_width) + '%s\n' % self.metadata['key_logic'][player])
                     outfile.write('\n')
@@ -3453,6 +3468,7 @@ class Spoiler(object):
                     outfile.write('Damage Challenge:'.ljust(line_width) + '%s\n' % self.metadata['damage_challenge'][player])
                     outfile.write('Damage Table Randomization:'.ljust(line_width) + '%s\n' % self.metadata['shuffle_damage_table'][player])
                     outfile.write('Crystal Book:'.ljust(line_width) + '%s\n' % yn(self.metadata['crystal_book'][player]))
+                    outfile.write('Extra Keys:'.ljust(line_width) + '%d%%\n' % self.metadata['extra_keys'][player])
                     outfile.write('Hints:'.ljust(line_width) + '%s\n' % yn(self.metadata['hints'][player]))
                     outfile.write('Race:'.ljust(line_width) + '%s\n' % yn(self.world.settings.world_rep['meta']['race']))
             

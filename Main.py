@@ -67,6 +67,7 @@ from Rom import (
     JsonRom,
     LocalRom,
     apply_rom_settings,
+    apply_rom_patches,
     get_hash_string,
     patch_race_rom,
     patch_rom,
@@ -335,7 +336,7 @@ def main(args, seed=None, fish=None):
     for player in range(1, world.players+1):
         if world.shopsanity[player]:
             customize_shops(world, player)
-    if args.algorithm in ['balanced', 'equitable']:
+    if not args.skip_money_balance and args.algorithm in ['balanced', 'equitable']:
         balance_money_progression(world)
     ensure_good_items(world, True)
 
@@ -364,6 +365,8 @@ def main(args, seed=None, fish=None):
                 rom_names.append((player, team, list(rom.name)))
                 world.spoiler.hashes[(player, team)] = get_hash_string(rom.hash)
 
+                if args.patches[player]:
+                    apply_rom_patches(rom, map(lambda arg: arg.strip(), args.patches[player].split(",")))
                 apply_rom_settings(rom, args.heartbeep[player], args.heartcolor[player], args.quickswap[player],
                                    args.fastmenu[player], args.disablemusic[player], args.sprite[player], args.triforce_gfx[player],
                                    args.ow_palettes[player], args.uw_palettes[player], args.reduce_flashing[player],
@@ -516,6 +519,7 @@ def init_world(args, fish):
     world.bigkeyshuffle = args.bigkeyshuffle.copy()
     world.prizeshuffle = args.prizeshuffle.copy()
     world.showloot = args.showloot.copy()
+    world.loothud = args.loothud.copy()
     world.showmap = args.showmap.copy()
     world.bombbag = args.bombbag.copy()
     world.flute_mode = args.flute_mode.copy()
@@ -564,13 +568,14 @@ def init_world(args, fish):
     world.damage_challenge = args.damage_challenge.copy()
     world.shuffle_damage_table = args.shuffle_damage_table.copy()
     world.crystal_book = args.crystal_book.copy()
+    world.extra_keys = {player: int(args.extra_keys[player]) for player in range(1, world.players + 1)}
     world.overworld_map = args.overworld_map.copy()
     world.take_any = args.take_any.copy()
     world.restrict_boss_items = args.restrict_boss_items.copy()
     world.collection_rate = args.collection_rate.copy()
     world.colorizepots = args.colorizepots.copy()
     world.aga_randomness = args.aga_randomness.copy()
-    world.money_balance = args.money_balance.copy()
+    world.money_balance = {player: int(args.money_balance[player]) for player in range(1, world.players + 1)}
 
     # custom settings - these haven't been promoted to full settings yet
     in_progress_settings = ['force_enemy']
@@ -836,6 +841,7 @@ def copy_world(world):
     ret.bigkeyshuffle = world.bigkeyshuffle.copy()
     ret.prizeshuffle = world.prizeshuffle.copy()
     ret.showloot = world.showloot.copy()
+    ret.loothud = world.loothud.copy()
     ret.showmap = world.showmap.copy()
     ret.bombbag = world.bombbag.copy()
     ret.flute_mode = world.flute_mode.copy()
@@ -868,6 +874,7 @@ def copy_world(world):
     ret.damage_challenge = world.damage_challenge.copy()
     ret.shuffle_damage_table = world.shuffle_damage_table.copy()
     ret.crystal_book = world.crystal_book.copy()
+    ret.extra_keys = world.extra_keys.copy()
     ret.overworld_map = world.overworld_map.copy()
     ret.take_any = world.take_any.copy()
     ret.boss_shuffle = world.boss_shuffle.copy()
@@ -1068,6 +1075,7 @@ def copy_world_premature(world, player, create_flute_exits=True):
     ret.bigkeyshuffle = world.bigkeyshuffle.copy()
     ret.prizeshuffle = world.prizeshuffle.copy()
     ret.showloot = world.showloot.copy()
+    ret.loothud = world.loothud.copy()
     ret.showmap = world.showmap.copy()
     ret.bombbag = world.bombbag.copy()
     ret.flute_mode = world.flute_mode.copy()
@@ -1100,6 +1108,7 @@ def copy_world_premature(world, player, create_flute_exits=True):
     ret.damage_challenge = world.damage_challenge.copy()
     ret.shuffle_damage_table = world.shuffle_damage_table.copy()
     ret.crystal_book = world.crystal_book.copy()
+    ret.extra_keys = world.extra_keys.copy()
     ret.overworld_map = world.overworld_map.copy()
     ret.take_any = world.take_any.copy()
     ret.boss_shuffle = world.boss_shuffle.copy()

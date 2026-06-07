@@ -89,6 +89,7 @@ def parse_cli(argv, no_defaults=False):
     parser.add_argument('--count', default=defval(int(settings["count"]) if settings["count"] != "" and settings["count"] is not None else 1), help="\n".join(fish.translate("cli", "help", "count")), type=int)
     parser.add_argument('--tries', default=defval(int(settings["tries"]) if settings["tries"] != "" and settings["tries"] is not None else 1), help="\n".join(fish.translate("cli", "help", "tries")), type=int)
     parser.add_argument('--customitemarray', default={}, help=argparse.SUPPRESS)
+    parser.add_argument('--skip_money_balance', action="store_true", help=argparse.SUPPRESS)
 
     # included for backwards compatibility
     parser.add_argument('--multi', default=defval(settings["multi"]), type=lambda value: min(max(int(value), 1), 255))
@@ -106,7 +107,14 @@ def parse_cli(argv, no_defaults=False):
     ret = parser.parse_args(argv)
 
     if ret.keysanity:
-        ret.mapshuffle, ret.compassshuffle, ret.keyshuffle, ret.bigkeyshuffle = ['wild'] * 4
+        if ret.mapshuffle == "none":
+            ret.mapshuffle = "wild"
+        if ret.compassshuffle == "none":
+            ret.compassshuffle = "wild"
+        if ret.keyshuffle == "none":
+            ret.keyshuffle = "wild"
+        if ret.bigkeyshuffle == "none":
+            ret.bigkeyshuffle = "wild"
 
     if ret.keydropshuffle:
         ret.dropshuffle = 'keys' if ret.dropshuffle == 'none' else ret.dropshuffle
@@ -153,31 +161,32 @@ def parse_cli(argv, no_defaults=False):
                          'crystals_ganon', 'crystals_gt', 'bosses_ganon',
                          'bosshunt_include_agas', 'ganon_item', 'openpyramid',
                          'mapshuffle', 'compassshuffle', 'keyshuffle',
-                         'bigkeyshuffle', 'prizeshuffle', 'showloot', 'showmap',
-                         'startinventory', 'usestartinventory', 'bombbag',
-                         'shuffleganon', 'overworld_map', 'restrict_boss_items',
-                         'triforce_max_difference', 'triforce_pool_min',
-                         'triforce_pool_max', 'triforce_goal_min',
-                         'triforce_goal_max', 'triforce_min_difference',
-                         'triforce_goal', 'triforce_pool', 'shufflelinks',
-                         'shuffletavern', 'skullwoods', 'linked_drops',
-                         'pseudoboots', 'mirrorscroll', 'dark_rooms',
-                         'damage_challenge', 'shuffle_damage_table',
-                         'crystal_book', 'retro', 'accessibility', 'hints',
-                         'beemizer', 'experimental', 'dungeon_counters',
-                         'shufflebosses', 'shuffleenemies', 'enemy_health',
-                         'enemy_damage', 'shufflepots', 'ow_palettes',
-                         'uw_palettes', 'sprite', 'triforce_gfx', 'disablemusic',
-                         'quickswap', 'fastmenu', 'heartcolor', 'heartbeep',
-                         'remote_items', 'shopsanity', 'dropshuffle', 'pottery',
-                         'keydropshuffle', 'mixed_travel',
-                         'standardize_palettes', 'code', 'reduce_flashing',
-                         'shuffle_sfx', 'shuffle_sfxinstruments',
-                         'shuffle_songinstruments', 'msu_resume',
-                         'collection_rate', 'colorizepots', 'decoupledoors',
-                         'door_type_mode', 'bonk_drops', 'trap_door_mode',
-                         'key_logic_algorithm', 'door_self_loops',
-                         'any_enemy_logic', 'aga_randomness', 'money_balance']:
+                         'bigkeyshuffle', 'prizeshuffle', 'showloot', 'loothud',
+                         'showmap', 'startinventory', 'usestartinventory',
+                         'bombbag', 'shuffleganon', 'overworld_map',
+                         'restrict_boss_items', 'triforce_max_difference',
+                         'triforce_pool_min', 'triforce_pool_max',
+                         'triforce_goal_min', 'triforce_goal_max',
+                         'triforce_min_difference', 'triforce_goal',
+                         'triforce_pool', 'shufflelinks', 'shuffletavern',
+                         'skullwoods', 'linked_drops', 'pseudoboots',
+                         'mirrorscroll', 'dark_rooms', 'damage_challenge',
+                         'shuffle_damage_table', 'crystal_book', 'extra_keys',
+                         'retro', 'accessibility', 'hints', 'beemizer',
+                         'experimental', 'dungeon_counters', 'shufflebosses',
+                         'shuffleenemies', 'enemy_health', 'enemy_damage',
+                         'shufflepots', 'ow_palettes', 'uw_palettes', 'sprite',
+                         'triforce_gfx', 'disablemusic', 'quickswap', 'fastmenu',
+                         'heartcolor', 'heartbeep', 'remote_items', 'shopsanity',
+                         'dropshuffle', 'pottery', 'keydropshuffle',
+                         'mixed_travel', 'standardize_palettes', 'code',
+                         'reduce_flashing', 'shuffle_sfx',
+                         'shuffle_sfxinstruments', 'shuffle_songinstruments',
+                         'msu_resume', 'collection_rate', 'colorizepots',
+                         'decoupledoors', 'door_type_mode', 'bonk_drops',
+                         'trap_door_mode', 'key_logic_algorithm',
+                         'door_self_loops', 'any_enemy_logic', 'aga_randomness',
+                         'money_balance', 'patches']:
                 value = getattr(defaults, name) if getattr(playerargs, name) is None else getattr(playerargs, name)
                 if player == 1:
                     setattr(ret, name, {1: value})
@@ -254,6 +263,7 @@ def parse_settings():
         "damage_challenge": "normal",
         "shuffle_damage_table": "vanilla",
         "crystal_book": False,
+        "extra_keys": 0,
 
         "shuffleenemies": "none",
         "shufflebosses": "none",
@@ -273,6 +283,7 @@ def parse_settings():
         "bigkeyshuffle": "none",
         "prizeshuffle": "none",
         "showloot": "never",
+        "loothud": "never",
         "showmap": "map",
         "keysanity": False,
         "door_shuffle": "vanilla",

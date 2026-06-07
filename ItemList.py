@@ -372,6 +372,13 @@ def generate_itempool(world, player):
         world.push_precollected(ItemFactory(item, player))
 
     if world.mode[player] == 'standard' and not world.state.has_blunt_weapon(player):
+        if world.customizer:
+            placements = world.customizer.get_placements()
+            if placements:
+                custom_uncle = placements.get(player, {}).get("Link's Uncle")
+                if custom_uncle:
+                    placed_items["Link's Uncle"] = custom_uncle
+
         if "Link's Uncle" not in placed_items:
             found_sword = False
             found_bow = False
@@ -865,7 +872,7 @@ def set_up_shops(world, player):
                 rss.locked = True
                 cap_shop = world.get_region('Capacity Upgrade', player).shop
                 cap_shop.inventory[1] = None  # remove arrow capacity upgrades in retro
-            for shop in random.sample([s for s in world.shops[player] if not s.locked and s.region.player == player], 5):
+            for shop in random.sample([s for s in world.shops[player] if not s.locked and s.region.name != "Red Shield Shop" and s.region.player == player], 5):
                 shop.custom = True
                 shop.locked = True
                 if retro_bow:
@@ -1669,12 +1676,15 @@ def fill_specific_items(world):
                     item_to_place, event_flag = get_item_and_event_flag(item, world, player,
                                                                         dungeon_pool, prize_set, prize_pool)
                     if item_to_place:
-                        world.push_item(loc, item_to_place, False)
-                        loc.locked = True
-                        track_outside_keys(item_to_place, loc, world)
-                        track_dungeon_items(item_to_place, loc, world)
-                        loc.event = (event_flag or item_to_place.advancement
-                                     or item_to_place.bigkey or item_to_place.smallkey)
+                        if not loc.item:
+                            world.push_item(loc, item_to_place, False)
+                            loc.locked = True
+                            track_outside_keys(item_to_place, loc, world)
+                            track_dungeon_items(item_to_place, loc, world)
+                            loc.event = (event_flag or item_to_place.advancement
+                                         or item_to_place.bigkey or item_to_place.smallkey)
+                        elif loc.item != item_to_place:
+                            logging.getLogger('').warning("Failed to place item %s at location %s because it already contained %s", item_to_place, loc.name, loc.item)
                     else:
                         raise Exception(f'Did not find "{item}" in item pool to place at "{location}"')
         advanced_placements = world.customizer.get_advanced_placements()
@@ -1802,7 +1812,7 @@ def shuffle_event_items(world, player):
                 continue
             break
         else:
-            raise FillError(f'Unable to place followers: {", ".join(list(map(lambda d: d.hint_text, follower_locations)))}')
+            raise FillError(f'Unable to place followers: {", ".join(list(map(lambda f: f.name, pickup_items)))}')
 
 
 def get_item_and_event_flag(item, world, player, dungeon_pool, prize_set, prize_pool):

@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '8945e9fdcefc02eb3ff3ad2a8892a180'
+RANDOMIZERBASEHASH = 'abaa7ce289fd18e0ab898f2ca1263db1'
 
 
 class JsonRom(object):
@@ -818,11 +818,13 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         rom.write_byte(0x138002, 2)
         for name, layout in world.key_layout[player].items():
             offset = compass_data[name][4]//2
+            dungeon = world.get_dungeon(name, player)
             if world.keyshuffle[player] == 'universal':
                 rom.write_byte(0x187010+offset, layout.max_chests + layout.max_drops)
             else:
-                rom.write_byte(0x13f020+offset, layout.max_chests + layout.max_drops)  # not currently used
-                rom.write_byte(0x187010+offset, layout.max_chests)
+                rom.write_byte(0x13f020+offset, layout.max_chests + layout.max_drops + dungeon.extra_small_keys)  # not currently used
+                rom.write_byte(0x187010+offset, layout.max_chests + dungeon.extra_small_keys)
+                rom.write_byte(0x187000+offset, dungeon.extra_small_keys)
             builder = world.dungeon_layouts[player][name]
             bk_status = 1 if builder.bk_required else 0
             bk_status = 2 if builder.bk_provided else bk_status
@@ -946,7 +948,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             rom.write_byte(cr_pc+0x1e, 0xEE)  # slash
             rom.write_byte(cr_pc+0x1f, thousands_bot)
             # modify stat config
-            stat_address = 0x23983E
+            stat_address = 0xA39895
             stat_pc = snes_to_pc(stat_address)
             rom.write_byte(stat_pc, 0xa9)  # change to pos 21 (from b1)
             rom.write_byte(stat_pc+2, 0xc0)  # change to 12 bits (from a0)
@@ -992,7 +994,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     set_inverted_mode(world, player, rom, inverted_buffer)
 
     uncle_location = world.get_location('Link\'s Uncle', player)
-    if uncle_location.item is None or uncle_location.item.name not in ['Master Sword', 'Tempered Sword', 'Fighter Sword', 'Golden Sword', 'Progressive Sword']:
+    if uncle_location.item is None or uncle_location.item.name not in ['Master Sword', 'Tempered Sword', 'Fighter Sword', 'Golden Sword', 'Progressive Sword', 'Sword and Shield']:
         # disable sword sprite from uncle
         rom.write_bytes(0x6D263, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
         rom.write_bytes(0x6D26B, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
@@ -1004,6 +1006,10 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         rom.write_bytes(0x6D2EB, [0x00, 0x00, 0xf7, 0xff, 0x02, 0x0E])
         rom.write_bytes(0x6D31B, [0x00, 0x00, 0xe4, 0xff, 0x08, 0x0E])
         rom.write_bytes(0x6D323, [0x00, 0x00, 0xe4, 0xff, 0x08, 0x0E])
+
+    bridge_item = world.get_location("Hobo", player).item
+    if bridge_item is None or not bridge_item.name.startswith("Bottle"):
+        rom.write_bytes(0x1E9C0, [0xFB, 0xFF, 0x03, 0x00, 0xAB, 0x00, 0x00, 0x00])
 
     # set light cones
     if world.dark_rooms[player] == 'no_dark_rooms':
@@ -1495,24 +1501,40 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     loot_source = 0x09
     if world.prizeshuffle[player] != 'none':
         loot_source |= 0x10
-    if world.pottery[player] not in ['none', 'cave']:
+    if world.pottery[player] != 'none':
         loot_source |= 0x02
     if world.dropshuffle[player] != 'none':
         loot_source |= 0x04
-    rom.write_byte(0x1CFF10, loot_source)
+    rom.write_byte(0x1CFF20, loot_source)
+
+    if world.loothud[player] == 'never':
+        rom.write_bytes(0x1CFF10, [0x00, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF17, 0x00)
+    elif world.loothud[player] == 'presence':
+        rom.write_bytes(0x1CFF10, [0x01, 0x01, 0x00, 0x00])
+        rom.write_byte(0x1CFF17, 0x01)
+    elif world.loothud[player] == 'value':
+        rom.write_bytes(0x1CFF10, [0x03, 0x03, 0x00, 0x00])
+        rom.write_byte(0x1CFF17, 0x01)
+    elif world.loothud[player] == 'dungeon_value':
+        rom.write_bytes(0x1CFF10, [0x01, 0x03, 0x00, 0x00])
+        rom.write_byte(0x1CFF17, 0x01)
+    elif world.loothud[player] == 'cave_value':
+        rom.write_bytes(0x1CFF10, [0x03, 0x01, 0x00, 0x00])
+        rom.write_byte(0x1CFF17, 0x01)
 
     if world.showloot[player] == 'never':
         rom.write_bytes(0x1CFF08, [0x00, 0x00, 0x00, 0x00])
-        rom.write_byte(0x1CFF11, 0x00)
+        rom.write_byte(0x1CFF0F, 0x00)
     elif world.showloot[player] == 'presence':
         rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x00, 0x00])
-        rom.write_byte(0x1CFF11, 0x00)
+        rom.write_byte(0x1CFF0F, 0x01)
     elif world.showloot[player] == 'compass':
-        rom.write_bytes(0x1CFF08, [0x01, 0x00, 0x02, 0x00])
-        rom.write_byte(0x1CFF11, 0x01)
+        rom.write_bytes(0x1CFF08, [0x02, 0x00, 0x03, 0x00])
+        rom.write_byte(0x1CFF0F, 0x01)
     elif world.showloot[player] == 'always':
-        rom.write_bytes(0x1CFF08, [0x02, 0x00, 0x00, 0x00])
-        rom.write_byte(0x1CFF11, 0x00)
+        rom.write_bytes(0x1CFF08, [0x03, 0x00, 0x00, 0x00])
+        rom.write_byte(0x1CFF0F, 0x01)
 
     if world.showmap[player] == 'visited':
         rom.write_bytes(0x1CFF00, [0x01, 0x00, 0x00, 0x05])
@@ -1526,7 +1548,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         rom.write_byte(loot_icons + 0x52, 0x0B) # bomb bag is major
 
     triforce_piece_ids = [0x6B, 0x6C]
-    if world.treasure_hunt_count[player] > 20:
+    if world.treasure_hunt_count[player] > 100:
         for triforce_piece_id in triforce_piece_ids:
             rom.write_byte(loot_icons + triforce_piece_id, 0x04)
 
@@ -1764,53 +1786,40 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     rom.write_byte(0x180358, 0x01 if glitches_enabled else 0x00)
     rom.write_byte(0x18008B, 0x01 if glitches_enabled else 0x00)
 
-    # remove shield from uncle
-    rom.write_bytes(0x6D253, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
-    rom.write_bytes(0x6D25B, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
-    rom.write_bytes(0x6D283, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
-    rom.write_bytes(0x6D28B, [0x00, 0x00, 0xf7, 0xff, 0x00, 0x0E])
-    rom.write_bytes(0x6D2CB, [0x00, 0x00, 0xf6, 0xff, 0x02, 0x0E])
-    rom.write_bytes(0x6D2FB, [0x00, 0x00, 0xf7, 0xff, 0x02, 0x0E])
-    rom.write_bytes(0x6D313, [0x00, 0x00, 0xe4, 0xff, 0x08, 0x0E])
+    if uncle_location.item is None or uncle_location.item.name not in ['Blue Shield', 'Red Shield', 'Mirror Shield', 'Progressive Shield', 'Sword and Shield']:
+        # remove shield from uncle
+        rom.write_bytes(0x6D253, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
+        rom.write_bytes(0x6D25B, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
+        rom.write_bytes(0x6D283, [0x00, 0x00, 0xf6, 0xff, 0x00, 0x0E])
+        rom.write_bytes(0x6D28B, [0x00, 0x00, 0xf7, 0xff, 0x00, 0x0E])
+        rom.write_bytes(0x6D2CB, [0x00, 0x00, 0xf6, 0xff, 0x02, 0x0E])
+        rom.write_bytes(0x6D2FB, [0x00, 0x00, 0xf7, 0xff, 0x02, 0x0E])
+        rom.write_bytes(0x6D313, [0x00, 0x00, 0xe4, 0xff, 0x08, 0x0E])
 
-    rom.write_byte(0x18004E, 0)  # Escape Fill (nothing)
-    write_int16(rom, 0x180183, 300)  # Escape fill rupee bow
-    rom.write_bytes(0x180185, [0, 0, 0])  # Uncle respawn refills (magic, bombs, arrows)
-    rom.write_bytes(0x180188, [0, 0, 0])  # Zelda respawn refills (magic, bombs, arrows)
-    rom.write_bytes(0x18018B, [0, 0, 0])  # Mantle respawn refills (magic, bombs, arrows)
-    bow_max, bomb_max, magic_max = 0, 0, 0
-    bow_small, bomb_small, magic_small = 10, 3, 0x20
+    write_int16(rom, 0x180183, 0)  # Escape fill rupee bow
+    # Uncle / Zelda / Mantle respawn refills (magic, bombs, arrows)
+    rom.write_bytes(0x180185, [0] * 9)
+
     if world.mode[player] == 'standard':
+        if world.doorShuffle[player] not in ['vanilla']:
+            # If door shuffle, give player small bit of all three ammos on respawn during escape
+            # Uncle / Zelda / Mantle respawn refills (magic, bombs, arrows)
+            rom.write_bytes(0x180185, [0x20, 3, 10] * 3)
+
+        # Always fully fill ammo of starting weapon on respawn during escape
         if uncle_location.item is not None and uncle_location.item.name in ['Bow', 'Progressive Bow']:
-            rom.write_byte(0x18004E, 1)  # Escape Fill (arrows)
             write_int16(rom, 0x180183, 300)  # Escape fill rupee bow
-            rom.write_bytes(0x180185, [0, 0, 70])  # Uncle respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x180188, [0, 0, 70])  # Zelda respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x18018B, [0, 0, 70])  # Mantle respawn refills (magic, bombs, arrows)
-            bow_max = 70
+            rom.write_byte(0x180187, 70)  # Uncle respawn refill arrows
+            rom.write_byte(0x18018A, 70)  # Zelda respawn refill arrows
+            rom.write_byte(0x18018D, 70)  # Mantle respawn refill arrowss
         elif uncle_location.item is not None and uncle_location.item.name in ['Bomb Upgrade (+10)' if world.bombbag[player] else 'Bombs (10)']:
-            rom.write_byte(0x18004E, 2)  # Escape Fill (bombs)
-            rom.write_bytes(0x180185, [0, 50, 0])  # Uncle respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x180188, [0, 50, 0])  # Zelda respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x18018B, [0, 50, 0])  # Mantle respawn refills (magic, bombs, arrows)
-            bomb_max = 50
+            rom.write_byte(0x180186, 50)  # Uncle respawn refill bombs
+            rom.write_byte(0x180189, 50)  # Zelda respawn refill bombs
+            rom.write_byte(0x18018C, 50)  # Mantle respawn refill bombs
         elif uncle_location.item is not None and uncle_location.item.name in ['Cane of Somaria', 'Cane of Byrna', 'Fire Rod']:
-            rom.write_byte(0x18004E, 4)  # Escape Fill (magic)
-            rom.write_bytes(0x180185, [0x80, 0, 0])  # Uncle respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x180188, [0x80, 0, 0])  # Zelda respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x18018B, [0x80, 0, 0])  # Mantle respawn refills (magic, bombs, arrows)
-            magic_max = 0x80
-        if world.doorShuffle[player] not in ['vanilla', 'basic']:
-            # Uncle respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x180185, [max(magic_small, magic_max), max(bomb_small, bomb_max), max(bow_small, bow_max)])
-            # Zelda respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x180188, [max(magic_small, magic_max), max(bomb_small, bomb_max), max(bow_small, bow_max)])
-            # Mantle respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x18018B, [max(magic_small, magic_max), max(bomb_small, bomb_max), max(bow_small, bow_max)])
-        elif world.doorShuffle[player] == 'basic':  # just in case a bomb is needed to get to a chest
-            rom.write_bytes(0x180185, [max(magic_small, magic_max), max(bomb_small, bomb_max), max(bow_small, bow_max)])
-            rom.write_bytes(0x180188, [magic_small, max(bomb_small, bomb_max), bow_small])  # Zelda respawn refills (magic, bombs, arrows)
-            rom.write_bytes(0x18018B, [magic_small, max(bomb_small, bomb_max), bow_small])  # Mantle respawn refills (magic, bombs, arrows)
+            rom.write_byte(0x180185, 0x80)  # Uncle respawn refill magic
+            rom.write_byte(0x180188, 0x80)  # Zelda respawn refill magic
+            rom.write_byte(0x18018B, 0x80)  # Mantle respawn refill magic
 
     # patch swamp: Need to enable permanent drain of water as dam or swamp were moved
     rom.write_byte(0x18003D, 0x01 if world.swamp_patch_required[player] else 0x00)
@@ -1930,7 +1939,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
 
     write_enemizer_tweaks(rom, world, player)
     randomize_damage_table(rom, world, player)
-    write_strings(rom, world, player, team)
+    write_strings(rom, world, player, team, is_mystery)
 
     # write initial sram
     rom.write_initial_sram()
@@ -2073,6 +2082,49 @@ def hud_format_text(text):
         output += b'\x7f\x00'
     return output[:32]
 
+def read_bytes(f, count):
+    values = f.read(count)
+    if len(values) < count:
+        raise EOFError
+    return values
+
+def apply_rom_patches(rom, patches):
+    for patch in patches:
+        if not os.path.exists(f"patches/{patch}.ips"):
+            logging.getLogger('').warning("Patch %s not found -- skipping", patch)
+            continue
+
+        with open(f"patches/{patch}.ips", "rb") as f:
+            byte_changes = []
+            try:
+                header = read_bytes(f, 5)
+                if header != b"PATCH":
+                    logging.getLogger('').warning("Patch %s invalid -- skipping", patch)
+                    continue
+
+                while True:
+                    address = read_bytes(f, 3)
+                    if address == b"EOF":
+                        break
+
+                    address = int.from_bytes(address, byteorder="big")
+                    length = int.from_bytes(read_bytes(f, 2), byteorder="big")
+
+                    if length > 0:
+                        byte_changes.append((address, list(f.read(length))))
+                    else:
+                        length = int.from_bytes(read_bytes(f, 2), byteorder="big")
+                        value = read_bytes(f, 1)
+                        byte_changes.append((address, length * list(value)))
+
+                for address, values in byte_changes:
+                    rom.write_bytes(address, values)
+
+                logging.getLogger("").info("Patch %s applied successfully", patch)
+
+            except EOFError:
+                logging.getLogger('').warning("Patch %s invalid -- skipping", patch)
+                continue
 
 def apply_rom_settings(rom, beep, color, quickswap, fastmenu, disable_music, sprite, triforce_gfx,
                        ow_palettes, uw_palettes, reduce_flashing, shuffle_sfx,
@@ -2389,7 +2441,7 @@ def write_string_to_rom(rom, target, string):
     rom.write_bytes(address, MultiByteTextMapper.convert(string, maxbytes))
 
 
-def write_strings(rom, world, player, team):
+def write_strings(rom, world, player, team, is_mystery=False):
     tt = TextTable()
     tt.removeUnwantedText()
     if world.shuffle[player] != 'vanilla':
@@ -2440,6 +2492,15 @@ def write_strings(rom, world, player, team):
 
     # For hints, first we write hints about entrances, some from the inconvenient list others from all reasonable entrances.
     if world.hints[player]:
+        zoraitem = world.get_location('King Zora', player).item.hint_text
+        if len(zoraitem) <= 15:
+            tt['zora_meeting'] = f"Whaddaya want?\n  ≥ {zoraitem.title()}\n    Nothin'{{CHOICE}}"
+        else:
+            tt['zora_meeting'] = f"Do you want {zoraitem}?\n  ≥ I'll pay\n    No thanks{{CHOICE}}"
+
+        bottleitem = world.get_location('Bottle Merchant', player).item.hint_text
+        tt['bottle_vendor_choice'] = f"Do you want {bottleitem}?\n  ≥ I'll take it\n    No thanks!\n{{CHOICE}}"
+
         tt['sign_north_of_links_house'] = '> Randomizer The telepathic tiles can have hints!'
         hint_locations = HintLocations.copy()
         random.shuffle(hint_locations)
@@ -2904,7 +2965,22 @@ def write_strings(rom, world, player, team):
         sanc_text = "Dark Chapel"
     tt['menu_start_2'] = "{MENU}\n{SPEED0}\n≥@'s " + lh_text + "\n " + sanc_text + "\n{CHOICE3}"
     tt['menu_start_3'] = "{MENU}\n{SPEED0}\n≥@'s " + lh_text + "\n " + sanc_text + "\n Mountain Cave\n{CHOICE2}"
-    if world.mode[player] == 'inverted':
+
+    if is_mystery:
+        tt['intro_main'] = CompressedTextMapper.convert(
+            "{INTRO}\n    Episode III"
+            + "{PAUSE3}\n A Link to the Past"
+            + "{PAUSE3}\n Mystery Randomizer"
+            + "{PAUSE3}\n\n\n"
+            + "{PAUSE3}\nAfter mostly disregarding what happened in the first two games,"
+            + "{PAUSE3}\nLink awakens to a massive mystery."
+            + "{PAUSE3}\nHe doesn't know why he's here, or what he must do."
+            + "{PAUSE3} {CHANGEPIC}\nGanon has moved around all the items in Hyrule."
+            + "{PAUSE7}\nYou will have to find all the items necessary to achieve your goal."
+            + "{PAUSE7}\nThis is your chance to be a hero."
+            + "{PAUSE3} {CHANGEPIC}\nGood luck out there, and try not to die."
+            + "{PAUSE9} {CHANGEPIC}", False)
+    elif world.mode[player] == 'inverted':
         tt['intro_main'] = CompressedTextMapper.convert(
             "{INTRO}\n    Episode III"
             + "{PAUSE3}\n A Link to the Past"
@@ -2918,6 +2994,7 @@ def write_strings(rom, world, player, team):
             + "{PAUSE7}\nThis is your chance to be a hero."
             + "{PAUSE3} {CHANGEPIC}\nYou must get the 7 crystals to beat Ganon."
             + "{PAUSE9} {CHANGEPIC}", False)
+
     rom.write_bytes(0xE0000, tt.getBytes())
 
     credits = Credits()
@@ -3526,7 +3603,10 @@ Prizes = ['Green Pendant',
            ]
 
 hash_alphabet = [
-    "Bow", "Boomerang", "Hookshot", "Bomb", "Mushroom", "Powder", "Rod", "Pendant", "Bombos", "Ether", "Quake",
-    "Lamp", "Hammer", "Shovel", "Ocarina", "Bug Net", "Book", "Bottle", "Potion", "Cane", "Cape", "Mirror", "Boots",
-    "Gloves", "Flippers", "Pearl", "Shield", "Tunic", "Heart", "Map", "Compass", "Key"
+    "Bow", "Boomerang", "Hookshot", "Bomb", "Mushroom", "Powder",
+    "Ice Rod", "Green Pendant", "Bombos", "Ether", "Quake", "Lamp",
+    "Hammer", "Shovel", "Ocarina", "Bug Net", "Book", "Bottle",
+    "Green Potion", "Somaria", "Cape", "Mirror", "Boots", "Gloves",
+    "Flippers", "Pearl", "Shield", "Green Tunic", "Heart", "Map",
+    "Compass", "Key",
 ]

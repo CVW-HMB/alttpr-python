@@ -486,6 +486,15 @@
       "always"
     ]
   },
+  "loothud": {
+    "choices": [
+      "never",
+      "presence",
+      "value",
+      "dungeon_value",
+      "cave_value"
+    ]
+  },
   "showmap": {
     "choices": [
       "visited",
@@ -665,6 +674,9 @@
     "action": "store_true",
     "type": "bool"
   },
+  "extra_keys": {
+    "type": "int"
+  },
   "calc_playthrough": {
     "action": "store_false",
     "type": "bool"
@@ -743,6 +755,10 @@
     "type": "bool"
   },
   "money_balance": {},
+  "patches": {
+    "type": "str",
+    "help": "suppress"
+  },
   "settingsonload": {
     "choices": [
       "default",
