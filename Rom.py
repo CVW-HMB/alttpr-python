@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'd340a2934396e403c99f12d0ed3c832d'
+RANDOMIZERBASEHASH = '0f3a202c548755e38a5aa499124d1d1b'
 
 
 class JsonRom(object):
@@ -1450,7 +1450,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         "bee": 0x10,
         "somaria": 0x11,
         "byrna": 0x12,
-        "none": 0xFF,
+        "none": 0x7F,
     }
     rom.write_byte(0x18002E, ganon_item_byte[world.ganon_item[player]])
 
