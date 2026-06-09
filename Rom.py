@@ -1452,7 +1452,12 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         "byrna": 0x12,
         "none": 0x7F,
     }
-    rom.write_byte(0x18002E, ganon_item_byte[world.ganon_item[player]])
+    ganon_item_value = ganon_item_byte[world.ganon_item[player]]
+    if world.require_ganon_item[player] and world.ganon_item[player] != "none":
+        if world.swords[player] != "swordless" or world.ganon_item[player] not in ["bombos", "ether", "quake"]:
+            ganon_item_value |= 0x80
+
+    rom.write_byte(0x18002E, ganon_item_value)
 
     # block HC upstairs doors in rain state in standard mode
     prevent_rain = world.mode[player] == 'standard' and world.shuffle[player] != 'vanilla' and world.logic[player] != 'nologic'

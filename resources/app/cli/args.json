@@ -378,6 +378,10 @@
       "none"
     ]
   },
+  "require_ganon_item": {
+    "action": "store_true",
+    "type": "bool"
+  },
   "beemizer": {
     "choices": [
       "4", "3", "2", "1", "0"

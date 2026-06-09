@@ -85,6 +85,7 @@ class World(object):
         self.bosses_ganon = {}
         self.bosshunt_include_agas = {}
         self.ganon_item = {}
+        self.require_ganon_item = {}
         self.ganon_item_orig = {}
         self.custom = custom
         self.customitemarray = customitemarray
@@ -186,6 +187,7 @@ class World(object):
             set_player_attr('bosses_ganon', 8)
             set_player_attr('bosshunt_include_agas', False)
             set_player_attr('ganon_item', 'silver')
+            set_player_attr('require_ganon_item', False)
             set_player_attr('crystals_ganon_orig', {})
             set_player_attr('crystals_gt_orig', {})
             set_player_attr('ganon_item_orig', 'silver')
@@ -3154,6 +3156,7 @@ class Spoiler(object):
                          'ganon_bosses': self.world.bosses_ganon,
                          'bosshunt_include_agas': self.world.bosshunt_include_agas,
                          'ganon_item': self.world.ganon_item,
+                         'require_ganon_item': self.world.require_ganon_item,
                          'open_pyramid': self.world.open_pyramid,
                          'accessibility': self.world.accessibility,
                          'restricted_boss_items': self.world.restrict_boss_items,
@@ -3391,7 +3394,8 @@ class Spoiler(object):
                     if custom['murahgoal'] and 'requirements' in custom['murahgoal']:
                         outfile.write('Murahdahla Requirement:'.ljust(line_width) + 'custom\n')
                         outfile.write('    %s\n' % custom['murahgoal']['goaltext'])
-                    outfile.write('Item Required for Ganon:'.ljust(line_width) + '%s\n' % str(self.world.ganon_item_orig[player]))
+                    outfile.write('Item to Hurt Stunned Ganon:'.ljust(line_width) + '%s\n' % str(self.world.ganon_item_orig[player]))
+                    outfile.write('Item Required for Ganon:'.ljust(line_width) + '%s\n' % yn(self.world.require_ganon_item[player]))
                     outfile.write('Swords:'.ljust(line_width) + '%s\n' % self.metadata['weapons'][player])
                     outfile.write('\n')
                     outfile.write('Accessibility:'.ljust(line_width) + '%s\n' % self.metadata['accessibility'][player])

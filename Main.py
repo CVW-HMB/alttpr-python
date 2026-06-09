@@ -546,6 +546,7 @@ def init_world(args, fish):
     world.crystals_ganon_orig = args.crystals_ganon.copy()
     world.crystals_gt_orig = args.crystals_gt.copy()
     world.ganon_item_orig = args.ganon_item.copy()
+    world.require_ganon_item = args.require_ganon_item.copy()
     world.bosses_ganon = {player: int(args.bosses_ganon[player]) for player in range(1, world.players + 1)}
     world.bosshunt_include_agas = args.bosshunt_include_agas.copy()
     world.owTerrain = args.ow_terrain.copy()
@@ -871,6 +872,7 @@ def copy_world(world):
     ret.bosses_ganon = world.bosses_ganon.copy()
     ret.bosshunt_include_agas = world.bosshunt_include_agas.copy()
     ret.ganon_item = world.ganon_item.copy()
+    ret.require_ganon_item = world.require_ganon_item.copy()
     ret.crystals_ganon_orig = world.crystals_ganon_orig.copy()
     ret.crystals_gt_orig = world.crystals_gt_orig.copy()
     ret.ganon_item_orig = world.ganon_item_orig.copy()
@@ -1105,6 +1107,7 @@ def copy_world_premature(world, player, create_flute_exits=True):
     ret.bosses_ganon = world.bosses_ganon.copy()
     ret.bosshunt_include_agas = world.bosshunt_include_agas.copy()
     ret.ganon_item = world.ganon_item.copy()
+    ret.require_ganon_item = world.require_ganon_item.copy()
     ret.crystals_ganon_orig = world.crystals_ganon_orig.copy()
     ret.crystals_gt_orig = world.crystals_gt_orig.copy()
     ret.ganon_item_orig = world.ganon_item_orig.copy()
