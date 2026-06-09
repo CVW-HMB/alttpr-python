@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '94ff6d50db131aabe6b086e783709004'
+RANDOMIZERBASEHASH = '589a044786a63d98aff0e44b51a6a339'
 
 
 class JsonRom(object):
