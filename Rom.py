@@ -2912,7 +2912,7 @@ def write_strings(rom, world, player, team, is_mystery=False):
             tt['sign_ganon'] = 'Ganon only respects those who have done everything.'
         tt['ganon_fall_in'] = Ganon1_texts[random.randint(0, len(Ganon1_texts) - 1)]
         tt['ganon_fall_in_alt'] = 'You cannot defeat me until you finish your goal!'
-        tt['ganon_phase_3_alt'] = 'Got wax in\nyour ears?\nI can not die!'
+        tt['ganon_phase_3_alt'] = 'Got wax in\nyour ears?\nI cannot die!'
 
     def get_custom_goal_text(type):
         goal_text = world.custom_goals[player][type]['goaltext']
@@ -2931,7 +2931,13 @@ def write_strings(rom, world, player, team, is_mystery=False):
     if world.custom_goals[player]['murahgoal'] and 'goaltext' in world.custom_goals[player]['murahgoal']:
         tt['murahdahla'] = get_custom_goal_text('murahgoal')
 
-    tt['kakariko_tavern_fisherman'] = TavernMan_texts[random.randint(0, len(TavernMan_texts) - 1)]
+    tavern_texts = random.sample(TavernMan_texts, 5)
+
+    tt['tavern_old_man_awake'] = tavern_texts.pop()
+    tt['tavern_old_man_unactivated_flute'] = tavern_texts.pop()
+    tt['tavern_old_man_know_tree_unactivated_flute'] = tavern_texts.pop()
+    tt['tavern_old_man_have_flute'] = tavern_texts.pop()
+    tt['kakariko_tavern_fisherman'] = tavern_texts.pop()
 
     pedestalitem = world.get_location('Master Sword Pedestal', player).item
     pedestal_text = 'Some Hot Air' if pedestalitem is None else hint_text(pedestalitem, True) if pedestalitem.pedestal_hint_text is not None else 'Unknown Item'
