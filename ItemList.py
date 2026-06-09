@@ -944,6 +944,7 @@ def customize_shops(world, player):
                 rep_price = final_price(loc.name, item.price, world, player)
                 shop.add_inventory(idx, upgrade.name, up_price, 6,
                                    item.name, rep_price, player=item.player)
+                upgrade.world = loc.item.world
                 loc.item = upgrade
                 upgrade.location = loc
         if not found_arrow_upgrade and len(possible_replacements) > 0:
@@ -959,6 +960,7 @@ def customize_shops(world, player):
                 shop.add_inventory(idx, upgrade.name, up_price, 6,
                                    item.name, rep_price, player=item.player)
                 loc.item = upgrade
+                upgrade.world = loc.item.world
                 upgrade.location = loc
     change_shop_items_to_rupees(world, player, shops_to_customize)
     balance_prices(world, player)
@@ -995,9 +997,11 @@ def change_shop_items_to_rupees(world, player, shops):
     for location in locations:
         if location.item.name in shop_transfer.keys() and (location.parent_region.name not in shops or location.name == 'Potion Shop'):
             new_item = ItemFactory(shop_transfer[location.item.name], location.item.player)
+            new_item.world = location.item.world
             location.item = new_item
         if location.parent_region.name == 'Capacity Upgrade' and location.item.name in cap_blacklist:
             new_item = ItemFactory('Rupees (300)', location.item.player)
+            new_item.world = location.item.world
             location.item = new_item
             shop = world.get_region('Capacity Upgrade', player).shop
             slot = shop_to_location_table['Capacity Upgrade'].index(location.name)

@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '9c603108cc074d98c06d1e200e777e4a'
+RANDOMIZERBASEHASH = '589a044786a63d98aff0e44b51a6a339'
 
 
 class JsonRom(object):
@@ -1450,9 +1450,14 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         "bee": 0x10,
         "somaria": 0x11,
         "byrna": 0x12,
-        "none": 0xFF,
+        "none": 0x7F,
     }
-    rom.write_byte(0x18002E, ganon_item_byte[world.ganon_item[player]])
+    ganon_item_value = ganon_item_byte[world.ganon_item[player]]
+    if world.require_ganon_item[player] and world.ganon_item[player] != "none":
+        if world.swords[player] != "swordless" or world.ganon_item[player] not in ["bombos", "ether", "quake"]:
+            ganon_item_value |= 0x80
+
+    rom.write_byte(0x18002E, ganon_item_value)
 
     # block HC upstairs doors in rain state in standard mode
     prevent_rain = world.mode[player] == 'standard' and world.shuffle[player] != 'vanilla' and world.logic[player] != 'nologic'
@@ -2021,7 +2026,15 @@ def write_custom_shops(rom, world, player):
             if world.shopsanity[player] or shop.type == ShopType.TakeAny:
                 rom.write_byte(0x186E40 + shop.sram_address + index, 1)
             if world.shopsanity[player] and shop.region.name in shop_to_location_table:
-                loc_item = world.get_location(shop_to_location_table[shop.region.name][index], player).item
+                if shop.region.name == "Capacity Upgrade" and shop.item_count == 3:
+                    if index == 1:
+                        loc_item = ItemFactory(item['item'], player)
+                    else:
+                        if index == 2:
+                            index = 1
+                        loc_item = world.get_location(shop_to_location_table[shop.region.name][index], player).item
+                else:
+                    loc_item = world.get_location(shop_to_location_table[shop.region.name][index], player).item
             elif world.shopsanity[player] and shop.region.name in retro_shops:
                 loc_item = world.get_location(retro_shops[shop.region.name][index], player).item
             else:
@@ -2037,7 +2050,7 @@ def write_custom_shops(rom, world, player):
                 replace_price = int16_as_bytes(item['replacement_price'])
                 item_max = item['max']
             item_player = 0 if item['player'] == player else item['player']
-            item_data = [shop_id,  item_id] + price + [item_max, replace] + replace_price + [item_player]
+            item_data = [shop_id, item_id] + price + [item_max, replace] + replace_price + [item_player]
             items_data.extend(item_data)
 
     rom.write_bytes(0x184800, shop_data)
@@ -2912,7 +2925,7 @@ def write_strings(rom, world, player, team, is_mystery=False):
             tt['sign_ganon'] = 'Ganon only respects those who have done everything.'
         tt['ganon_fall_in'] = Ganon1_texts[random.randint(0, len(Ganon1_texts) - 1)]
         tt['ganon_fall_in_alt'] = 'You cannot defeat me until you finish your goal!'
-        tt['ganon_phase_3_alt'] = 'Got wax in\nyour ears?\nI can not die!'
+        tt['ganon_phase_3_alt'] = 'Got wax in\nyour ears?\nI cannot die!'
 
     def get_custom_goal_text(type):
         goal_text = world.custom_goals[player][type]['goaltext']
@@ -2931,7 +2944,13 @@ def write_strings(rom, world, player, team, is_mystery=False):
     if world.custom_goals[player]['murahgoal'] and 'goaltext' in world.custom_goals[player]['murahgoal']:
         tt['murahdahla'] = get_custom_goal_text('murahgoal')
 
-    tt['kakariko_tavern_fisherman'] = TavernMan_texts[random.randint(0, len(TavernMan_texts) - 1)]
+    tavern_texts = random.sample(TavernMan_texts, 5)
+
+    tt['tavern_old_man_awake'] = tavern_texts.pop()
+    tt['tavern_old_man_unactivated_flute'] = tavern_texts.pop()
+    tt['tavern_old_man_know_tree_unactivated_flute'] = tavern_texts.pop()
+    tt['tavern_old_man_have_flute'] = tavern_texts.pop()
+    tt['kakariko_tavern_fisherman'] = tavern_texts.pop()
 
     pedestalitem = world.get_location('Master Sword Pedestal', player).item
     pedestal_text = 'Some Hot Air' if pedestalitem is None else hint_text(pedestalitem, True) if pedestalitem.pedestal_hint_text is not None else 'Unknown Item'

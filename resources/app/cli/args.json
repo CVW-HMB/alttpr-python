@@ -378,6 +378,10 @@
       "none"
     ]
   },
+  "require_ganon_item": {
+    "action": "store_true",
+    "type": "bool"
+  },
   "beemizer": {
     "choices": [
       "4", "3", "2", "1", "0"
@@ -757,6 +761,10 @@
   "money_balance": {},
   "patches": {
     "type": "str",
+    "help": "suppress"
+  },
+  "orange_potion": {
+    "action": "store_true",
     "help": "suppress"
   },
   "settingsonload": {
