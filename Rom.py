@@ -85,7 +85,7 @@ from Utils import int16_as_bytes, int32_as_bytes, local_path, snes_to_pc
 from Versions import DRVersion, GKVersion, ORVersion
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'c7ef3ff118c84ddd427ca4fa2461a47b'
+RANDOMIZERBASEHASH = '94ff6d50db131aabe6b086e783709004'
 
 
 class JsonRom(object):
@@ -2021,7 +2021,15 @@ def write_custom_shops(rom, world, player):
             if world.shopsanity[player] or shop.type == ShopType.TakeAny:
                 rom.write_byte(0x186E40 + shop.sram_address + index, 1)
             if world.shopsanity[player] and shop.region.name in shop_to_location_table:
-                loc_item = world.get_location(shop_to_location_table[shop.region.name][index], player).item
+                if shop.region.name == "Capacity Upgrade" and shop.item_count == 3:
+                    if index == 1:
+                        loc_item = ItemFactory(item['item'], player)
+                    else:
+                        if index == 2:
+                            index = 1
+                        loc_item = world.get_location(shop_to_location_table[shop.region.name][index], player).item
+                else:
+                    loc_item = world.get_location(shop_to_location_table[shop.region.name][index], player).item
             elif world.shopsanity[player] and shop.region.name in retro_shops:
                 loc_item = world.get_location(retro_shops[shop.region.name][index], player).item
             else:
@@ -2037,7 +2045,7 @@ def write_custom_shops(rom, world, player):
                 replace_price = int16_as_bytes(item['replacement_price'])
                 item_max = item['max']
             item_player = 0 if item['player'] == player else item['player']
-            item_data = [shop_id,  item_id] + price + [item_max, replace] + replace_price + [item_player]
+            item_data = [shop_id, item_id] + price + [item_max, replace] + replace_price + [item_player]
             items_data.extend(item_data)
 
     rom.write_bytes(0x184800, shop_data)

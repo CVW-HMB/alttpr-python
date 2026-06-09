@@ -336,9 +336,28 @@ def main(args, seed=None, fish=None):
     for player in range(1, world.players+1):
         if world.shopsanity[player]:
             customize_shops(world, player)
+
     if not args.skip_money_balance and args.algorithm in ['balanced', 'equitable']:
         balance_money_progression(world)
     ensure_good_items(world, True)
+
+    for player in range(1, world.players+1):
+        if args.orange_potion and world.difficulty[player] == "normal":
+            cap_shop = world.get_region('Capacity Upgrade', player).shop
+            potion = {
+                'item': "Orange Potion",
+                'price': 1000,
+                'max': 0,
+                'replacement': None,
+                'replacement_price': 0,
+                'create_location': False,
+                'player': 0,
+            }
+            if cap_shop.inventory[0] is None:
+                cap_shop.inventory[0] = potion
+            else:
+                cap_shop.inventory.insert(1, potion)
+
 
     if args.print_custom_yaml:
         world.settings.record_info(world)
@@ -482,7 +501,7 @@ def export_yaml(args, fish):
 
     for player in range(1, world.players + 1):
         world.difficulty_requirements[player] = difficulties[world.difficulty[player]]
-    
+
     set_starting_inventory(world, args)
 
     world.settings = CustomSettings()

@@ -759,6 +759,10 @@
     "type": "str",
     "help": "suppress"
   },
+  "orange_potion": {
+    "action": "store_true",
+    "help": "suppress"
+  },
   "settingsonload": {
     "choices": [
       "default",
