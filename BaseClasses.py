@@ -1409,7 +1409,7 @@ class CollectionState(object):
     def can_hit_stunned_ganon(self, player):
         ganon_item = self.world.ganon_item[player]
         if ganon_item == "silver":
-            return self.has("Silver Arroys", player) and self.can_shoot_arrows(player)
+            return self.has("Silver Arrows", player) and self.can_shoot_arrows(player)
         elif ganon_item == "boomerang":
             return self.has("Blue Boomerang", player) or self.has("Red Boomerang", player)
         elif ganon_item == "hookshot":
