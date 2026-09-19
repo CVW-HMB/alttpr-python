@@ -346,7 +346,7 @@ def main(args, seed=None, fish=None):
             cap_shop = world.get_region('Capacity Upgrade', player).shop
             potion = {
                 'item': "Orange Potion",
-                'price': 1000,
+                'price': 500,
                 'max': 0,
                 'replacement': None,
                 'replacement_price': 0,
