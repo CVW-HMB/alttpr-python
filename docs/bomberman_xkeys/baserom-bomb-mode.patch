@@ -1,0 +1,670 @@
+From 26e41abdce40f06860a9ba3876c8e7fda0f904a8 Mon Sep 17 00:00:00 2001
+From: Vince Welke <vince.welke@gmail.com>
+Date: Tue, 6 Oct 2026 07:49:11 -0700
+Subject: [PATCH] Restore bomb-only mode (Progressive Bombs) from the kara
+ branch
+
+Bomb-only mode was half-ported during the GK refactor: only DamageClassCalc
+survived, SpecialWeapons was org'd at $B0902F (PC 0x18102F, a typo for
+$B0802F) and nothing ever raised SpecialWeaponLevel, so the mode could not
+work. Port the rest from ardnaxelarak/z3randomizer branch "kara" (the base
+rom the legacy site's bombs mode ran on):
+
+- SpecialWeapons back at $B0802F (PC 0x18002F), matching the legacy writer
+- item $C0 Progressive Bombs: receipt behavior raises SpecialWeaponLevel
+  (capped at 4) and turns on infinite bombs; graphics, palette by level
+- infinite bombs restored on load/spawn when bomb level > 0
+- bomb-mode damage table (Damage_Table_Bombs, selected by SpecialWeapons
+  bit 7), Trinexx/Sidenexx/hammer imperviousness rules
+- bombs collide with Giant Moldorm tail, Trinexx body, Helmasaur King;
+  Moldorm and Agahnim's barrier accept bombs
+- B button detonates placed bombs
+- menu/HUD/Y-box bomb level icons, bomb sprite color by level
+- tablets readable with level 2 ("master") bombs, boss-kill stats by level
+
+Non-bomb modes keep vanilla collision behavior.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ LTTP_RND_GeneralBugfixes.asm      |   5 +
+ custompalettes.asm                |   2 +
+ darkworldspawn.asm                |   4 +
+ data/damage_table_sword_bombs.bin | Bin 0 -> 2048 bytes
+ gk/special_weapons.asm            | 245 ++++++++++++++++++++++++++++++
+ hooks.asm                         |  79 +++++++++-
+ inventory.asm                     |   7 +-
+ itemdatatables.asm                |  10 +-
+ newhud.asm                        |   1 +
+ newitems.asm                      |  11 ++
+ swordswap.asm                     |  18 +++
+ tables.asm                        |   6 +-
+ utilities.asm                     |  15 +-
+ 13 files changed, 386 insertions(+), 17 deletions(-)
+ create mode 100644 data/damage_table_sword_bombs.bin
+
+diff --git a/LTTP_RND_GeneralBugfixes.asm b/LTTP_RND_GeneralBugfixes.asm
+index 68f0030..9cb4dcc 100644
+--- a/LTTP_RND_GeneralBugfixes.asm
++++ b/LTTP_RND_GeneralBugfixes.asm
+@@ -298,6 +298,11 @@ InvertedCastleHole: ;address used by front end. DO NOT MOVE!
+ incbin "data/sheet73.gfx"
+ warnpc $B1E501
+ 
++org $B1E800
++Damage_Table_Bombs:
++incbin "data/damage_table_sword_bombs.bin"
++warnpc $B1F001
++
+ org $B38000
+ GFX_HUD_Palette:
+ incbin "data/hudpalette.pal"
+diff --git a/custompalettes.asm b/custompalettes.asm
+index d19f52b..b27c918 100644
+--- a/custompalettes.asm
++++ b/custompalettes.asm
+@@ -15,3 +15,5 @@ dw $0000, $7E4E, $6F44, $1CF5, $7399, $1CE7, $02F9, $0233
+ dw $7FFF, $7FFF, $0000, $5907, $6E0E, $0000, $7FBB, $7672
+ .off_black
+ dw $0000, $14A5, $14A5, $14A5, $14A5, $14A5, $14A5, $14A5
++.golden_bombs ; Progressive Bombs level 4 (bomb-only mode)
++dw $0000, $7FFF, $27FF, $02BC, $4F5F, $1CE7, $2E9C, $14B6
+diff --git a/darkworldspawn.asm b/darkworldspawn.asm
+index df48bd3..3c1e08d 100644
+--- a/darkworldspawn.asm
++++ b/darkworldspawn.asm
+@@ -211,6 +211,10 @@ SetEscapeAssist:
+ 		LDA.l EscapeAssist : BIT.b #$02 : BEQ + : LDA.b #$00 : STA.l InfiniteBombs : +
+ 		LDA.l EscapeAssist : BIT.b #$01 : BEQ + : LDA.b #$00 : STA.l InfiniteArrows : +
+ 	++
++	LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BNE + ; bomb mode: any bomb level = infinite bombs
++	LDA.l SpecialWeaponLevel : BEQ +
++		LDA.b #$01 : STA.l InfiniteBombs
++	+
+ RTL
+ ;--------------------------------------------------------------------------------
+ SetSilverBowMode:
+diff --git a/data/damage_table_sword_bombs.bin b/data/damage_table_sword_bombs.bin
+new file mode 100644
+index 0000000000000000000000000000000000000000..d3f53fe68a3bf068d382036ae6180ed351e5dc9f
+GIT binary patch
+literal 2048
+zcmd5+v2GJV5S{fB9i8v&!YLgW)NA<z3?dSUCNckkkVpXq!a@`&`2Ymw59nzUDH8ku
+z5<(!wRsfd{0%0558D?j9cJEArj*i=6c6Q#(yqTTbUY02UNPAI|TK;QWzou!ZPRGUp
+z(S1A+$>*u5dwU}1BClmN@-_``Z>TKO(1fJGB#j#Tk)3dqACg{;>(GL@-D)u((Jzvc
+zPwZZIakbVQA0WiFybM5{@$38~NRFo*{V!7b23zjlA<LK=*9{Q*-@eXvr`z*_?(Yd8
+z3Fpr4^>~k*kNPK)^U%DAl)kVICiGd?J8Yu4V(I<C;lzvQjpoEO;z?mA@kADkWfY&c
+zw12N%=v$Zs=AEnC#Wik@hzQv!N7T!3%VRiR$QCU$ucXAjMoV!=IQm~`vi+xOTe3~<
+zkL37*{U1n+{Z?*#1REsPV{uyMOQefqG}&!F`|hxhNQ=vt;qdYQ3klXX9_QaNlRBON
+zuC6H8+;S@Ms8m3BvO!g>KX2QPuY14fo;aVpKU9ay!}Zv9IeRX8*)7K{3;q|JucJ`k
+zU;L%+iy+<}=9hRA)WEJd6!KkleZ9o@z=%+1et^<Si;ea@xBWivebw$gusFIcz~$-}
+ze!~-di%)TYc(8|k%zg7WqZg~e;`#CG$tObL_}S6HQTIuIpBC;Da5F5x$9RO}wY7;r
+zE1&?n-TwC7-FrKGcOKn(xJ?YuB3M{He|#gH;}=}v4iW1UP^pSmO6!eeBe`59xI(4!
+zUOt*T0ysQu4qpzN!;|5a(Yx=}YS-Mq`QXO;SChec%Xv-l6n`wHv+3;Td^%q&S7&D-
+S!;);{+2r(i`0?|HufGAuAQfu>
+
+literal 0
+HcmV?d00001
+
+diff --git a/gk/special_weapons.asm b/gk/special_weapons.asm
+index 22c5d25..9d3b5cc 100644
+--- a/gk/special_weapons.asm
++++ b/gk/special_weapons.asm
+@@ -114,13 +114,258 @@ DamageClassCalc:
+ 	RTL
+ ;--------------------------------------------------------------------------------
+ Utility_CheckImpervious:
++	LDA.w SpriteTypeTable, X : CMP.b #$CB : BNE .normal
++.trinexx
++	LDA.l SpecialWeapons : BPL .normal ; "only swords" (bomb mode) Trinexx rules
++	LDA.w UseY1 : AND.b #$0A : BNE .impervious ; impervious to hammer
++	LDA.w $0DD1 : ORA.w $0DD2 : BNE .impervious ; at least one sidenexx alive
++	LDA.w $0D80, X : CMP.b #$02 : BCS .impervious ; at least one sidenexx alive
++	BRA .not_impervious
++
++.normal
+ 	LDA.w SpriteControl, X : AND.b #$40 : BNE .impervious
+ 	LDA.w $0CF2 : CMP.b #$FF : BEQ .impervious
++	LDA.w SpriteTypeTable, X : CMP.b #$CC : BEQ .sidenexx
++	                           CMP.b #$CD : BEQ .sidenexx
+ 	LDA.w UseY1 : AND.b #$0A : BEQ .not_impervious ; normal behavior if not hammering
+ 	JSL Ganon_CheckHammerVulnerability : BCS .not_impervious
++	LDA.l SpecialWeapons : BPL .not_impervious
++	LDA.w SpriteTypeTable, X : CMP.b #$1E : BEQ .not_impervious ; crystal switch
++	                           CMP.b #$40 : BEQ .not_impervious ; aga barrier
++	BRA .impervious
+ 
+ .not_impervious
+ 	LDA.b #$00 : RTL
+ .impervious
+ 	LDA.b #$01 : RTL
++
++.sidenexx
++	LDA.l SpecialWeapons : BPL .not_impervious
++	LDA.w $0CAA, X : AND.b #$04 : BEQ .vulnerable
++	LDA.w $0CF2 : CMP.b #$06 : BCC .impervious ; swords are ineffective
++	BRA .not_impervious
++.vulnerable
++	LDA.w $0CF2 : CMP.b #$06 : BCS .impervious ; non-swords are ineffective
++	BRA .not_impervious
++;--------------------------------------------------------------------------------
++
++;================================================================================
++; Bomb-Only Mode (ported from ardnaxelarak/z3randomizer branch "kara")
++;================================================================================
++; start with X = ancilla index, Y = sprite index
++; returns carry clear if there was no overlap
++;--------------------------------------------------------------------------------
++Utility_CheckAncillaOverlapWithSprite:
++	LDA.w SpriteTypeTable, Y : CMP.b #$09 : BEQ .giant_moldorm
++	                           CMP.b #$CB : BEQ .trinexx
++.not_giant_moldorm ; ordinary collision checking
++	PHY : PHX
++	TYX
++	JSL $8683EA ; Sprite_SetupHitBoxLong
++	PLX : PLY
++	JSL $8683E6 ; Utility_CheckIfHitBoxesOverlapLong
++	RTL
++
++.giant_moldorm
++	LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BNE .not_giant_moldorm
++	LDA.w $0E10, Y : BNE .ignore_collision ; Moldy can have little a I-Frames, as a treat
++	LDA.w $0C4A, X : CMP.b #$07 : BNE .ignore_collision ; don't collide with non-bombs
++	JSR SetUpMoldormHitbox
++	JSL $8683E6 ; Utility_CheckIfHitBoxesOverlapLong
++	RTL
++
++.ignore_collision
++	CLC
++	RTL
++
++.trinexx
++	LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BNE .not_giant_moldorm
++	LDA.w $0C4A, X : CMP.b #$07 : BNE .ignore_collision ; don't collide with non-bombs
++	JSR SetUpTrinexxHitbox
++	JSL $8683E6 ; Utility_CheckIfHitBoxesOverlapLong
++	RTL
++;--------------------------------------------------------------------------------
++SetUpTrinexxHitbox:
++	; rearrange trinexx's hitbox to be her middle instead of her head
++	LDA.w $0CAA, Y : PHA
++	LDA.w $0E60, Y : PHA
++	LDA.w $0D10, Y : PHA
++	LDA.w $0D30, Y : PHA
++	LDA.w $0D00, Y : PHA
++	LDA.w $0D20, Y : PHA
++
++	LDA.b #$80 : STA.w $0CAA, Y
++
++	PHX
++	LDA.w $0E80, Y : !SUB.l $9DAF28 : AND.b #$7F : TAX
++
++	LDA.l $7FFC00, X : STA.w $0D10, Y
++	LDA.l $7FFC80, X : STA.w $0D30, Y
++	LDA.l $7FFD00, X : STA.w $0D00, Y
++	LDA.l $7FFD80, X : STA.w $0D20, Y
++
++	TYX
++	STZ.w $0E60, X
++
++	JSL $8683EA ; Sprite_SetupHitBoxLong
++	PLX
++
++	PLA : STA.w $0D20, Y
++	PLA : STA.w $0D00, Y
++	PLA : STA.w $0D30, Y
++	PLA : STA.w $0D10, Y
++	PLA : STA.w $0E60, Y
++	PLA : STA.w $0CAA, Y
++	RTS
++;--------------------------------------------------------------------------------
++SetUpMoldormHitbox:
++	; rearrange moldorm's hitbox to be his tail instead of his head
++	LDA.w $0D90, Y : PHA
++	LDA.w $0F60, Y : PHA
++	LDA.w $0D10, Y : PHA
++	LDA.w $0D30, Y : PHA
++	LDA.w $0D00, Y : PHA
++	LDA.w $0D20, Y : PHA
++
++	PHY : PHX
++	LDA.w $0E80, Y : !SUB.b #$30 : AND.b #$7F : TAX
++
++	LDA.l $7FFC00, X : STA.w $0D10, Y
++	LDA.l $7FFC80, X : STA.w $0D30, Y
++	LDA.l $7FFD00, X : STA.w $0D00, Y
++	LDA.l $7FFD80, X : STA.w $0D20, Y
++	LDA.b #$01 : STA.w $09D0, Y
++
++	TYX
++	STZ.w $0F60, X
++
++	JSL $8683EA ; Sprite_SetupHitBoxLong
++
++	PLX : PLY
++
++	PLA : STA.w $0D20, Y
++	PLA : STA.w $0D00, Y
++	PLA : STA.w $0D30, Y
++	PLA : STA.w $0D10, Y
++	PLA : STA.w $0F60, Y
++	PLA : STA.w $0D90, Y
++	RTS
++;--------------------------------------------------------------------------------
++; start with X = ancilla index, Y = sprite index
++; returns carry set if there is collision immunity
++Utility_CheckHelmasaurKingCollision:
++	LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BNE .normal
++	LDA.w $0C4A, X : CMP.b #$07 : BNE .normal ; normal behavior with non-bombs
++	CLC
++	RTL
++.normal
++	LDA.w $0DB0, Y : CMP.b #$03
++	RTL
++;--------------------------------------------------------------------------------
++; start with X = sprite index
++AllowBombingMoldorm:
++	LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BEQ .no_disable_projectiles
++	INC.w $0BA0, X
++.no_disable_projectiles
++	JSL $9DD6D1 ; Sprite_InitializedSegmented
++	RTL
++;--------------------------------------------------------------------------------
++AllowBombingBarrier:
++	; what we wrote over
++	LDA.w $0D00, X : !SUB.b #$0C : STA.w $0D00, X
++	LDA.w SpriteTypeTable, X : CMP.b #$40 : BNE .disable_projectiles
++	LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BEQ .no_disable_projectiles
++.disable_projectiles
++	INC.w $0BA0, X
++.no_disable_projectiles
++	RTL
++;--------------------------------------------------------------------------------
++DrawBombInMenu:
++	JSL LoadBombCount16 : AND.w #$00FF : BEQ .noBombs
++	LDA.l SpecialWeapons : AND.w #$007F : CMP.w #$0001 : BNE .vanillaBombs
++	LDA.l SpecialWeaponLevel : AND.w #$00FF : BEQ .noBombs : STA.b $02
++	LDA.w #$FC81 : STA.b $04
++	RTL
++.vanillaBombs
++	LDA.w #$0001 : STA.b $02
++	LDA.w #$F699 : STA.b $04
++	RTL
++.noBombs
++	LDA.w #$0000 : STA.b $02
++	LDA.w #$F699 : STA.b $04
++	RTL
++;--------------------------------------------------------------------------------
++DrawSwordInMenu:
++	LDA.l SpecialWeapons : AND.w #$007F : CMP.w #$0001 : BEQ .specialSword
++	LDA.l SwordEquipment : AND.w #$00FF : CMP.w #$00FF : BEQ .noSword
++	STA.b $02
++	LDA.w #$F859 : STA.b $04
++	RTL
++.noSword
++	LDA.w #$0000 : STA.b $02
++	LDA.w #$F859 : STA.b $04
++	RTL
++.specialSword
++	LDA.l SpecialWeaponLevel : AND.w #$00FF : STA.b $02
++	LDA.w #$FC51 : STA.b $04
++	RTL
++;--------------------------------------------------------------------------------
++DrawBombInYBox:
++	CPX.w #$0004 : BNE .done
++	LDA.l SpecialWeapons : AND.w #$007F : CMP.w #$0001 : BNE .vanilla
++	LDA.l SpecialWeaponLevel : AND.w #$00FF : CLC : ADC.w #$00BD : BRA .done
++.vanilla
++	LDA.w #$0001
++.done
++	RTL
++;--------------------------------------------------------------------------------
++BombIcon:
++	dw $207F, $207F, $3C88, $3C89, $2C88, $2C89, $2488, $2489, $2888, $2889, $2888, $2889
++DrawBombOnHud:
++	PHB
++	LDA.w #$0149
++	LDX.w #HUD_TileMap
++	LDY.w #$C700
++	MVN $A17E
++	PLB
++
++	LDA.l SpecialWeapons : AND.w #$007F : CMP.w #$0001 : BNE .regularBombs
++	LDA.l SpecialWeaponLevel : AND.w #$00FF : ASL #2 : TAX
++	LDA.l BombIcon, X : STA.l $7EC71A
++	LDA.l BombIcon+2, X : STA.l $7EC71C
++.regularBombs
++	RTL
++;--------------------------------------------------------------------------------
++BombSpriteColor:
++	db $04, $08, $04, $02, $0A, $0A
++SetBombSpriteColor:
++	LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BNE .normal
++	PHX
++	LDA.l SpecialWeaponLevel
++	TAX
++	LDA.l BombSpriteColor, X
++	STA.b $0B
++	PLX
++	RTL
++.normal
++	LDA.b #$04 : STA.b $0B
++	RTL
++;--------------------------------------------------------------------------------
++; B button in bomb mode detonates all placed bombs instead of swinging
++CheckDetonateBomb:
++	LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BNE .normal
++	LDX.b #$09
++.check_ancilla
++	LDA.w $0C4A, X : CMP.b #$07 : BNE .next_ancilla
++	LDA.b #$03 : STA.w $039F, X
++.next_ancilla
++	DEX
++	BPL .check_ancilla
++	SEC
++	RTL
++.normal ; what we wrote over
++	LDA.b #$80 : TSB.b $3A
++	LDA.b #$01 : TSB.b $50
++	CLC
++	RTL
+ ;--------------------------------------------------------------------------------
+diff --git a/hooks.asm b/hooks.asm
+index d3367e8..fdb98c4 100755
+--- a/hooks.asm
++++ b/hooks.asm
+@@ -435,8 +435,9 @@ JSL LoadBombCount
+ org $898133 ; <- 48133 - ancilla_init.asm : 211 (STA $7EF343 : BNE .bombs_left_over)
+ JSL StoreBombCount
+ ;--------------------------------------------------------------------------------
+-org $8DE4BF ; <- 6E4BF - equipment.asm : 1249 (LDA $7EF343 : AND.w #$00FF : BEQ .gotNoBombs)
+-JSL LoadBombCount16
++org $8DE4BF ; <- 6E4BF - equipment.asm : 1249 (LDA $7EF343 : AND.w #$00FF : BEQ .gotNoBombs : ...)
++JSL DrawBombInMenu ; calls LoadBombCount16, draws bomb-mode levels
++BRA + : NOP #13 : +
+ ;--------------------------------------------------------------------------------
+ org $8DDEB3 ; <- 6DEB3 - equipment.asm : 328 (LDA $7EF33F, X)
+ JSL IsItemAvailable
+@@ -1493,10 +1494,11 @@ org $8DED04 ; <- 6ED04 - equipment.asm : 1963 (REP #$30)
+ JSL DrawHUDDungeonItems
+ ;--------------------------------------------------------------------------------
+ ; Insert our version of the hud tilemap
+-org $8DFA96 ; <- 6FA96 - headsup_display.asm : 626 (LDX.w #.hud_tilemap)
+-LDX.w #HUD_TileMap
+-org $8DFA9C ; <- 6FA9C - headsup_display.asm : 629 (MVN $0D, $7E ; $Transfer 0x014A bytes from $6FE77 -> $7EC700)
+-MVN $A17E
++; Done by DrawBombOnHud (gk/special_weapons.asm), hooked at $8DFA92, which also draws bomb-mode icons
++; org $8DFA96 ; <- 6FA96 - headsup_display.asm : 626 (LDX.w #.hud_tilemap)
++; LDX.w #HUD_TileMap
++; org $8DFA9C ; <- 6FA9C - headsup_display.asm : 629 (MVN $0D, $7E ; $Transfer 0x014A bytes from $6FE77 -> $7EC700)
++; MVN $A17E
+ ;--------------------------------------------------------------------------------
+ org $8DFB1F : JSL CheckHUDSilverArrows
+ org $8DFB29 : BRA UpdateHUDBuffer_update_item_check_arrows
+@@ -2800,6 +2802,71 @@ org $86ED94 ; Bank06.asm@4866 (LDA $0E60, X : AND.b #$40)
+ JSL Utility_CheckImpervious
+ NOP
+ ;--------------------------------------------------------------------------------
++; Bomb-Only Mode (ported from ardnaxelarak/z3randomizer branch "kara")
++;--------------------------------------------------------------------------------
++org $8882D4 ; Bank08.asm@445 (PHX : TYX : ... )
++JSL Utility_CheckAncillaOverlapWithSprite
++BRA + : NOP #5 : +
++;--------------------------------------------------------------------------------
++org $888DB1 ; Bank08.asm@1207 (PHY : PHX : TYX : ... )
++JSL Utility_CheckAncillaOverlapWithSprite
++BRA + : NOP #7 : +
++;--------------------------------------------------------------------------------
++org $88E252 ; Bank08.asm@1770 (PHY : PHX : TYX : ... )
++JSL Utility_CheckAncillaOverlapWithSprite
++BRA + : NOP #7 : +
++;--------------------------------------------------------------------------------
++org $8882E8 ; Bank08.asm@456 (LDA $0DB0, Y : CMP.b #$03)
++JSL Utility_CheckHelmasaurKingCollision
++NOP
++;--------------------------------------------------------------------------------
++org $868F94 ; sprite_prep.asm@1984 (INC $0BA0, X : JSL Sprite_InitializedSegmented)
++JSL AllowBombingMoldorm
++BRA + : NOP : +
++;--------------------------------------------------------------------------------
++org $86892F ; sprite_prep.asm@548 (LDA $0D00, X : SUB #$0C : STA $0D00, X : JMP $8BA1)
++JSL AllowBombingBarrier
++RTS : NOP #7
++;--------------------------------------------------------------------------------
++org $8DFB6A ; headsup_display@727 (CPX #$0004 : BNE .bombsNotEquipped : LDA #$0001)
++JSL DrawBombInYBox
++BRA + : NOP #2 : +
++;--------------------------------------------------------------------------------
++org $8DEE05 ; equipment.asm@2065 (LDA $7EF359 : AND.w #$00FF : CMP.w #$00FF : ...)
++JSL DrawSwordInMenu
++BRA + : NOP #16 : +
++;--------------------------------------------------------------------------------
++org $8DFA92 ; headsup_display.asm@622 (PHB : LDA.w #$0149 : ...)
++JSL DrawBombOnHud
++BRA + : NOP #8 : +
++;--------------------------------------------------------------------------------
++org $889EF8 ; ancilla_bomb@1438 (LDA.w #$04 : STA $0B)
++JSL SetBombSpriteColor
++;--------------------------------------------------------------------------------
++org $879CE6 ; Bank07.asm@4632 (LDA #$80 : TSB $3A : JSR $9C56 : LDA #$01 : TSB $50)
++JSL CheckDetonateBomb
++BCC + : RTS : +
++JSR $9C56
++NOP
++;--------------------------------------------------------------------------------
++; bomb icons with numbers (menu sword slot)
++org $8DFC51 ; freed by the OnDrawHud hook's NOP #197 at $8DFC4C
++db $F5, $20, $F5, $20, $F5, $20, $F5, $20
++db $B2, $3C, $B3, $3C, $C2, $3C, $17, $3C
++db $B2, $2C, $B3, $2C, $C2, $2C, $18, $2C
++db $B2, $24, $B3, $24, $C2, $24, $19, $24
++db $B2, $28, $B3, $28, $C2, $28, $1A, $28
++db $B2, $28, $B3, $28, $C2, $28, $1B, $28
++
++; bomb icons without numbers (menu bomb slot / Y box), $8DFC81
++db $F5, $20, $F5, $20, $F5, $20, $F5, $20
++db $B2, $3C, $B3, $3C, $C2, $3C, $C2, $7C
++db $B2, $2C, $B3, $2C, $C2, $2C, $C2, $6C
++db $B2, $24, $B3, $24, $C2, $24, $C2, $64
++db $B2, $28, $B3, $28, $C2, $28, $C2, $68
++db $B2, $28, $B3, $28, $C2, $28, $C2, $68
++warnpc $8DFC4C+4+197 ; stay inside the NOPs
++;--------------------------------------------------------------------------------
+ 
+ ;================================================================================
+ ;--------------------------------------------------------------------------------
+diff --git a/inventory.asm b/inventory.asm
+index cf26238..f70739d 100644
+--- a/inventory.asm
++++ b/inventory.asm
+@@ -306,9 +306,12 @@ RTS
+ IncrementBossSword:
+         PHX
+         LDA.l StatsLocked : BNE .done
+-        LDA.l SwordEquipment : CMP.b #$FF : BNE +
++        LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BNE .check_sword ; bomb mode counts bomb level
++        LDA.l SpecialWeaponLevel : BRA .dispatch
++        .check_sword
++        LDA.l SwordEquipment : CMP.b #$FF : BNE .dispatch
+                 BRA .none
+-        +
++        .dispatch
+         ASL : TAX
+         JMP (.vectors,X)
+ 
+diff --git a/itemdatatables.asm b/itemdatatables.asm
+index 0ee9c7d..7c7995e 100644
+--- a/itemdatatables.asm
++++ b/itemdatatables.asm
+@@ -329,7 +329,7 @@ endmacro
+ %ReceiptProps($BD, -4, 0, $49, $F36A, $FF, skip, skip) ; BD - 
+ %ReceiptProps($BE, -4, 0, $49, $F36A, $FF, skip, skip) ; BE - 
+ %ReceiptProps($BF, -4, 0, $49, $F36A, $FF, skip, skip) ; BF - 
+-%ReceiptProps($C0, -4, 0, $49, $F36A, $FF, skip, skip) ; C0 - 
++%ReceiptProps($C0, -4, 0, $13, $F36A, $FF, prog_weapon, skip) ; C0 - Progressive Bombs
+ %ReceiptProps($C1, -4, 0, $49, $F36A, $FF, skip, skip) ; C1 - 
+ %ReceiptProps($C2, -4, 0, $49, $F36A, $FF, skip, skip) ; C2 - 
+ %ReceiptProps($C3, -4, 0, $49, $F36A, $FF, skip, skip) ; C3 - 
+@@ -608,7 +608,7 @@ endmacro
+ %SpriteProps($BD, 2, 2, $04, $04, $0000)                                ; BD - 
+ %SpriteProps($BE, 2, 2, $04, $04, $0000)                                ; BE - 
+ %SpriteProps($BF, 2, 2, $04, $04, $0000)                                ; BF - 
+-%SpriteProps($C0, 2, 2, $04, $04, $0000)                                ; C0 - 
++%SpriteProps($C0, 2, 2, $FF, $FF, PalettesVanilla_blue_ice+$0E)         ; C0 - Progressive Bombs
+ %SpriteProps($C1, 2, 2, $04, $04, $0000)                                ; C1 - 
+ %SpriteProps($C2, 2, 2, $04, $04, $0000)                                ; C2 - 
+ %SpriteProps($C3, 2, 2, $04, $04, $0000)                                ; C3 - 
+@@ -884,7 +884,7 @@ endmacro
+ %InventoryItem($BD, $0001, $0000, $0000) ; BD -
+ %InventoryItem($BE, $0001, $0000, $0000) ; BE -
+ %InventoryItem($BF, $0001, $0000, $0000) ; BF -
+-%InventoryItem($C0, $0001, $0000, $0000) ; C0 -
++%InventoryItem($C0, $0015, SwordTime, $0000) ; C0 - Progressive Bombs
+ %InventoryItem($C1, $0001, $0000, $0000) ; C1 -
+ %InventoryItem($C2, $0001, $0000, $0000) ; C2 -
+ %InventoryItem($C3, $0001, $0000, $0000) ; C3 -
+@@ -1148,7 +1148,7 @@ ItemReceiptGraphicsOffsets:
+ 	dw $0                                  ; BD -
+ 	dw $0                                  ; BE -
+ 	dw $0                                  ; BF -
+-	dw $0                                  ; C0 -
++	dw BigDecompressionBuffer+$1080        ; C0 - Progressive Bombs
+ 	dw $0                                  ; C1 -
+ 	dw $0                                  ; C2 -
+ 	dw $0                                  ; C3 -
+@@ -1418,7 +1418,7 @@ StandingItemGraphicsOffsets:
+ 	dw $0                                  ; BD -
+ 	dw $0                                  ; BE -
+ 	dw $0                                  ; BF -
+-	dw $0                                  ; C0 -
++	dw BigDecompressionBuffer+$1080        ; C0 - Progressive Bombs
+ 	dw $0                                  ; C1 -
+ 	dw $0                                  ; C2 -
+ 	dw $0                                  ; C3 -
+diff --git a/newhud.asm b/newhud.asm
+index ede7358..78fa612 100644
+--- a/newhud.asm
++++ b/newhud.asm
+@@ -23,6 +23,7 @@ NewHUD_DrawBombs:
+         BRA .draw
+ 
+ .finite
++        LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BEQ .no_bomb_bag ; bomb mode, no bomb level yet
+         LDA.w BombCapacity : BEQ .no_bomb_bag
+         LDA.w BombsEquipment
+         JSR HUDHex2Digit
+diff --git a/newitems.asm b/newitems.asm
+index c086428..1b5ac6b 100755
+--- a/newitems.asm
++++ b/newitems.asm
+@@ -676,6 +676,17 @@ ItemBehavior:
+         .done
+         RTS
+ 
++        .prog_weapon ; Progressive Bombs (bomb-only mode)
++        SEP #$20
++        LDA.l SpecialWeaponLevel : CMP.b #$04 : BCS + ; cap at golden bombs
++            INC : STA.l SpecialWeaponLevel
++        +
++        LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BNE +
++            LDA.b #$01 : STA.l InfiniteBombs
++            STA.l UpdateHUDFlag
++        +
++        RTS
++
+         .refill_magic
+         SEP #$30 : LDA.b #$80 : STA.l MagicFiller : RTS
+ 
+diff --git a/swordswap.asm b/swordswap.asm
+index e62b5bd..1b161d8 100644
+--- a/swordswap.asm
++++ b/swordswap.asm
+@@ -17,6 +17,7 @@ LookupDamageLevel:
+ 		LDA.l StalfosBombDamage
+ 		RTL
+ 	+
++	LDA.l SpecialWeapons : BMI .bomb_table ; "only swords" bit: use the bomb mode damage table
+ 	PHP
+ 		REP #$20 ; set 16-bit accumulator
+ 		TXA : LSR : TAX : BCS .lower
+@@ -30,6 +31,19 @@ RTL
+ 	LDA.l Damage_Table, X
+ 	AND.b #$0F
+ RTL
++.bomb_table
++	PHP
++		REP #$20 ; set 16-bit accumulator
++		TXA : LSR : TAX : BCS .bomb_lower
++	PLP
++	LDA.l Damage_Table_Bombs, X
++	LSR #4
++RTL
++.bomb_lower
++	PLP
++	LDA.l Damage_Table_Bombs, X
++	AND.b #$0F
++RTL
+ ;================================================================================
+ LoadModifiedSwordLevel: ; returns short
+ 	LDA.l SwordModifier : BEQ +
+@@ -84,8 +98,12 @@ RTL
+ CheckTabletSword:
+ 	LDA.l AllowHammerTablets : BEQ +
+ 	LDA.l HammerEquipment : BEQ + ; check for hammer
++		.allow
+ 		LDA.b #$02 : RTL
+ 	+
++	LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BNE .normal ; bomb mode
++	LDA.l SpecialWeaponLevel : CMP.b #$02 : BCS .allow ; master bombs read tablets
++	.normal
+ 	LDA.l SwordEquipment ; get actual sword value
+ RTL
+ ;================================================================================
+diff --git a/tables.asm b/tables.asm
+index 66f3a18..bd44ce5 100644
+--- a/tables.asm
++++ b/tables.asm
+@@ -111,11 +111,11 @@ GanonVulnerabilityItem:
+ ; i - index of item vulnerability
+ db $00 ; $00 = default behavior (silver arrows)
+ ;--------------------------------------------------------------------------------
+-org $B0902F
++org $B0802F ; PC 0x18002F
+ SpecialWeapons:
+ db #$00
+-; s - - -  m m m m (bitfield) - NYI
+-; s - only swords damage can hurt enemies
++; s - - -  m m m m (bitfield)
++; s - only "sword" damage can hurt enemies (bomb mode uses Damage_Table_Bombs)
+ ; m - special weapon mode
+ ; $00 = Off (default)
+ ; $01 = Bomb mode
+diff --git a/utilities.asm b/utilities.asm
+index 7e4b71f..70afb9d 100644
+--- a/utilities.asm
++++ b/utilities.asm
+@@ -439,8 +439,21 @@ LoadItemPalette:
+         PLB : PLB
+         REP #$30
+ 
++        CPX.w #$00C0 : BNE .not_prog_bombs ; Progressive Bombs color follows current bomb level
++        LDA.l SpecialWeaponLevel : AND.w #$00FF : BNE +
++                LDA.w #PalettesVanilla_blue_ice+$0E         : BRA .continue  ; none
++        + DEC : BNE +
++                LDA.w #PalettesVanilla_green_blue_guard+$0E : BRA .continue  ; fighter
++        + DEC : BNE +
++                LDA.w #PalettesVanilla_blue_ice+$0E         : BRA .continue  ; master
++        + DEC : BNE +
++                LDA.w #PalettesVanilla_red_melon+$0E        : BRA .continue  ; tempered
++        +       LDA.w #PalettesCustom_golden_bombs          : BRA .continue  ; gold
++        .not_prog_bombs
+         TXA : ASL : TAX
+-        LDA.l SpriteProperties_palette_addr,X : STA.b Scrap0A
++        LDA.l SpriteProperties_palette_addr,X
++        .continue
++        STA.b Scrap0A
+         LDY.w #$000E
+         JSR AuxPaletteCheck : BCS .aux
+                 LDA.w TransparencyFlag : BNE .SP05
+-- 
+2.50.1 (Apple Git-155)
+

@@ -86,8 +86,9 @@ On top of upstream `main` of `git.gwaa.kiwi/alttpr-gwaa-kiwi/alttpr-python`:
 1. **Add bomb-only sword mode (`--swords bombs`).** Ported from the Python the legacy site
    (alttpr-legacy.gwaa.kiwi) runs: `ardnaxelarak/ALttPDoorRandomizer` at f8e427ea. Item pool, logic, boss rules,
    ROM writes, Ganon vulnerability, settings code.
-2. **Update baserom.** `data/base2current.bps` rebuilt from `CVW-HMB/alttpr-baserom` branch `feature/bomb-mode`,
-   which restores the bomb-only ROM code from `ardnaxelarak/z3randomizer` branch `kara`: item `$C0` Progressive
+2. **Update baserom.** `data/base2current.bps` is already rebuilt, so this repo rolls seeds on its own. The
+   assembly change is [`baserom-bomb-mode.patch`](baserom-bomb-mode.patch), against
+   `git.gwaa.kiwi/alttpr-gwaa-kiwi/alttpr-baserom` commit `5e892ca`. It restores the bomb-only ROM code from `ardnaxelarak/z3randomizer` branch `kara`: item `$C0` Progressive
    Bombs, infinite bombs, B-button detonation, the bomb damage table, bomb collision for Moldorm, Trinexx and
    Helmasaur King, the bombable Agahnim barrier, and HUD/menu icons. It also fixes the SpecialWeapons byte, which
    was assembled at PC `0x18102F` instead of `0x18002F`.
@@ -98,10 +99,12 @@ On top of upstream `main` of `git.gwaa.kiwi/alttpr-gwaa-kiwi/alttpr-python`:
 
 ### Rebuilding the base patch
 
-Only needed if you change the baserom. With asar and flips on your PATH:
+Not needed to roll seeds; `data/base2current.bps` is already built. Only if you change the assembly, with asar
+and flips on your PATH:
 
 ```bash
-git clone -b feature/bomb-mode https://github.com/CVW-HMB/alttpr-baserom.git && cd alttpr-baserom
+git clone https://git.gwaa.kiwi/alttpr-gwaa-kiwi/alttpr-baserom.git && cd alttpr-baserom
+git checkout 5e892ca && git am /path/to/alttpr-python/docs/bomberman_xkeys/baserom-bomb-mode.patch
 cp /path/to/jp.sfc ../working.sfc
 asar --symbols=wla LTTP_RND_GeneralBugfixes.asm ../working.sfc   # run from the baserom directory
 flips --create --bps-delta /path/to/jp.sfc ../working.sfc ../base2current.bps
