@@ -561,7 +561,11 @@ def generate_itempool(world, player):
     if pool_size < ttl_locations:
         retro_bow = world.bow_mode[player].startswith('retro')
         amount_to_add = ttl_locations - pool_size
-        filler_additions = random.choices(list(filler_items.keys()), filler_items.values(), k=amount_to_add)
+        fillers = filler_items
+        if getattr(world, 'no_money_balance', False):
+            # --no_money_balance: padding the pool must not add money either
+            fillers = {k: v for k, v in filler_items.items() if not k.startswith('Rupee')}
+        filler_additions = random.choices(list(fillers.keys()), fillers.values(), k=amount_to_add)
         for item in filler_additions:
             item_name = 'Rupees (5)' if retro_bow and item == 'Arrows (10)' else item
             if world.swords[player] == 'bombs':

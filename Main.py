@@ -612,6 +612,7 @@ def init_world(args, fish):
     world.colorizepots = args.colorizepots.copy()
     world.aga_randomness = args.aga_randomness.copy()
     world.money_balance = {player: int(args.money_balance[player]) for player in range(1, world.players + 1)}
+    world.no_money_balance = bool(getattr(args, 'no_money_balance', False))
 
     # custom settings - these haven't been promoted to full settings yet
     in_progress_settings = ['force_enemy']
@@ -928,6 +929,7 @@ def copy_world(world):
     ret.key_logic_algorithm = world.key_logic_algorithm.copy()
     ret.aga_randomness = world.aga_randomness.copy()
     ret.money_balance = world.money_balance.copy()
+    ret.no_money_balance = getattr(world, 'no_money_balance', False)
     ret.experimental = world.experimental.copy()
     ret.shopsanity = world.shopsanity.copy()
     ret.dropshuffle = world.dropshuffle.copy()
@@ -1163,6 +1165,7 @@ def copy_world_premature(world, player, create_flute_exits=True):
     ret.key_logic_algorithm = world.key_logic_algorithm.copy()
     ret.aga_randomness = world.aga_randomness.copy()
     ret.money_balance = world.money_balance.copy()
+    ret.no_money_balance = getattr(world, 'no_money_balance', False)
     ret.experimental = world.experimental.copy()
     ret.shopsanity = world.shopsanity.copy()
     ret.dropshuffle = world.dropshuffle.copy()
