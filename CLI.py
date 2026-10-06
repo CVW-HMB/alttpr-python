@@ -90,6 +90,9 @@ def parse_cli(argv, no_defaults=False):
     parser.add_argument('--tries', default=defval(int(settings["tries"]) if settings["tries"] != "" and settings["tries"] is not None else 1), help="\n".join(fish.translate("cli", "help", "tries")), type=int)
     parser.add_argument('--customitemarray', default={}, help=argparse.SUPPRESS)
     parser.add_argument('--skip_money_balance', action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument('--no_money_balance', action="store_true",
+                        help='Never move or create rupees to balance money; reject the seed instead if a '
+                             'required purchase cannot be afforded.')
 
     # included for backwards compatibility
     parser.add_argument('--multi', default=defval(settings["multi"]), type=lambda value: min(max(int(value), 1), 255))

@@ -1035,7 +1035,10 @@ def check_shop_swap(l, make_item_free=False):
         inv_slot['item'] = l.item.name
 
 
-def balance_money_progression(world):
+def balance_money_progression(world, check_only=False):
+    """Make required purchases affordable by moving (or, as a last resort, creating) rupees.
+    check_only: never touch items; walk the spheres and raise GenerationException if any
+    player would be short of money for a required purchase (the seed should be rerolled)."""
     logger = logging.getLogger('')
     state = CollectionState(world)
     unchecked_locations = world.get_locations().copy()
@@ -1192,6 +1195,10 @@ def balance_money_progression(world):
                 else:
                     difference = 0
                     target_player = next(p for p in solvent)
+                if check_only and difference > 0:
+                    from DungeonGenerator import GenerationException
+                    raise GenerationException(f'Money balancing is off and player {target_player} '
+                                              f'is short {difference} rupees for a required purchase')
                 while difference > 0:
                     swap_targets = [x for x in unchecked_locations if x not in sphere_locations and x.item.name.startswith('Rupees') and x.item.player == target_player]
                     if len(swap_targets) == 0:

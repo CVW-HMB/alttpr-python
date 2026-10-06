@@ -349,8 +349,12 @@ def main(args, seed=None, fish=None):
         if world.shopsanity[player]:
             customize_shops(world, player)
 
-    if not args.skip_money_balance and args.algorithm in ['balanced', 'equitable']:
-        balance_money_progression(world)
+    if args.algorithm in ['balanced', 'equitable']:
+        if args.no_money_balance:
+            # never move or create rupees; only verify required purchases are affordable
+            balance_money_progression(world, check_only=True)
+        elif not args.skip_money_balance:
+            balance_money_progression(world)
     ensure_good_items(world, True)
 
     for player in range(1, world.players+1):
