@@ -220,7 +220,7 @@ def parse_settings():
         "crystals_ganon": "7",
         "bosses_ganon": "8",
         "bosshunt_include_agas": False,
-        "ganon_item": "silver",
+        "ganon_item": "default",
         "require_ganon_item": False,
         "swords": "random",
         "flute_mode": "normal",

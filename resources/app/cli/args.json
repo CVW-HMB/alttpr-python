@@ -45,7 +45,8 @@
       "random",
       "assured",
       "swordless",
-      "vanilla"
+      "vanilla",
+      "bombs"
     ]
   },
   "flute_mode": {
@@ -361,9 +362,11 @@
   },
   "ganon_item": {
     "choices": [
+      "default",
       "silver",
       "boomerang",
       "hookshot",
+      "bomb",
       "powder",
       "fire_rod",
       "ice_rod",

@@ -18,7 +18,8 @@ def BossFactory(boss, player, on_ice=False):
 
 def ArmosKnightsDefeatRule(state, player):
     # Magic amounts are probably a bit overkill
-    return (
+    return state.special_weapon_check(player, 1) and (
+        state.has_special_weapon_level(player, 1) or
         state.has_blunt_weapon(player) or
         state.can_shoot_arrows(player) or
         (state.has('Cane of Somaria', player) and state.can_extend_magic(player, 10)) or
@@ -29,7 +30,8 @@ def ArmosKnightsDefeatRule(state, player):
         state.has('Red Boomerang', player))
 
 def LanmolasDefeatRule(state, player):
-    return (
+    return state.special_weapon_check(player, 1) and (
+        state.has_special_weapon_level(player, 1) or
         state.has_blunt_weapon(player) or
         state.has('Fire Rod', player) or
         state.has('Ice Rod', player) or
@@ -38,10 +40,12 @@ def LanmolasDefeatRule(state, player):
         state.can_shoot_arrows(player))
 
 def MoldormDefeatRule(state, player):
-    return state.has_blunt_weapon(player)
+    return state.special_weapon_check(player, 1) and (state.has_blunt_weapon(player) or state.has_special_weapon_level(player, 1))
 
 def HelmasaurKingDefeatRule(state, player):
-    return (state.has('Hammer', player) or state.can_use_bombs(player)) and (state.has_sword(player) or state.can_shoot_arrows(player))
+    return (state.special_weapon_check(player, 2)
+            and (state.has('Hammer', player) or state.can_use_bombs(player))
+            and (state.has_sword(player) or state.can_shoot_arrows(player) or state.has_special_weapon_level(player, 2)))
 
 
 def IceHelmasaurKingDefeatRule(state, player):
@@ -51,7 +55,9 @@ def IceHelmasaurKingDefeatRule(state, player):
 def ArrghusDefeatRule(state, player):
     if not state.has('Hookshot', player):
         return False
-    if state.has_blunt_weapon(player):
+    if not state.special_weapon_check(player, 2):
+        return False
+    if state.has_blunt_weapon(player) or state.has_special_weapon_level(player, 2):
         return True
 
     if state.can_shoot_arrows(player) and state.has('Silver Arrows', player) and state.world.difficulty_adjustments[player] not in ['hard', 'expert']:
@@ -62,7 +68,8 @@ def ArrghusDefeatRule(state, player):
 
 
 def MothulaDefeatRule(state, player):
-    return (
+    return state.special_weapon_check(player, 1) and (
+        state.has_special_weapon_level(player, 1) or
         state.has_blunt_weapon(player) or
         (state.has('Fire Rod', player) and state.can_extend_magic(player, 10)) or
         # TODO: Not sure how much (if any) extend magic is needed for these two, since they only apply
@@ -73,7 +80,9 @@ def MothulaDefeatRule(state, player):
 
 
 def BlindDefeatRule(state, player):
-    return state.has_blunt_weapon(player) or state.has('Cane of Somaria', player) or state.has('Cane of Byrna', player)
+    return state.special_weapon_check(player, 1) and (
+        state.has_blunt_weapon(player) or state.has('Cane of Somaria', player) or state.has('Cane of Byrna', player)
+        or state.has_special_weapon_level(player, 1))
 
 
 def IceBlindDefeatRule(state, player):
@@ -93,16 +102,17 @@ def IceBlindDefeatRule(state, player):
 
 
 def KholdstareDefeatRule(state, player):
-    return (
+    return state.special_weapon_check(player, 2) and (
         (
             state.has('Fire Rod', player) or
             (
                 state.has('Bombos', player) and
                 # FIXME: the following only actually works for the vanilla location for swordless
-                (state.has_sword(player) or state.world.swords[player] == 'swordless')
+                (state.can_use_medallions(player) or state.world.swords[player] == 'swordless')
             )
         ) and
         (
+            state.has_special_weapon_level(player, 2) or
             state.has_blunt_weapon(player) or
             (state.has('Fire Rod', player) and state.can_extend_magic(player, 20)) or
             # FIXME: this actually only works for the vanilla location for swordless
@@ -141,7 +151,9 @@ def IceKholdstareDefeatRule(state, player):
 
 
 def VitreousDefeatRule(state, player):
-    return (state.can_shoot_arrows(player) and state.can_use_bombs(player)) or state.has_blunt_weapon(player)
+    return state.special_weapon_check(player, 2) and (
+        (state.can_shoot_arrows(player) and state.can_use_bombs(player)) or state.has_blunt_weapon(player)
+        or state.has_special_weapon_level(player, 2))
 
 
 def IceVitreousDefeatRule(state, player):
@@ -151,11 +163,16 @@ def IceVitreousDefeatRule(state, player):
 def TrinexxDefeatRule(state, player):
     if not (state.has('Fire Rod', player) and state.has('Ice Rod', player)):
         return False
+    if not state.special_weapon_check(player, 2):
+        return False
     return (state.has('Hammer', player) or
             state.has('Golden Sword', player) or
             state.has('Tempered Sword', player) or
-            (state.has('Master Sword', player) and state.can_extend_magic(player, 16)) or
-            (state.has_sword(player) and state.can_extend_magic(player, 32)))
+            state.has_special_weapon_level(player, 4) or
+            ((state.has('Master Sword', player) or state.has_special_weapon_level(player, 3))
+             and state.can_extend_magic(player, 16)) or
+            ((state.has_sword(player) or state.has_special_weapon_level(player, 2))
+             and state.can_extend_magic(player, 32)))
 
 
 def IceTrinexxDefeatRule(state, player):

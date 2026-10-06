@@ -221,7 +221,9 @@ def roll_settings(weights):
         ret.swords = {'randomized': 'random',
                       'assured': 'assured',
                       'vanilla': 'vanilla',
-                      'swordless': 'swordless'
+                      'swordless': 'swordless',
+                      'bombs': 'bombs',
+                      'assured_bombs': 'bombs',
                       }[swords]
 
     ret.difficulty = get_choice('item_pool')
@@ -260,6 +262,8 @@ def roll_settings(weights):
     for item in inventoryweights.keys():
         if get_choice(item, inventoryweights) == 'on':
             startitems.append(item)
+    if swords == 'assured_bombs' and 'Progressive Bombs' not in startitems:
+        startitems.append('Progressive Bombs')  # Bomb-Only (Starting Bombs)
     ret.startinventory = ','.join(startitems)
     if len(startitems) > 0:
         ret.usestartinventory = True

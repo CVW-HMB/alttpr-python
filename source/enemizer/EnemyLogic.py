@@ -13,7 +13,7 @@ def defeat_rule_single(world, player, enemy_sprite, region):
         return has('Hammer', player)
     elif enemy_sprite.kind == EnemySprite.RedBari:
         # must be burned to drop
-        return or_rule(has('Fire Rod', player), and_rule(has_sword(player), has('Bombos', player)))
+        return or_rule(has('Fire Rod', player), and_rule(can_use_medallions(world, player), has('Bombos', player)))
     vln = enemy_vulnerability(world, player, enemy_sprite, region)
     rules = []
     if vln['Blunt'] != 0:
@@ -25,7 +25,7 @@ def defeat_rule_single(world, player, enemy_sprite, region):
     if vln['Byrna'] != 0:
         rules.append(byrna_rule(world, player, vln['Byrna']))
     if vln['Master'] != 0:
-        rules.append(has_class_2_weapon(player))
+        rules.append(has_class_2_weapon(player, world))
     if vln['Bow'] != 0:
         rules.append(bow_rule(world, player, vln['Bow']))
     if vln['Silvers'] != 0:
@@ -159,7 +159,7 @@ def find_possible_rules(vln_list, used_resources, world, player):
             if damage_type == 'Stun':
                 optional_clears[vln_sub_list].append((buzzblob_rule(player), {}))
             if damage_type == 'Master' and not blunt_marker[vln_sub_list]:
-                optional_clears[vln_sub_list].append((has_class_2_weapon(player), {}))
+                optional_clears[vln_sub_list].append((has_class_2_weapon(player, world), {}))
             if damage_type == 'Boomerang':
                 optional_clears[vln_sub_list].append((has('Hookshot', player), {}))
             elif damage_type == 'Hookshot':
@@ -168,7 +168,7 @@ def find_possible_rules(vln_list, used_resources, world, player):
     vln_sub_list = frozenset({idx for idx, vln in enumerate(vln_list.values()) if vln[damage_type] != 0})
     if vln_sub_list:
         hits = needed_resources(damage_type, vln_list)
-        if hits + used_resources['Bomb'] <= 8:
+        if hits + used_resources['Bomb'] <= 8 or world.swords[player] == 'bombs':  # bomb-only: bombs are infinite
             optional_clears[vln_sub_list].append(
                 (bombs_rule(world, player, hits + used_resources['Bomb']), {'Bomb': hits}))
     for damage_type in ['Bow', 'Silvers']:
@@ -288,7 +288,10 @@ def buzzblob_rule(player):
                    and_rule(has('Quake', player), has_sword(player)))
 
 
-def has_class_2_weapon(player):
+def has_class_2_weapon(player, world=None):
+    if world is not None and world.swords[player] == 'bombs':
+        # bomb-only: bombs use the sword damage class matching the weapon level; level 3 hits like a tempered spin
+        return or_rule(has_beam_sword(player), has('Hammer', player), has_special_weapon_level(world, player, 3))
     return or_rule(has_beam_sword(player), has('Hammer', player))
 
 
@@ -327,7 +330,7 @@ def silvers_rule(world, player, arrows):
 
 
 def bombs_rule(world, player, bombs):
-    if bombs == -1 or 0 < bombs <= 8:
+    if bombs == -1 or 0 < bombs <= 8 or (bombs > 0 and world.swords[player] == 'bombs'):
         return can_use_bombs(world, player)
     return RuleFactory.static_rule(False)
 
@@ -365,14 +368,28 @@ def magic_powder_rule(world, player, shots):
 
 def medallion_rule(world, player, medallion, shots):
     if shots == -1:
-        return and_rule(has(medallion, player), has_sword(player))
+        return and_rule(has(medallion, player), can_use_medallions(world, player))
     if shots == -2:
-        return and_rule(has(medallion, player), has_sword(player))
+        return and_rule(has(medallion, player), can_use_medallions(world, player))
     magic_needed = shots * 2
     if magic_needed > 8:
-        return and_rule(has(medallion, player), has_sword(player), can_extend_magic(world, player, shots))
+        return and_rule(has(medallion, player), can_use_medallions(world, player), can_extend_magic(world, player, shots))
     else:
-        return and_rule(has(medallion, player), has_sword(player))
+        return and_rule(has(medallion, player), can_use_medallions(world, player))
+
+
+def can_use_medallions(world, player):
+    if world.swords[player] == 'bombs':
+        return RuleFactory.static_rule(True)  # AllowSwordlessMedallionUse = always
+    return has_sword(player)
+
+
+def has_special_weapon_level(world, player, level):
+    from BaseClasses import special_weapon_item
+    weapon = special_weapon_item(world.swords[player])
+    if weapon is None:
+        return RuleFactory.static_rule(False)
+    return has(weapon, player, level)
 
 
 def or_rule(*rules):
@@ -446,6 +463,8 @@ def can_shoot_silver_arrows(world, player):
 
 
 def can_use_bombs(world, player):
+    if world.swords[player] == 'bombs':
+        return has_special_weapon_level(world, player, 1)
     return or_rule(RuleFactory.static_rule(not world.bombbag[player]), has('Bomb Upgrade (+10)', player))
 
 
@@ -466,8 +485,10 @@ def enemy_vulnerability(world, player, enemy_sprite, region):
         else:
             vulnerability['Blunt'] = -1
             vulnerability['Master'] = -1
-        vulnerability['Somaria'] = c1
-        vulnerability['Byrna'] = c1
+        if world.swords[player] != 'bombs':
+            # bomb-only sets SpecialWeapons bit 0x80, which makes everything but crystal switches cane-immune
+            vulnerability['Somaria'] = c1
+            vulnerability['Byrna'] = c1
     else:
         c2 = number_of_hits('Sword3', damage_src, enemy_sub_class, stats, enemy_sprite, region)
         if c2 != 0:
@@ -478,7 +499,16 @@ def enemy_vulnerability(world, player, enemy_sprite, region):
     hits = number_of_hits('SilverArrow', damage_src, enemy_sub_class, stats, enemy_sprite, region)
     if hits != 0:
         vulnerability['Silvers'] = hits
+    bomb_mode = world.swords[player] == 'bombs'
+    if bomb_mode:
+        # bomb-only: once SpecialWeaponLevel >= 1 bombs deal the sword damage class of that level (min level 1);
+        # class 3+ only enemies (lynels) are covered by has_class_2_weapon via the 'Master' vulnerability
+        hits = number_of_hits('Sword1', damage_src, enemy_sub_class, stats, enemy_sprite, region)
+        if hits != 0:
+            vulnerability['Bomb'] = hits
     for method in ['Bomb', 'Hookshot', 'FireRod', 'IceRod', 'Boomerang', 'Powder', 'Bombos', 'Ether', 'Quake']:
+        if method == 'Bomb' and bomb_mode:
+            continue
         hits = number_of_hits(method, damage_src, enemy_sub_class, stats, enemy_sprite, region)
         if hits == -3:
             if enemy_sprite.kind != EnemySprite.Buzzblob:  # buzzblobs are special and don't die

@@ -40,6 +40,8 @@ def set_rules(world, player):
 
     if world.swords[player] == 'swordless':
         swordless_rules(world, player)
+    if world.swords[player] == 'bombs':
+        bomb_mode_rules(world, player)
 
     if world.logic[player] == 'noglitches':
         no_glitches_rules(world, player)
@@ -401,13 +403,13 @@ def global_rules(world, player):
         set_rule(world.get_location('Master Sword Pedestal', player), rule)
     else:
         set_rule(world.get_location('Master Sword Pedestal', player), lambda state: state.has('Red Pendant', player) and state.has('Blue Pendant', player) and state.has('Green Pendant', player))
-    set_rule(world.get_location('Ether Tablet', player), lambda state: state.has('Book of Mudora', player) and state.has_beam_sword(player))
+    set_rule(world.get_location('Ether Tablet', player), lambda state: state.has('Book of Mudora', player) and (state.has_beam_sword(player) or state.has_special_weapon_level(player, 2)))
     set_rule(world.get_location('Old Man', player), lambda state: state.has('Return Old Man', player))
     set_rule(world.get_location('Old Man Drop Off', player), lambda state: state.has('Escort Old Man', player))
-    set_rule(world.get_location('Turtle Medallion Pad', player), lambda state: state.has_sword(player) and state.has_turtle_rock_medallion(player))  # sword required to cast magic (!)
+    set_rule(world.get_location('Turtle Medallion Pad', player), lambda state: state.can_use_medallions(player) and state.has_turtle_rock_medallion(player))  # sword required to cast magic (!)
     set_rule(world.get_location('Zora\'s Ledge', player), lambda state: state.has('Flippers', player))
     set_rule(world.get_location('Flute Spot', player), lambda state: state.has('Shovel', player))
-    set_rule(world.get_location('Bombos Tablet', player), lambda state: state.has('Book of Mudora', player) and state.has_beam_sword(player))
+    set_rule(world.get_location('Bombos Tablet', player), lambda state: state.has('Book of Mudora', player) and (state.has_beam_sword(player) or state.has_special_weapon_level(player, 2)))
     set_rule(world.get_location('Kiki Assistance', player), lambda state: state.has('Pick Up Kiki', player))  # Can S&Q with chest
     set_rule(world.get_location('Middle Aged Man', player), lambda state: state.has('Pick Up Purple Chest', player))  # Can S&Q with chest
     set_rule(world.get_location('Purple Chest', player), lambda state: state.has('Deliver Purple Chest', player))  # Can S&Q with chest
@@ -565,7 +567,7 @@ def global_rules(world, player):
 
     set_rule(world.get_entrance('Palace of Darkness', player), lambda state: state.has('Dark Palace Opened', player))
     set_rule(world.get_entrance('Skull Woods Final Section', player), lambda state: state.has('Fire Rod', player))
-    set_rule(world.get_entrance('Misery Mire', player), lambda state: state.has_sword(player) and state.has_misery_mire_medallion(player))  # sword required to cast magic (!)
+    set_rule(world.get_entrance('Misery Mire', player), lambda state: state.can_use_medallions(player) and state.has_misery_mire_medallion(player))  # sword required to cast magic (!)
     set_rule(world.get_entrance('Turtle Rock', player), lambda state: state.has('Turtle Opened', player))
 
     if world.custom_goals[player]['gtentry'] and 'requirements' in world.custom_goals[player]['gtentry']:
@@ -574,7 +576,7 @@ def global_rules(world, player):
     else:
         set_rule(world.get_entrance('Ganons Tower' if not world.is_atgt_swapped(player) else 'Agahnims Tower', player), lambda state: state.has_crystals(world.crystals_needed_for_gt[player], player))
     if not world.is_atgt_swapped(player):
-        set_rule(world.get_entrance('Agahnims Tower', player), lambda state: state.has('Cape', player) or state.has_beam_sword(player))
+        set_rule(world.get_entrance('Agahnims Tower', player), lambda state: state.has('Cape', player) or state.has_beam_sword(player) or state.has_special_weapon_level(player, 2))
 
     # Start of door rando rules
     # TODO: Do these need to flag off when door rando is off? - some of them, yes
@@ -1022,17 +1024,27 @@ def global_rules(world, player):
             add_mc_rule('Agahnim 1')
         add_mc_rule('Agahnim 2')
 
-    set_rule(
-        world.get_location('Ganon', player),
-        lambda state: state.has_beam_sword(player)
-            and state.has_fire_source(player)
-            and (state.can_hit_stunned_ganon(player) or (
-                not world.require_ganon_item[player] and (
-                    state.has('Tempered Sword', player) or state.has('Golden Sword', player)
-                    or state.has('Lamp', player)
-                    or state.can_extend_magic(player, 12)))))  # need to light torch a sufficient amount of times
+    if world.swords[player] == 'bombs':
+        # bomb-only: level 3 ("tempered") bombs are needed to damage Ganon; they also cover the stun-phase
+        # damage unless the Ganon item is required
+        set_rule(
+            world.get_location('Ganon', player),
+            lambda state: state.has_special_weapon_level(player, 3)
+                and state.has_fire_source(player)
+                and (state.can_hit_stunned_ganon(player) or not world.require_ganon_item[player]))
+        set_rule(world.get_entrance('Ganon Drop', player), lambda state: state.has_special_weapon_level(player, 3))  # need to damage ganon to get tiles to drop
+    else:
+        set_rule(
+            world.get_location('Ganon', player),
+            lambda state: state.has_beam_sword(player)
+                and state.has_fire_source(player)
+                and (state.can_hit_stunned_ganon(player) or (
+                    not world.require_ganon_item[player] and (
+                        state.has('Tempered Sword', player) or state.has('Golden Sword', player)
+                        or state.has('Lamp', player)
+                        or state.can_extend_magic(player, 12)))))  # need to light torch a sufficient amount of times
 
-    set_rule(world.get_entrance('Ganon Drop', player), lambda state: state.has_beam_sword(player))  # need to damage ganon to get tiles to drop
+        set_rule(world.get_entrance('Ganon Drop', player), lambda state: state.has_beam_sword(player))  # need to damage ganon to get tiles to drop
 
 
 def bomb_rules(world, player):
@@ -1216,7 +1228,7 @@ def ow_inverted_rules(world, player):
     if world.is_atgt_swapped(player):
         set_rule(world.get_entrance('Agahnims Tower', player), lambda state: state.has_crystals(world.crystals_needed_for_gt[player], player))
     else:
-        set_rule(world.get_entrance('Agahnims Tower', player), lambda state: state.has('Cape', player) or state.has_beam_sword(player))  # barrier gets removed after killing agahnim, rule for that added later
+        set_rule(world.get_entrance('Agahnims Tower', player), lambda state: state.has('Cape', player) or state.has_beam_sword(player) or state.has_special_weapon_level(player, 2))  # barrier gets removed after killing agahnim, rule for that added later
         set_rule(world.get_entrance('GT Approach', player), lambda state: state.has_crystals(world.crystals_needed_for_gt[player], player))
         set_rule(world.get_entrance('GT Leave', player), lambda state: state.has_crystals(world.crystals_needed_for_gt[player], player) or state.world.shuffle[player] in ('restricted', 'full', 'lite', 'lean', 'district', 'swapped', 'crossed', 'insanity'))
 
@@ -1648,6 +1660,14 @@ def swordless_rules(world, player):
     
     if not world.is_atgt_swapped(player):
         set_rule(world.get_entrance('Agahnims Tower', player), lambda state: state.has('Cape', player) or state.has('Hammer', player))  # barrier gets removed after killing agahnim, rule for that added later
+
+def bomb_mode_rules(world, player):
+    # curtains are pre-opened in bomb-only mode (set_swordless_curtains)
+    set_rule(world.get_entrance('Tower Altar NW', player), lambda state: True)
+    set_rule(world.get_entrance('Skull Vines NW', player), lambda state: True)
+    # tablets, the Agahnim's Tower barrier and medallions are handled in global_rules / ow_inverted_rules via
+    # has_special_weapon_level / can_use_medallions
+
 
 std_kill_rooms = {
     'Hyrule Dungeon Armory Main':  # One green guard

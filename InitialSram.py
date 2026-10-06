@@ -65,7 +65,9 @@ class InitialSram:
         equip[0x36C] = 0x18
         equip[0x36D] = 0x18
         equip[0x379] = 0x68
-        starting_bomb_cap_upgrades = 10 if not world.bombbag[player] else 0
+        # bomb-only mode has no bomb capacity (legacy wrote 0 to the starting max bombs table, which the current
+        # base rom no longer has; capacity lives in SRAM 0x370 now)
+        starting_bomb_cap_upgrades = 10 if not world.bombbag[player] and world.swords[player] != 'bombs' else 0
         starting_arrow_cap_upgrades = 30
         starting_bombs = 0
         starting_arrows = 0
@@ -99,6 +101,13 @@ class InitialSram:
             equip[0x359] = 2
         elif startingstate.has('Fighter Sword', player):
             equip[0x359] = 1
+
+        from BaseClasses import special_weapon_item, special_weapon_max_level
+        weapon = special_weapon_item(world.swords[player])
+        if weapon is not None:
+            level = min(startingstate.item_count(weapon, player), special_weapon_max_level)
+            if level > 0:
+                self.set_starting_weapon(level)
 
         if startingstate.has('Mirror Shield', player):
             equip[0x35A] = 3
@@ -159,6 +168,7 @@ class InitialSram:
             if item.name in ['Bow', 'Silver Arrows', 'Progressive Bow', 'Progressive Bow (Alt)',
                              'Titans Mitts', 'Power Glove', 'Progressive Glove',
                              'Golden Sword', 'Tempered Sword', 'Master Sword', 'Fighter Sword', 'Progressive Sword',
+                             'Progressive Bombs',
                              'Mirror Shield', 'Red Shield', 'Blue Shield', 'Progressive Shield',
                              'Red Mail', 'Blue Mail', 'Progressive Armor',
                              'Magic Upgrade (1/4)', 'Magic Upgrade (1/2)',
@@ -278,6 +288,10 @@ class InitialSram:
             raise ValueError("Starting rupees must be between 0 and 9999")
         self._initial_sram_bytes[0x362] = self._initial_sram_bytes[0x360] = rupees & 0xFF
         self._initial_sram_bytes[0x363] = self._initial_sram_bytes[0x361] = rupees >> 8
+
+    def set_starting_weapon(self, level: int):
+        # SpecialWeaponLevel ($7EF3C3)
+        self._set_value(0x3C3, level)
 
     def set_progress_indicator(self, indicator: int):
         self._set_value(0x3C5, indicator)

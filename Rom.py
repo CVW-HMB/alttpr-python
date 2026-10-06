@@ -1193,6 +1193,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     rom.write_byte(0x180044, 0x01 if world.swords[player] == 'swordless' else 0x00)  # hammer activates tablets
     if world.swords[player] == 'swordless':
         rom.initial_sram.set_swordless_curtains()  # open curtains
+    if world.swords[player] == 'bombs':
+        write_bomb_mode(rom, world, player)
 
     # set up challenge modes
     challenge = 0x00;
@@ -2065,6 +2067,72 @@ def write_enemizer_tweaks(rom, world, player):
         rom.write_byte(snes_to_pc(0x0DB6B3), 0x82)  # hovers don't need water necessarily?
 
 
+def write_bomb_mode(rom, world, player):
+    # Bomb-only mode (ported from the legacy gwaa.kiwi randomizer).
+    # SpecialWeapons (PC 0x18002F): bit 0x80 = only "sword" damage hurts enemies (selects Damage_Table_Bombs),
+    # mode 0x01 = bombs. Progressive Bombs (0xC0) raise SpecialWeaponLevel; level >= 1 gives infinite bombs.
+    rom.write_byte(0x18002F, 0x81)
+    rom.initial_sram.set_swordless_curtains()  # open curtains
+    rom.write_byte(0x180041, 0x02)  # AllowSwordlessMedallionUse: always
+    # (legacy also zeroed "starting max bombs" at 0x180034; that table is gone, InitialSram zeroes capacity instead)
+
+    # since we have infinite bombs, let's get rid of bomb drops
+    rom.write_byte(0x030051, 0xDB)  # fish bottle merchant
+    rom.write_byte(0x0301F8, 0xD9)  # replace Pot bombs with green rupees
+    rom.write_byte(0x0301FD, 0xD9)
+    rom.write_byte(0x030224, 0x04)  # adjust width of offset for replaced pot bomb
+    rom.write_byte(0x030229, 0x04)
+    if not world.shuffle_bonk_drops[player]:
+        rom.write_byte(0x04CC4A, 0xD9)  # bonk rocks that drop bombs
+        rom.write_byte(0x04D028, 0xD9)
+        rom.write_byte(0x04D397, 0xD9)
+        rom.write_byte(0x04D3A3, 0xDB)
+        rom.write_byte(0x04D56A, 0xDA)
+    rom.write_byte(0x00EDA7, 0x35)  # DW chest game (bomb -> blue rupee)
+
+    # thieves and pikits shouldn't steal bombs
+    rom.write_bytes(0x0ECB54, [0xA9, 0x00, 0xEA, 0xEA])  # thief
+    rom.write_bytes(0x0F0D80, [0xA9, 0x00, 0xEA, 0xEA])  # pikit
+
+    # remove regular bombs for sale from bomb shop and center the big bomb
+    rom.write_bytes(0x0309DE, [0xA9, 0xFF, 0xEA, 0xEA])
+    rom.write_byte(0x030A28, 0x2C)
+
+    # hack palette to make gold bombs actually gold
+    rom.write_bytes(0x0DD634, [0xBC, 0x02])
+    rom.write_bytes(0x0DD648, [0x5F, 0x4F])
+    rom.write_bytes(0x0DD658, [0x5F, 0x4F])
+
+    # update sword references in the credits to bombs
+    for old_text, new_text in [("FIRST SWORD", "FIRST BOMBS"), ("SWORDLESS", "BOMBLESS "),
+                               ("FIGHTER'S SWORD", "FIGHTER'S BOMBS"), ("MASTER SWORD", "MASTER BOMBS"),
+                               ("TEMPERED SWORD", "TEMPERED BOMBS"), ("GOLD SWORD", "GOLD BOMBS")]:
+        replace_credits_text(rom, old_text, new_text)
+
+
+def credits_chars(text):
+    char_map = {" ": (0x9F, 0x9F), "'": (0xD9, 0xEC)}
+    for i, ch in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
+        char_map[ch] = (0x5D + i, 0x83 + i)
+    return [char_map.get(c, (0x9F, 0x9F)) for c in text]
+
+
+def replace_credits_text(rom, old_text, new_text):
+    # The credits stats text lives in the base rom's credits data (stats/credits.asm), whose location moves
+    # between base rom builds, so find the encoded strings instead of hardcoding addresses.
+    assert len(old_text) == len(new_text)
+    if not hasattr(rom, 'buffer'):
+        return
+    old_pairs, new_pairs = credits_chars(old_text), credits_chars(new_text)
+    for row in range(2):  # top and bottom halves of the big credits font
+        old_bytes = bytes(p[row] for p in old_pairs)
+        start = rom.buffer.find(old_bytes, 0x118000, 0x120000)
+        if start == -1:
+            logging.getLogger('').warning(f'Could not find credits text "{old_text}" to replace')
+            continue
+        rom.write_bytes(start, [p[row] for p in new_pairs])
+
+
 def randomize_damage_table(rom, world, player):
     if world.shuffle_damage_table[player] == 'randomized':
         rom.write_bytes(snes_to_pc(0x0DB8F9),
@@ -2073,9 +2141,15 @@ def randomize_damage_table(rom, world, player):
              0x00, 0x01, 0x02, 0x03, 0x04, 0x08, 0x10, 0x40,
              0x00, 0x01, 0x02, 0x03, 0x04, 0x08, 0x10, 0x40,
              0x00, 0x01, 0x02, 0x03, 0x04, 0x08, 0x10, 0x40])
-        dmg_table = DamageTable()
-        dmg_table.randomize_sword_subclasses()
-        rom.write_bytes(snes_to_pc(0x31C800), dmg_table.get_bytes())
+        if world.swords[player] == 'bombs':
+            # bomb-only reads Damage_Table_Bombs ($B1E800) instead of Damage_Table ($B1C800)
+            dmg_table = DamageTable.from_file("data/damage_table_sword_bombs.bin")
+            dmg_table.randomize_sword_subclasses()
+            rom.write_bytes(snes_to_pc(0x31E800), dmg_table.get_bytes())
+        else:
+            dmg_table = DamageTable()
+            dmg_table.randomize_sword_subclasses()
+            rom.write_bytes(snes_to_pc(0x31C800), dmg_table.get_bytes())
 
 
 def hud_format_text(text):
@@ -3561,6 +3635,7 @@ RelevantItems = ['Bow',
                  'Fighter Sword',
                  'Golden Sword',
                  'Progressive Sword',
+                 'Progressive Bombs',
                  'Progressive Glove',
                  'Master Sword',
                  'Power Star',

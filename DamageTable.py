@@ -4,9 +4,9 @@ from typing import List
 import RaceRandom as random
 
 
-def _load_entries():
+def _load_entries(path="data/damage_table.bin"):
     entries = []
-    with open("data/damage_table.bin", 'rb') as stream:
+    with open(path, 'rb') as stream:
         for sprite in range(0x100):
             entries.append([])
             for pair in range(8):
@@ -18,6 +18,10 @@ def _load_entries():
 @dataclass
 class DamageTable:
     _entries: List[int] = field(default_factory=_load_entries)
+
+    @classmethod
+    def from_file(cls, path):
+        return cls(_load_entries(path))
 
     def randomize_sword_subclasses(self):
         for sprite in range(0xD8):

@@ -489,6 +489,9 @@ class World(object):
                         ret.prog_items['Silver Arrows', item.player] += 1
                     elif self.difficulty_requirements[item.player].progressive_bow_limit >= 1:
                         ret.prog_items['Bow', item.player] += 1
+                elif item.name in special_weapon_items:
+                    if ret.item_count(item.name, item.player) < special_weapon_max_level:
+                        ret.prog_items[item.name, item.player] += 1
             elif item.name.startswith('Bottle'):
                 if ret.bottle_count(item.player) < self.difficulty_requirements[item.player].progressive_bottle_limit:
                     ret.prog_items[item.name, item.player] += 1
@@ -1111,6 +1114,7 @@ class CollectionState(object):
                  'Blue Pendant', 'Red Pendant', 'Crystal 1', 'Crystal 2', 'Crystal 3', 'Crystal 4', 'Crystal 5',
                  'Crystal 6', 'Crystal 7', 'Blue Boomerang', 'Red Boomerang', 'Blue Shield', 'Red Shield',
                  'Mirror Shield', 'Progressive Shield', 'Bug Catching Net', 'Cane of Byrna', 'Ocarina (Activated)',
+                 'Progressive Bombs',
                  'Boss Heart Container', 'Sanctuary Heart Container', 'Piece of Heart', 'Magic Upgrade (1/2)',
                  'Magic Upgrade (1/4)']
                 or item_name.startswith(('Bottle', 'Small Key', 'Big Key'))
@@ -1233,7 +1237,7 @@ class CollectionState(object):
         return False
 
     def can_collect_bonkdrops(self, player):
-        return self.has_Boots(player) or (self.has_sword(player) and self.has('Quake', player))
+        return self.has_Boots(player) or (self.can_use_medallions(player) and self.has('Quake', player))
 
     def can_farm_rupees(self, player):
         return self.has('Farmable Rupees', player)
@@ -1335,6 +1339,9 @@ class CollectionState(object):
         return basemagic >= smallmagic
 
     def can_kill_most_things(self, player, enemies=5):
+        if self.world.swords[player] == 'bombs':
+            # bomb-only mode: the bomb damage table makes the special weapon the only reliable damage source
+            return self.has_special_weapon_level(player, 1)
         return (self.has_blunt_weapon(player)
                 or self.has('Cane of Somaria', player)
                 or (self.has('Cane of Byrna', player) and (enemies < 6 or self.can_extend_magic(player)))
@@ -1354,6 +1361,9 @@ class CollectionState(object):
 
     # In the future, this can be used to check if the player starts without bombs
     def can_use_bombs(self, player):
+        if self.world.swords[player] == 'bombs':
+            # bomb-only mode: no bomb capacity, bombs become infinite once the first Progressive Bombs is found
+            return self.has_special_weapon_level(player, 1)
         return (not self.world.bombbag[player] or self.has('Bomb Upgrade (+10)', player) or self.has('Bomb Upgrade (+5)', player, 2)) and (self.world.override_bomb_check or self.can_farm_bombs(player))
 
     def can_hit_crystal(self, player):
@@ -1406,6 +1416,21 @@ class CollectionState(object):
     def has_blunt_weapon(self, player):
         return self.has_sword(player) or self.has('Hammer', player)
 
+    def has_special_weapon_level(self, player, level):
+        """Level of the progressive special weapon in special weapon modes (bomb-only: Progressive Bombs).
+        Mirrors SpecialWeaponLevel ($7EF3C3) in the ROM. Always False outside special weapon modes."""
+        weapon = special_weapon_item(self.world.swords[player])
+        if weapon is None:
+            return False
+        return self.has(weapon, player, level)
+
+    def special_weapon_check(self, player, level):
+        """In special weapon modes the ROM only lets the special weapon (and a few items) damage bosses,
+        so boss rules additionally require this weapon level. True in all other modes."""
+        if special_weapon_item(self.world.swords[player]) is not None:
+            return self.has_special_weapon_level(player, level)
+        return True
+
     def can_hit_stunned_ganon(self, player):
         ganon_item = self.world.ganon_item[player]
         if ganon_item == "silver":
@@ -1440,7 +1465,8 @@ class CollectionState(object):
             return False
 
     def can_use_medallions(self, player):
-        return self.has_sword(player)
+        # bomb-only mode sets AllowSwordlessMedallionUse to "always"
+        return self.has_sword(player) or self.world.swords[player] == 'bombs'
 
     def has_Mirror(self, player):
         return self.has('Magic Mirror', player)
@@ -1582,6 +1608,11 @@ class CollectionState(object):
                 else:
                     self.prog_items['Blue Mail', item.player] += 1
                     changed = True
+            elif item.name in special_weapon_items:
+                # special weapon modes (e.g. bomb-only): each copy raises the weapon level by one
+                if self.item_count(item.name, item.player) < special_weapon_max_level:
+                    self.prog_items[item.name, item.player] += 1
+                    changed = True
 
         elif item.name.startswith('Bottle'):
             if self.bottle_count(item.player) < self.world.difficulty_requirements[item.player].progressive_bottle_limit:
@@ -1635,6 +1666,8 @@ class CollectionState(object):
                         to_remove = 'Bow'
                     else:
                         to_remove = None
+                elif item.name in special_weapon_items:
+                    to_remove = item.name if self.has(item.name, item.player) else None
 
             if to_remove is not None:
 
@@ -3394,7 +3427,10 @@ class Spoiler(object):
                     if custom['murahgoal'] and 'requirements' in custom['murahgoal']:
                         outfile.write('Murahdahla Requirement:'.ljust(line_width) + 'custom\n')
                         outfile.write('    %s\n' % custom['murahgoal']['goaltext'])
-                    outfile.write('Item to Hurt Stunned Ganon:'.ljust(line_width) + '%s\n' % str(self.world.ganon_item_orig[player]))
+                    ganon_item_shown = self.world.ganon_item_orig[player]
+                    if ganon_item_shown != 'random':  # 'default' resolves per sword mode (bomb-only: bomb)
+                        ganon_item_shown = self.world.ganon_item[player]
+                    outfile.write('Item to Hurt Stunned Ganon:'.ljust(line_width) + '%s\n' % str(ganon_item_shown))
                     outfile.write('Item Required for Ganon:'.ljust(line_width) + '%s\n' % yn(self.world.require_ganon_item[player]))
                     outfile.write('Swords:'.ljust(line_width) + '%s\n' % self.metadata['weapons'][player])
                     outfile.write('\n')
@@ -3789,7 +3825,17 @@ er_mode = {"vanilla": 0, "simple": 1, "restricted": 2, "full": 3, "crossed": 4, 
 # byte 1: LLLW WSSB (logic, mode, sword, bombbag)
 logic_mode = {"noglitches": 0, "minorglitches": 1, "nologic": 2, "owglitches": 3, "majorglitches": 4, "hybridglitches": 5}
 world_mode = {"open": 0, "standard": 1, "inverted": 2}
-sword_mode = {"random": 0, "assured": 1, "swordless": 2, "vanilla": 3}
+# special weapon modes: sword mode -> progressive item that tracks SpecialWeaponLevel
+special_weapon_modes = {'bombs': 'Progressive Bombs'}
+special_weapon_items = set(special_weapon_modes.values())
+special_weapon_max_level = 5
+
+
+def special_weapon_item(sword_mode):
+    return special_weapon_modes.get(sword_mode)
+
+
+sword_mode = {"random": 0, "assured": 1, "swordless": 2, "vanilla": 3, "bombs": 2}  # bombs: see byte 15 bit 0x04
 
 # byte 2: GGGD DFFH (goal, diff, item_func, hints)
 goal_mode = {'ganon': 0, 'pedestal': 1, 'dungeons': 2, 'triforcehunt': 3,
@@ -3853,7 +3899,7 @@ overworld_map_mode = {'default': 0, 'compass': 1, 'map': 2}
 trap_door_mode = {'vanilla': 0, 'optional': 1, 'boss': 2, 'oneway': 3}
 key_logic_algo = {'dangerous': 0, 'partial': 1, 'strict': 2}
 
-# byte 15: SSLL M?DD (skullwoods, linked_drops, mirrorscroll, 1 free byte, door_type)
+# byte 15: SSLL MBDD (skullwoods, linked_drops, mirrorscroll, bomb-only sword mode, door_type)
 skullwoods_mode = {'original': 0, 'restricted': 1, 'loose': 2, 'followlinked': 3}
 linked_drops_mode = {'unset': 0, 'linked': 1, 'independent': 2}
 door_type_mode = {'original': 0, 'big': 1, 'all': 2, 'chaos': 3}
@@ -3915,7 +3961,8 @@ class Settings(object):
              | trap_door_mode[w.trap_door_mode[p]] << 3 | key_logic_algo[w.key_logic_algorithm[p]]),
 
             (skullwoods_mode[w.skullwoods[p]] << 6 | linked_drops_mode[w.linked_drops[p]] << 4
-             | (0x8 if w.mirrorscroll[p] else 0) | door_type_mode[w.door_type_mode[p]]),
+             | (0x8 if w.mirrorscroll[p] else 0) | (0x4 if w.swords[p] == 'bombs' else 0)
+             | door_type_mode[w.door_type_mode[p]]),
         ])
         return base64.b64encode(code, "+-".encode()).decode()
 
@@ -3936,7 +3983,7 @@ class Settings(object):
 
         args.logic[p] = r(logic_mode)[(settings[1] & 0xE0) >> 5]
         args.mode[p] = r(world_mode)[(settings[1] & 0x18) >> 3]
-        args.swords[p] = r(sword_mode)[(settings[1] & 0x6) >> 1]
+        args.swords[p] = r({k: v for k, v in sword_mode.items() if k != 'bombs'})[(settings[1] & 0x6) >> 1]
         args.bombbag[p] = True if settings[1] & 0x1 else False
 
         args.difficulty[p] = r(diff_mode)[(settings[2] & 0x18) >> 3]
@@ -4012,6 +4059,8 @@ class Settings(object):
             args.skullwoods[p] = r(skullwoods_mode)[(settings[15] & 0xc0) >> 6]
             args.linked_drops[p] = r(linked_drops_mode)[(settings[15] & 0x30) >> 4]
             args.mirrorscroll[p] = True if settings[15] & 0x8 else False
+            if settings[15] & 0x4:
+                args.swords[p] = 'bombs'
             args.door_type_mode[p] = r(door_type_mode)[(settings[15] & 0x3)]
 
 

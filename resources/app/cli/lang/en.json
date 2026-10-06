@@ -106,7 +106,16 @@
       "                Ether and Bombos Tablet can be activated with Hammer",
       "                (and Book). Bombos pads have been added in Ice",
       "                Palace, to allow for an alternative to firerod.",
-      "Vanilla:        Swords are in vanilla locations."
+      "Vanilla:        Swords are in vanilla locations.",
+      "Bombs:          Bomb-only mode. No swords; 4 Progressive Bombs replace",
+      "                them. The first one gives infinite bombs and each one",
+      "                raises bomb damage like a sword level. Bomb pickups,",
+      "                bomb upgrades and shop bombs are removed. Curtains are",
+      "                removed and medallions work without a sword. Level 2",
+      "                bombs open tablets and the Agahnim\\'s Tower barrier,",
+      "                level 3 bombs are needed for Ganon. Combine with",
+      "                --usestartinventory true --startinventory",
+      "                Progressive_Bombs for Bomb-Only (Starting Bombs)."
     ],
     "goal": [
       "Select completion goal. (default: %(default)s)",
@@ -340,6 +349,7 @@
     ],
     "ganon_item": [
       "What item Ganon is vulnerable to while stunned in his final phase.",
+      "Default: Silver arrows, or bombs in bomb-only mode.",
       "Silver: Silver arrows (as in the vanilla game).",
       "Random: Picks a random damaging item (but not a medallion if swordless).",
       "<item>: The specified item will damage stunned ganon.",

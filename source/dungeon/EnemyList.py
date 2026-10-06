@@ -2328,6 +2328,8 @@ def add_drop_contents(world, player):
                     index_selector[pack] = (idx + 1) % len(pack_contents)
                     item_name = pack_contents[idx]
                     item_name = 'Rupees (5)' if retro_bow and 'Arrows' in item_name else item_name
+                    if world.swords[player] == 'bombs' and item_name in ['Single Bomb', 'Bombs (3)', 'Bombs (10)']:
+                        item_name = 'Small Heart'  # bomb-only: bombs are infinite
                     world.itempool.append(ItemFactory(item_name, player))
 
 

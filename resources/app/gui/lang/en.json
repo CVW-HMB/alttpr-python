@@ -346,6 +346,7 @@
     "randomizer.item.weapons.assured": "Assured",
     "randomizer.item.weapons.swordless": "Swordless",
     "randomizer.item.weapons.vanilla": "Vanilla",
+    "randomizer.item.weapons.bombs": "Bomb-Only",
 
     "randomizer.item.sortingalgo": "Item Fill",
     "randomizer.item.sortingalgo.balanced": "Balanced",

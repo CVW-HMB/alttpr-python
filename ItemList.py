@@ -333,6 +333,8 @@ def generate_itempool(world, player):
                         item = slot['item']
                         if shop.region.name == 'Capacity Upgrade' and world.difficulty[player] != 'normal':
                             pool.append('Rupees (20)')
+                        elif world.swords[player] == 'bombs':
+                            pool.append(bomb_mode_replacement(item))
                         else:
                             pool.append(item)
 
@@ -371,7 +373,11 @@ def generate_itempool(world, player):
     for item in precollected_items:
         world.push_precollected(ItemFactory(item, player))
 
-    if world.mode[player] == 'standard' and not world.state.has_blunt_weapon(player):
+    if world.swords[player] == 'bombs':
+        needs_uncle_weapon = not world.state.has_special_weapon_level(player, 1)
+    else:
+        needs_uncle_weapon = not world.state.has_blunt_weapon(player)
+    if world.mode[player] == 'standard' and needs_uncle_weapon:
         if world.customizer:
             placements = world.customizer.get_placements()
             if placements:
@@ -379,7 +385,11 @@ def generate_itempool(world, player):
                 if custom_uncle:
                     placed_items["Link's Uncle"] = custom_uncle
 
-        if "Link's Uncle" not in placed_items:
+        if "Link's Uncle" not in placed_items and world.swords[player] == 'bombs':
+            # bomb-only: the escape needs bombs, so uncle always hands out a Progressive Bombs
+            placed_items["Link's Uncle"] = 'Progressive Bombs'
+            pool.remove('Progressive Bombs')
+        elif "Link's Uncle" not in placed_items:
             found_sword = False
             found_bow = False
             possible_weapons = []
@@ -554,6 +564,8 @@ def generate_itempool(world, player):
         filler_additions = random.choices(list(filler_items.keys()), filler_items.values(), k=amount_to_add)
         for item in filler_additions:
             item_name = 'Rupees (5)' if retro_bow and item == 'Arrows (10)' else item
+            if world.swords[player] == 'bombs':
+                item_name = bomb_mode_replacement(item_name)
             world.itempool.append(ItemFactory(item_name, player))
 
 
@@ -889,6 +901,20 @@ def set_up_shops(world, player):
             cap_shop = world.get_region('Capacity Upgrade', player).shop
             cap_shop.inventory[0] = cap_shop.inventory[1]  # remove bomb capacity upgrades in bombbag
             cap_shop.inventory[1] = None
+    if world.swords[player] == 'bombs' and not world.shopsanity[player]:
+        # bomb-only: bombs are infinite, so stop selling them and drop the bomb capacity upgrades
+        for shop in [s for s in world.shops[player] if s.region.player == player]:
+            shop.custom = True
+            shop.locked = True
+            if shop.inventory[2] and shop.inventory[2]['item'] == 'Bombs (10)':
+                shop.inventory[2] = None
+        cap_shop = world.get_region('Capacity Upgrade', player).shop
+        if not world.bombbag[player]:  # bombbag already removed the bomb capacity upgrade
+            if cap_shop.inventory[1]:
+                cap_shop.inventory[0] = cap_shop.inventory[1]
+                cap_shop.inventory[1] = None
+            else:
+                cap_shop.inventory[0] = None
 
 
 def customize_shops(world, player):
@@ -932,7 +958,8 @@ def customize_shops(world, player):
             shop.shopkeeper_config = shopkeeper
     # handle capacity upgrades - randomly choose a bomb bunch or arrow bunch to become capacity upgrades
     if world.difficulty[player] == 'normal':
-        if not found_bomb_upgrade and len(possible_replacements) > 0 and not world.bombbag[player]:
+        if (not found_bomb_upgrade and len(possible_replacements) > 0 and not world.bombbag[player]
+                and world.swords[player] != 'bombs'):
             choices = []
             for shop, idx, loc, item in possible_replacements:
                 if item.name in ['Bombs (3)', 'Bombs (10)']:
@@ -1120,6 +1147,8 @@ def add_pot_contents(world, player):
                 if valid_pot_location(pot, world.pot_pool[player], world, player):
                     item = ('Rupees (5)' if retro_bow and pot_items[pot.item] == 'Arrows (5)'
                             else pot_items[pot.item])
+                    if world.swords[player] == 'bombs':
+                        item = bomb_mode_replacement(item)
                     world.itempool.append(ItemFactory(item, player))
 
 
@@ -1128,6 +1157,8 @@ def add_bonkdrop_contents(world, player):
     for item_name, (_, count, alt_item) in bonk_prize_lookup.items():
         if item_name not in item_table:
             item_name = alt_item
+        if world.swords[player] == 'bombs':
+            item_name = bomb_mode_replacement(item_name)
         while (count > 0):
             item = ItemFactory(item_name, player)
             world.itempool.append(item)
@@ -1214,6 +1245,8 @@ def get_pool_core(world, player, progressive, shuffle, difficulty, treasure_hunt
 
     if swords == 'swordless':
         pool.extend(diff.swordless)
+    elif swords == 'bombs':
+        pool.extend(['Progressive Bombs'] * 4)
     elif swords == 'vanilla':
         swords_to_use = diff.progressivesword.copy() if want_progressives() else diff.basicsword.copy()
         random.shuffle(swords_to_use)
@@ -1282,7 +1315,17 @@ def get_pool_core(world, player, progressive, shuffle, difficulty, treasure_hunt
                 pool.extend(['Small Key (Universal)'])
         else:
             pool.extend(['Small Key (Universal)'])
+    if swords == 'bombs':
+        pool = [bomb_mode_replacement(item) for item in pool]
     return (pool, placed_items, precollected_items, clock_mode)
+
+
+bomb_mode_removed_items = ['Single Bomb', 'Bombs (3)', 'Bombs (10)', 'Bomb Upgrade (+5)', 'Bomb Upgrade (+10)']
+
+
+def bomb_mode_replacement(item):
+    # bomb-only mode: bombs are infinite once Progressive Bombs is found, so bomb pickups/upgrades are useless
+    return 'Small Heart' if item in bomb_mode_removed_items else item
 
 
 item_alternates = {
