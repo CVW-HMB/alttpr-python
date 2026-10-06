@@ -1,0 +1,27 @@
+# Bomberman + xkeys
+#  - Bomb-Only (Starting Bombs): swords "bombs" + one starting Progressive Bombs
+#  - crossed entrance shuffle
+#  - full keysanity: small keys, big keys, maps, compasses all wild
+#  - Skull Woods small key plando'd in the Pinball Room
+#  - static key logic (DoorDevUnstable), 100% locations accessibility
+#  - roll with: docs/bomberman_xkeys/roll.sh (adds --no_money_balance --race --spoiler full --bps)
+meta:
+  players: 1
+settings:
+  1:
+    mode: open
+    goal: ganon
+    swords: bombs
+    shuffle: crossed
+    keyshuffle: wild
+    bigkeyshuffle: wild
+    mapshuffle: wild
+    compassshuffle: wild
+    key_logic_algorithm: static
+    accessibility: locations
+start_inventory:
+  1:
+    - Progressive Bombs
+placements:
+  1:
+    Skull Woods - Pinball Room: Small Key (Skull Woods)

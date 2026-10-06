@@ -1,5 +1,7 @@
 # Overworld Randomizer
 
+> **Bomberman + xkeys branch:** how to roll the mode is in [docs/bomberman_xkeys/README.md](docs/bomberman_xkeys/README.md).
+
 This is a overworld randomizer for _The Legend of Zelda: A Link to the Past_ for the SNES
 based on the Door Randomizer found at [Aerinon's Github Project.](https://github.com/Aerinon/ALttPDoorRandomizer)
 See https://alttpr.com/ for more details on the normal randomizer.

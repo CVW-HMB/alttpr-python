@@ -10,6 +10,7 @@
 *.bps
 *.pyc
 *.sfc
+*.smc
 *.srm
 *.bst
 *.wixobj
