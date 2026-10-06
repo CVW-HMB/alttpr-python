@@ -46,6 +46,7 @@ from Dungeons import (
     standard_starts,
 )
 from Items import ItemFactory
+from source.dungeon.StaticKeyLogic import static_door_rules
 from KeyDoorShuffle import (
     DoorRules,
     analyze_dungeon,
@@ -87,6 +88,8 @@ def link_doors(world, player):
             world.get_door("Skull Pinball WS", player).no_exit()
             world.swamp_patch_required[player] = orig_swamp_patch
             link_doors_prep(world, player)
+    if world.key_logic_algorithm[player] == 'static':
+        static_door_rules(world, player)
 
 
 def link_doors_prep(world, player):
