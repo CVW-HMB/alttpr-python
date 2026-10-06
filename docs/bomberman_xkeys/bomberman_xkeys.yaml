@@ -1,4 +1,5 @@
 # Bomberman + xkeys
+#  - fast ganon (goal: crystals), shopsanity
 #  - Bomb-Only (Starting Bombs): swords "bombs" + one starting Progressive Bombs
 #  - crossed entrance shuffle
 #  - full keysanity: small keys, big keys, maps, compasses all wild
@@ -10,7 +11,8 @@ meta:
 settings:
   1:
     mode: open
-    goal: ganon
+    goal: crystals
+    shopsanity: true
     swords: bombs
     shuffle: crossed
     keyshuffle: wild

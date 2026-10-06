@@ -14,7 +14,9 @@ How to roll the exact "Bomberman xkeys" mode: Bomb-Only with starting bombs, on 
 | Key logic | `static` (the DoorDevUnstable static key logic) |
 | Accessibility | 100% locations |
 | Money | no money balancing: rupees are never moved or created; seeds that would need it are rerolled |
-| Other | open, defeat Ganon, 7/7 crystals, race ROM (tournament flag on) |
+| Goal | fast Ganon (`goal: crystals`): all 7 crystals, then Ganon; no Agahnim 2 needed. Pyramid hole: DR `auto` |
+| Shops | shopsanity: shop slots are item locations (potions that land outside shops become Rupees (50), as in normal shopsanity) |
+| Other | open, 7/7 crystals, race ROM (tournament flag on) |
 
 Bomb levels work like sword levels. Level 2 ("master bombs") reads tablets and breaks Agahnim's Tower barrier,
 level 3 is needed to hurt Ganon, and Ganon's stun phase is hurt by bombs. Agahnim still has to be beaten by
@@ -63,8 +65,8 @@ RecursionError; those happen in this generator with normal swords too.
 
 `verify_seed.py` checks each seed's ROM and spoiler for: bomb mode on, Ganon vulnerable to bombs, starting bomb
 level 1, no bomb capacity, race flag on, the Pinball Room key, 3 Progressive Bombs placed plus 1 starting, no
-swords, bomb pickups or bomb upgrades, exactly the base pool's 5 Rupees (300), crossed entrances, 100% locations
-and static key logic.
+swords, bomb pickups or bomb upgrades, exactly the base pool's 5 Rupees (300), crossed entrances, 100% locations,
+static key logic, fast Ganon and shopsanity.
 
 ## Sharing a seed with the online patcher
 

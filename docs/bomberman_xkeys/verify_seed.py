@@ -26,7 +26,7 @@ for bad in ['Progressive Sword', 'Fighter Sword', 'Master Sword', 'Tempered Swor
     check(f'no {bad} placed', n == 0, str(n) if n else '')
 r300 = items.count('Rupees (300)')
 check('Rupees (300) count equals the base pool (5, no minting)', r300 == 5, str(r300))
-for key, want in [('Swords', 'bombs'), ('Entrance Shuffle', 'crossed'), ('Accessibility', 'locations'), ('Key Logic Algorithm', 'static')]:
+for key, want in [('Swords', 'bombs'), ('Entrance Shuffle', 'crossed'), ('Accessibility', 'locations'), ('Key Logic Algorithm', 'static'), ('Goal', 'crystals'), ('Shopsanity', 'yes')]:
     m = re.search(rf"^{re.escape(key)}:\s+(\S+)", txt, re.M)
     check(f'{key}: {want}', m and m.group(1).lower() == want, m.group(1) if m else 'missing')
 print('ALL OK' if ok else 'PROBLEMS FOUND')
