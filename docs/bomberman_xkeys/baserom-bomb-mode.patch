@@ -1,7 +1,7 @@
 From 26e41abdce40f06860a9ba3876c8e7fda0f904a8 Mon Sep 17 00:00:00 2001
 From: Vince Welke <vince.welke@gmail.com>
 Date: Tue, 6 Oct 2026 07:49:11 -0700
-Subject: [PATCH] Restore bomb-only mode (Progressive Bombs) from the kara
+Subject: [PATCH 1/2] Restore bomb-only mode (Progressive Bombs) from the kara
  branch
 
 Bomb-only mode was half-ported during the GK refactor: only DamageClassCalc
@@ -665,6 +665,49 @@ index 7e4b71f..70afb9d 100644
          LDY.w #$000E
          JSR AuxPaletteCheck : BCS .aux
                  LDA.w TransparencyFlag : BNE .SP05
+-- 
+2.50.1 (Apple Git-155)
+
+
+From f04e66825e93019e7e054954087e415bbe565343 Mon Sep 17 00:00:00 2001
+From: Vince Welke <vince.welke@gmail.com>
+Date: Thu, 8 Oct 2026 17:26:05 -0700
+Subject: [PATCH 2/2] Bomb mode: B still holds and locks facing after
+ detonating
+
+CheckDetonateBomb returned early after detonating, skipping the code it hooks
+over (TSB $3A / TSB $50 and the sword routine), so in bomb mode holding B no
+longer showed the hold pose or locked Link's facing. The kara branch's UseItem
+falls through to that normal path after detonating; do the same.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ gk/special_weapons.asm | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/gk/special_weapons.asm b/gk/special_weapons.asm
+index 9d3b5cc..7a18239 100644
+--- a/gk/special_weapons.asm
++++ b/gk/special_weapons.asm
+@@ -351,7 +351,8 @@ SetBombSpriteColor:
+ 	LDA.b #$04 : STA.b $0B
+ 	RTL
+ ;--------------------------------------------------------------------------------
+-; B button in bomb mode detonates all placed bombs instead of swinging
++; B button in bomb mode detonates all placed bombs, then B does what it normally does
++; (hold pose and direction lock while held), as in the kara branch's UseItem
+ CheckDetonateBomb:
+ 	LDA.l SpecialWeapons : AND.b #$7F : CMP.b #$01 : BNE .normal
+ 	LDX.b #$09
+@@ -361,8 +362,6 @@ CheckDetonateBomb:
+ .next_ancilla
+ 	DEX
+ 	BPL .check_ancilla
+-	SEC
+-	RTL
+ .normal ; what we wrote over
+ 	LDA.b #$80 : TSB.b $3A
+ 	LDA.b #$01 : TSB.b $50
 -- 
 2.50.1 (Apple Git-155)
 

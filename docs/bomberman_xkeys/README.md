@@ -111,4 +111,4 @@ flips --create --bps-delta /path/to/jp.sfc ../working.sfc ../base2current.bps
 md5 ../working.sfc   # put this in RANDOMIZERBASEHASH in Rom.py, copy base2current.bps to data/
 ```
 
-The current patch gives md5 `f22707df0da27c4c047bb4d9ca8fef07`.
+The current patch gives md5 `b772722a59202a06f1602fabfc870d8b`.
